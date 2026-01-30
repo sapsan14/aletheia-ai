@@ -18,9 +18,14 @@ import java.util.List;
  *   <li>Non-empty result ends with exactly one newline (so "line" and "line\n" both become "line\n").</li>
  * </ol>
  * Output is UTF-8 bytes. Same input always produces same bytes; {@code \r\n} vs {@code \n} yields same result.
+ * <p>
+ * Input length is limited to {@value #MAX_INPUT_LENGTH} characters to prevent DoS via huge strings.
  */
 @Service
 public class CanonicalizationServiceImpl implements CanonicalizationService {
+
+    /** Maximum input length (characters) to prevent DoS. 512K chars is enough for typical LLM responses. */
+    public static final int MAX_INPUT_LENGTH = 512 * 1024;
 
     private static final String LINE_SEP = "\n";
 
@@ -28,6 +33,10 @@ public class CanonicalizationServiceImpl implements CanonicalizationService {
     public byte[] canonicalize(String input) {
         if (input == null) {
             return new byte[0];
+        }
+        if (input.length() > MAX_INPUT_LENGTH) {
+            throw new IllegalArgumentException(
+                    "Input exceeds maximum length: " + input.length() + " > " + MAX_INPUT_LENGTH);
         }
         // (1) Unicode NFC
         String nfc = Normalizer.normalize(input, Normalizer.Form.NFC);

@@ -38,7 +38,13 @@ docker run -d --name aletheia-db -e POSTGRES_DB=aletheia -e POSTGRES_USER=alethe
 # Or: java -jar target/aletheia-backend.jar
 ```
 
-Set env: `SPRING_DATASOURCE_URL`, `OPENAI_API_KEY` (or GEMINI/Mistral), TSA URL, key path. Default API: `http://localhost:8080`.
+Set env: `SPRING_DATASOURCE_URL`, `OPENAI_API_KEY` (or GEMINI/Mistral), TSA URL, signing key path. Default API: `http://localhost:8080`.
+
+**Signing key (required for backend):** PEM path in `ai.aletheia.signing.key-path` or env. Generate:
+```bash
+openssl genpkey -algorithm RSA -out ai.key -pkeyopt rsa_keygen_bits:2048
+```
+Then set `ai.aletheia.signing.key-path=/path/to/ai.key` (or equivalent env).
 
 ---
 
@@ -61,7 +67,7 @@ Set `NEXT_PUBLIC_API_URL=http://localhost:8080` (or backend URL). Open http://lo
 ./mvnw test
 # or: mvn test
 ```
-Runs JUnit 5 tests: `HealthControllerTest` (GET /health → 200, `{"status":"UP"}`) and `AletheiaBackendApplicationTests` (context load). Uses H2 in-memory for tests.
+Runs JUnit 5 tests: `HealthControllerTest` (GET /health → 200, `{"status":"UP"}`), `AletheiaBackendApplicationTests` (context load), `CanonicalizationServiceTest`, `HashServiceTest`, and `SignatureServiceTest` (sign/verify, tampered signature). Uses H2 in-memory for tests; signing tests use in-memory RSA keys (no PEM file required).
 
 **Frontend:** `npm test` when test script is added.
 

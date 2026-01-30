@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Unit tests for {@link CanonicalizationServiceImpl}.
@@ -85,5 +86,23 @@ class CanonicalizationServiceTest {
         String input = "hello\n";
         byte[] result = service.canonicalize(input);
         assertThat(new String(result, StandardCharsets.UTF_8)).isEqualTo("hello\n");
+    }
+
+    @Test
+    void inputExceedingMaxLength_throwsIllegalArgumentException() {
+        int max = CanonicalizationServiceImpl.MAX_INPUT_LENGTH;
+        String tooLong = "x".repeat(max + 1);
+        assertThatThrownBy(() -> service.canonicalize(tooLong))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("exceeds maximum length")
+                .hasMessageContaining(String.valueOf(max + 1))
+                .hasMessageContaining(String.valueOf(max));
+    }
+
+    @Test
+    void inputAtMaxLength_succeeds() {
+        String atLimit = "x".repeat(CanonicalizationServiceImpl.MAX_INPUT_LENGTH);
+        byte[] result = service.canonicalize(atLimit);
+        assertThat(result).isNotEmpty();
     }
 }

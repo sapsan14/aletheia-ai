@@ -88,7 +88,7 @@ Step-by-step plan for building the PoC: verifiable AI responses with cryptograph
 | **Description** | Service that hashes canonical bytes with SHA-256 and returns hex string (or fixed format). |
 
 **Coding prompt (LLM-readable):**
-- Create HashService (interface + impl). Method: hash(canonicalBytes: byte[]) → String (64-char hex). Use SHA-256. Use BouncyCastle or standard MessageDigest. No external I/O. Unit test: hash known string (e.g. "hello\\n" after canonicalization) and assert against known SHA-256 hex value. Integrate with canonicalization: input string → canonical bytes → hash; document that callers must pass already canonical bytes or a single method that accepts string and does canonicalize+hash.
+- Create HashService (interface + impl). Method: hash(canonicalBytes: byte[]) → String (64-char hex). Use standard MessageDigest (SHA-256); BouncyCastle not required for hashing. No external I/O. Unit test: hash known string (e.g. "hello\\n" after canonicalization) and assert against known SHA-256 hex value. Integrate with canonicalization: input string → canonical bytes → hash; document that callers must pass already canonical bytes or a single method that accepts string and does canonicalize+hash.
 
 ---
 

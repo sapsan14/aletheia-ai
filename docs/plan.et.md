@@ -88,7 +88,7 @@ Samm-sammuline plaan PoC koostamiseks: kontrollitavad AI vastused krüptograafil
 | **Kirjeldus** | Teenus: kanooniliste baitide SHA-256 räsi, tagasta hex string (või fikseeritud vorming). |
 
 **Koodi juhend (LLM-readable):**
-- Loo HashService (liides + impl). Meetod: hash(canonicalBytes: byte[]) → String (64 tähemärki hex). SHA-256. BouncyCastle või MessageDigest. Välise I/O-d pole. Üksiktest: teadaoleva stringi räsi (nt "hello\n" pärast kanoniseerimist) ja võrdle teadaoleva SHA-256 hex väärtusega. Integreeri kanoniseerimisega: sisend string → kanoonilised baitid → hash; dokumenteeri, et kutsuja edastab juba kanoonilised baitid või üks meetod võtab stringi ja teeb canonicalize+hash.
+- Loo HashService (liides + impl). Meetod: hash(canonicalBytes: byte[]) → String (64 tähemärki hex). Kasuta standardset MessageDigest (SHA-256); BouncyCastle räsimiseks pole vaja. Välise I/O-d pole. Üksiktest: teadaoleva stringi räsi (nt "hello\n" pärast kanoniseerimist) ja võrdle teadaoleva SHA-256 hex väärtusega. Integreeri kanoniseerimisega: sisend string → kanoonilised baitid → hash; dokumenteeri, et kutsuja edastab juba kanoonilised baitid või üks meetod võtab stringi ja teeb canonicalize+hash.
 
 ---
 
