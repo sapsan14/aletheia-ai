@@ -10,15 +10,16 @@ Stack (PoC): Next.js, Java Spring Boot, PostgreSQL, OpenSSL/BouncyCastle, RFC 31
 
 ---
 
-## Course project
+## Authorship and License
 
-This project was developed as part of the **TalTech continuing education programme**  
-**[„Noorem-tarkvaraarendajast vanemarendajaks“](https://taltech.ee/vanemarendajaks)** (From junior to senior software developer).
+The **Aletheia AI** project was initiated and primarily developed by **Anton Sokolov** 
+as part of the TalTech continuing education program 
+"Noorem-tarkvaraarendajast vanemarendajaks" (From Junior to Senior Software Developer).
 
-The programme is funded by the **European Union’s NextGenerationEU** recovery and resilience fund via Haridus- ja Noorteamet (Estonian Education and Youth Board). The project is for educational and portfolio use.
+The project is licensed under the **MIT License**.  
+You are free to use, copy, modify, and distribute the code with attribution.
 
----
+The author retains the right to continue development of the project independently 
+of the course or project group.
 
-## License
-
-This project is licensed under the **MIT License** — see [LICENSE](LICENSE) for the full text. You may use, modify, and distribute the code with attribution.
+For full details, see [LICENSE](LICENSE).
