@@ -26,5 +26,12 @@ For full details, see [LICENSE](LICENSE).
 
 ## Private Development / Future Work
 
-The author may continue to develop **Aletheia AI** independently.  
-If you fork or build on this project, please do not modify or claim work in the `future/` or `dev/` branches, which may contain ongoing private development.
+This project is open for exploration, experimentation, and contributions.  
+**Please note:** the original author intends to continue developing certain features independently in future branches (`future/` or `dev/`).  
+
+When forking or contributing:  
+- Always retain proper attribution to the original author.  
+- Do **not modify, merge, or claim ownership** of ongoing private work in `future/` or `dev/`.  
+- Contributions to main or feature branches outside these reserved areas are welcome and appreciated.  
+
+This approach helps the community experiment, while preserving the author’s right to continue personal development.
