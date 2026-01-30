@@ -88,12 +88,15 @@ Meie projekt teeb sama: **näitab tõde** selle kohta, mida robot ütles.
 
 ### Maailm, kus tehisintellekt on kõikjal
 
-Mõne aasta pärast robotabilised võivad PKI-d kasutada selleks, et:
-🚗 Juhivad autosid
-🩺 Panevad diagnoose
-🏭 Juhivad tehaseid
-💰 Teevad finantsotsuseid
-⚖️ Aitavad kohtutes
+## 🤖💣 Robotid tulevikus koos PKI-ga:
+- 🚗🤖 Autojuhtimine — robotid armastavad kiirust ja sertifikaate  
+- 🩺🤖 Diagnostika — AI naljatab: „Sul on viirus… kohvi!“  
+- 🏭🤖 Tehased — vahel ilma kohvita, vahel allkirjastatult  
+- 💰🤖 Finantsid — AI arvutab protsente ja naeratab  
+- ⚖️🤖 Kohtud — robotite allkirjastatud otsused, naljadeta  
+- 🌌🛰️ Kosmos — autonoomsed satelliidid allkirjastavad andmeid ise  
+- 🕹️🎮 VR ja mängud — robotid võidavad ja panustavad allkirju  
+- 🥷🤫 Salajased missioonid — AI varastas su toosti, aga tagastab PKI-ga  
 
 **Küsimus:** Kuidas usaldada nende otsuseid?
 
@@ -101,20 +104,22 @@ Mõne aasta pärast robotabilised võivad PKI-d kasutada selleks, et:
 
 **PKI** (Public Key Infrastructure) — see on "digitaalsete passide" ja "pitserite" süsteem.
 
-Praegu kasutatakse PKI järgmistel eesmärkidel:
-🔒 Turvalised veebisaidid (brauseris)
-✍️ Dokumentide elektrooniline allkirjastamine
-💸 Pangalised ülekanded
-📧 Turvaline e-post (S/MIME)
-🧑‍💻 Kasutajate autentimine ettevõtte süsteemides (VPN, portaalid)
-🤖 Kaitstud IoT-kommunikatsioon (tark kodu, tööstusautomaatika)
-🖥️ Tarkvara allkirjastamine ja kontroll (code signing)
-💬 Turvalised sõnumid ja vestlused
-🆔 Digipassid ja ID-kaardid
-🗳️ Elektrooniline hääletamine ja küsitlused
-☁️ Pilvandmete krüpteerimine
-🏢 Juurdepääsu kontroll kriitilistes süsteemides (serverid, andmekeskused)
-📜 Dokumentide kaitse ja kontroll riigiteenustes (sertifikaadid, litsentsid)
+## 🔐 Täna PKI kaitseb:
+- 🌐🔒 Veebisaite brauseris — su salasõna peidus, isegi kass ei saa ligi  
+- ✍️📄 Digiallkirju — robotitel ei lubata võltsida  
+- 💸🏦 Pangaülekandeid — AI puhkab ja hoiab su raha turvaliselt  
+- 📧📬 Turvalist e-posti — isegi botid loevad kirju täpselt kellaaega järgides  
+- 🧑‍💻 VPN ja portaalid — AI ei tungi kohviaparaati  
+- 🤖🏠 IoT ja nutikodud — röster nüüd digiallkirjaga  
+- 🖥️💾 Koodi allkirjastamine — halvad naljad softiga ei aita roboteid  
+- 💬🔑 Turvalised sõnumid — AI vahel sosistab emotikone  
+- 🆔🛂 ID-kaardid — isegi robotid ootavad järjekorras  
+- 🗳️📊 Elektroonilised valimised — botid ei pane meeldimisi, lubame 😎  
+- ☁️🔐 Pilvandmed — su failid turvaliselt peidus  
+- 🏢🖲️ Juhtimine serveritele — isegi droon ei pääse ilma võtmeta  
+- 📜🖋️ Riigi dokumendid — allkirjad nagu spioonil  
+- 🛰️🛰️ Satelliidid — su signaal lendab turvaliselt kosmosesse  
+- 🚀🌌 Kosmose missioonid — AI allkirjastab lepinguid marslastega  
 
 **Tulevik:** PKI tehisintellektile tähendab:
 - Igal AI-agendil on oma "pass" (sertifikaat)
