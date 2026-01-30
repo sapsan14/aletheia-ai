@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: aletheia-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-aletheia}
+      POSTGRES_USER: ${POSTGRES_USER:-aletheia}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-local}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # Optional: mount init scripts
+      # - ./backend/src/main/resources/db/migration:/docker-entrypoint-initdb.d
+    networks:
+      - aletheia-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-aletheia}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Local RFC 3161 TSA (OpenTSA or custom)
+  # Note: This is a placeholder. For actual implementation, use:
+  # - OpenTSA Docker image
+  # - Custom Java TSA service
+  # - Or rely on MOCK_TSA for testing
+  tsa:
+    image: ghcr.io/digicert/timestamp-authority:latest
+    container_name: aletheia-tsa
+    ports:
+      - "3180:3180"
+    environment:
+      TSA_PORT: 3180
+      TSA_POLICY_OID: "1.2.3.4.5.6.7.8"
+    networks:
+      - aletheia-network
+    # Note: If ghcr.io/digicert/timestamp-authority doesn't exist,
+    # comment out this service and use MOCK_TSA in tests.
+    # Alternatively, build your own TSA container.
+    profiles:
+      - with-tsa  # Only start with: docker-compose --profile with-tsa up
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  aletheia-network:
+    driver: bridge
+
+# ============================================
+# Usage Instructions
+# ============================================
+#
+# Start PostgreSQL only (default):
+#   docker-compose up -d postgres
+#
+# Start PostgreSQL + TSA:
+#   docker-compose --profile with-tsa up -d
+#
+# Stop all services:
+#   docker-compose down
+#
+# Stop and remove volumes:
+#   docker-compose down -v
+#
+# View logs:
+#   docker-compose logs -f postgres
+#
+# Check status:
+#   docker-compose ps
+#
+# ============================================
+# Environment Variables
+# ============================================
+# Override defaults by creating .env file:
+#   POSTGRES_DB=aletheia
+#   POSTGRES_USER=aletheia
+#   POSTGRES_PASSWORD=secure_password_here
+#
+# See .env.example for full configuration template

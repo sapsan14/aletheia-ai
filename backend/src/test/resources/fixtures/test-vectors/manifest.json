@@ -1,0 +1,26 @@
+{
+  "version": "1.0",
+  "generated_at": "2026-01-30T17:30:00Z",
+  "generator": "RFC 3161 Test Vector Generator",
+  "test_vectors": [
+    {
+      "name": "valid-sha256",
+      "description": "Valid RFC 3161 request with SHA-256 digest",
+      "file": "valid-sha256.json",
+      "expected_outcome": "granted"
+    },
+    {
+      "name": "invalid-digest",
+      "description": "Request with malformed digest",
+      "file": "invalid-digest.json",
+      "expected_outcome": "rejection"
+    },
+    {
+      "name": "missing-nonce",
+      "description": "Request without nonce (optional field)",
+      "file": "missing-nonce.json",
+      "expected_outcome": "granted"
+    }
+  ],
+  "notes": "Test vectors include both valid and invalid cases to verify RFC 3161 protocol compliance. Each vector specifies request, expected response, and validation rules."
+}

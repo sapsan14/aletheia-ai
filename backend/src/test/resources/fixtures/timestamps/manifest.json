@@ -1,0 +1,22 @@
+{
+  "version": "1.0",
+  "generated_at": "2026-01-30T17:30:00Z",
+  "generator": "MockTsaService v1.0 (Bouncy Castle TSP)",
+  "tsa_mode": "deterministic",
+  "fixed_time": "2026-01-01T00:00:00Z",
+  "policy_oid": "1.2.3.4.5.6",
+  "fixtures": [
+    {
+      "name": "hello-world",
+      "description": "Timestamp token for 'hello world' canonical text",
+      "digest_sha256": "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9",
+      "files": {
+        "request": "hello-world.tsq",
+        "response": "hello-world.tsr",
+        "metadata": "hello-world.json"
+      },
+      "expected_serial": "83737289194838447048400471564591383726494234456"
+    }
+  ],
+  "notes": "All tokens use MOCK_TSA with fixed time 2026-01-01T00:00:00Z. Serial is derived from request digest. Fully deterministic: same input → same token (byte-for-byte)."
+}

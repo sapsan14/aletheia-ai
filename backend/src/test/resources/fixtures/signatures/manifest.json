@@ -1,0 +1,24 @@
+{
+  "version": "1.0",
+  "generated_at": "2026-01-30T17:30:00Z",
+  "generator": "SignatureService (RSA PKCS#1 v1.5 with SHA-256)",
+  "algorithm": "SHA256withRSA",
+  "key_size": 2048,
+  "fixtures": [
+    {
+      "name": "test-message",
+      "input": "test message",
+      "hash_hex": "3f0a377ba0a4a460ecb616f6507ce0d8cfa3e704025d4fda3ed0c5ca05468728",
+      "signature_file": "test-message-rsa.sig",
+      "notes": "Deterministic RSA PKCS#1 v1.5 signature"
+    },
+    {
+      "name": "hello-world",
+      "input": "hello world",
+      "hash_hex": "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9",
+      "signature_file": "hello-world-rsa.sig",
+      "notes": "Same input as hash fixture for cross-layer testing"
+    }
+  ],
+  "notes": "All signatures use RSA PKCS#1 v1.5 (deterministic, no PSS randomness). Private key is test-only, generated for fixtures."
+}

@@ -1,5 +1,11 @@
 # Aletheia AI
 
+[![Java](https://img.shields.io/badge/Java-21-orange?logo=openjdk)](https://openjdk.org/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5-brightgreen?logo=spring)](https://spring.io/projects/spring-boot)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue?logo=postgresql)](https://www.postgresql.org/)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![RFC 3161](https://img.shields.io/badge/RFC-3161-purple)](https://www.ietf.org/rfc/rfc3161.txt)
+
 **Verifiable AI responses with signing and timestamps.**
 
 PoC for cryptographically signed and timestamped LLM answers so that responses can be proven, not just trusted.
@@ -59,11 +65,36 @@ For details: [Signing](docs/en/SIGNING.md), [Timestamping](docs/en/TIMESTAMPING.
 
 ---
 
+## Quick Start
+
+1. **Copy environment template:**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your API keys and configuration
+   ```
+
+2. **Start PostgreSQL:**
+   ```bash
+   docker-compose up -d postgres
+   ```
+
+3. **Generate signing key:**
+   ```bash
+   openssl genpkey -algorithm RSA -out ai.key -pkeyopt rsa_keygen_bits:2048
+   ```
+
+4. **Run backend:**
+   ```bash
+   cd backend && ./mvnw spring-boot:run
+   ```
+
+---
+
 ## Prerequisites
 
 - **Java 21+** (backend)
 - **Node.js 18+** (frontend)
-- **PostgreSQL 15+** (or Docker)
+- **PostgreSQL 15+** (or Docker via docker-compose.yml)
 - **OpenSSL** (key generation, optional local TSA)
 - Env: LLM API key (OpenAI/Gemini/Mistral), DB URL, TSA URL, signing key path — see [PoC](docs/en/PoC.md) and [plan](docs/en/plan.md) for details.
 
@@ -119,6 +150,8 @@ Set `NEXT_PUBLIC_API_URL=http://localhost:8080` (or backend URL). Open http://lo
 # or: mvn test
 ```
 Runs JUnit 5 tests: `HealthControllerTest` (GET /health → 200, `{"status":"UP"}`), `AletheiaBackendApplicationTests` (context load), `CanonicalizationServiceTest`, `HashServiceTest`, and `SignatureServiceTest` (sign/verify, tampered signature). Uses H2 in-memory for tests; signing tests use in-memory RSA keys (no PEM file required).
+
+**Golden Fixtures:** Test fixtures (hash outputs, signatures, RFC 3161 tokens) are stored in `backend/src/test/resources/fixtures/` for deterministic regression testing. See [fixtures README](backend/src/test/resources/fixtures/README.md) for details.
 
 **Frontend:** `npm test` when test script is added.
 

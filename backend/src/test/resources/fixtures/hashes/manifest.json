@@ -1,0 +1,23 @@
+{
+  "version": "1.0",
+  "generated_at": "2026-01-30T17:30:00Z",
+  "generator": "HashService (Java MessageDigest SHA-256)",
+  "algorithm": "SHA-256",
+  "fixtures": [
+    {
+      "name": "hello-world",
+      "input": "hello world",
+      "encoding": "UTF-8",
+      "hash_hex": "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9",
+      "file": "hello-world-sha256.bin"
+    },
+    {
+      "name": "empty-string",
+      "input": "",
+      "encoding": "UTF-8",
+      "hash_hex": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "file": "empty-string-sha256.bin"
+    }
+  ],
+  "notes": "All hashes are SHA-256. Binary files contain 32 raw bytes (no hex encoding)."
+}
