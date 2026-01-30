@@ -23,3 +23,8 @@ The author retains the right to continue development of the project independentl
 of the course or project group.
 
 For full details, see [LICENSE](LICENSE).
+
+## Private Development / Future Work
+
+The author may continue to develop **Aletheia AI** independently.  
+If you fork or build on this project, please do not modify or claim work in the `future/` or `dev/` branches, which may contain ongoing private development.
