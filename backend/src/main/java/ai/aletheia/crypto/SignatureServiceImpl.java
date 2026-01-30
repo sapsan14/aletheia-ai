@@ -69,8 +69,7 @@ public class SignatureServiceImpl implements SignatureService {
     @PostConstruct
     void loadKeys() {
         if (keyPath == null || keyPath.isEmpty()) {
-            throw new IllegalStateException(
-                    "Signing key not configured: set ai.aletheia.signing.key-path to PEM file path");
+            return; // key optional at startup; sign/verify will fail with clear message when called
         }
         try {
             Reader reader;
@@ -207,6 +206,10 @@ public class SignatureServiceImpl implements SignatureService {
     private void ensureKeysLoaded() {
         if (privateKey == null) {
             loadKeys();
+        }
+        if (privateKey == null) {
+            throw new IllegalStateException(
+                    "Signing key not configured: set ai.aletheia.signing.key-path to PEM file path");
         }
     }
 }
