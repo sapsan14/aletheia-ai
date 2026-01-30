@@ -32,9 +32,9 @@ Step-by-step plan for building the PoC: verifiable AI responses with cryptograph
 | **Description** | Create Spring Boot app with package layout: `llm`, `crypto`, `audit`, `api`, `db`. No business logic yet; one health/readiness endpoint. |
 
 **Coding prompt (LLM-readable):**
-- Create a new Spring Boot 3.x project (Maven or Gradle). Java 17+. Base package e.g. `ai.aletheia`.
+- Create a new Spring Boot 3.x project (Maven or Gradle). Java 21+. Base package e.g. `ai.aletheia`.
 - Create empty package structure: `ai.aletheia.llm`, `ai.aletheia.crypto`, `ai.aletheia.audit`, `ai.aletheia.api`, `ai.aletheia.db` (or equivalent). No classes required yet except one REST controller under `api` that exposes GET /actuator/health or GET /health returning 200 and a simple JSON like `{"status":"UP"}`.
-- Add dependency: spring-boot-starter-web, spring-boot-starter-data-jpa (for later), and BouncyCastle (bcmail, bcpkix, bcprov). Do not implement LLM, crypto, or DB logic in this task.
+- Add dependency: spring-boot-starter-web, spring-boot-starter-data-jpa (for later), and BouncyCastle (bcpkix, bcprov). Do not implement LLM, crypto, or DB logic in this task.
 
 ---
 
@@ -269,7 +269,7 @@ Step-by-step plan for building the PoC: verifiable AI responses with cryptograph
 | **Description** | README: how to generate key, set env vars, run PostgreSQL, run backend, run frontend, run local TSA (if any). List required env: API keys, DB URL, TSA URL, key path. |
 
 **Coding prompt (LLM-readable):**
-- Update README with: (1) Prerequisites: Java 17+, Node 18+, PostgreSQL 15+, optional Docker. (2) Environment variables: OPENAI_API_KEY or GEMINI_API_KEY (or Mistral), DB URL, TSA URL, path to private key for signing. (3) How to generate key: openssl genpkey -algorithm RSA -out ai.key. (4) How to run DB: docker-compose up -d or local install, run migrations. (5) How to run backend: ./mvnw spring-boot:run or equivalent, with env set. (6) How to run frontend: npm run dev, set NEXT_PUBLIC_API_URL. (7) Optional: how to run a local RFC 3161 TSA for development. Keep sections short; link to docs/PoC for architecture.
+- Update README with: (1) Prerequisites: Java 21+, Node 18+, PostgreSQL 15+, optional Docker. (2) Environment variables: OPENAI_API_KEY or GEMINI_API_KEY (or Mistral), DB URL, TSA URL, path to private key for signing. (3) How to generate key: openssl genpkey -algorithm RSA -out ai.key. (4) How to run DB: docker-compose up -d or local install, run migrations. (5) How to run backend: ./mvnw spring-boot:run or equivalent, with env set. (6) How to run frontend: npm run dev, set NEXT_PUBLIC_API_URL. (7) Optional: how to run a local RFC 3161 TSA for development. Keep sections short; link to docs/PoC for architecture.
 
 ---
 
@@ -285,6 +285,37 @@ Step-by-step plan for building the PoC: verifiable AI responses with cryptograph
 | 6 — Frontend | 6–8 |
 | 7 — Verification and docs | 2–4 |
 | **Total** | **38–54** |
+
+---
+
+## Testing (by step)
+
+Detailed test scope and acceptance criteria for each step. Run backend tests with `mvn test` (from `backend/`); frontend with `npm test` when available.
+
+| Step | Test type | What to test | Acceptance criteria |
+|------|-----------|--------------|---------------------|
+| **1.1** | Manual / doc | README and diagram | README has Prerequisites, Run backend/frontend/DB; Mermaid diagram renders; link to docs/PoC works. |
+| **1.2** | Unit | Health endpoint | `GET /health` returns 200 and JSON `{"status":"UP"}`. Use `@WebMvcTest(HealthController.class)` + MockMvc. |
+| **1.2** | Integration | Context load | `@SpringBootTest` context loads (no missing beans). |
+| **1.3** | Manual | Frontend | App runs with `npm run dev`; page shows Prompt, Send, Response placeholders. |
+| **1.4** | Manual / migration | DB schema | Liquibase/Flyway runs; table `ai_response` exists with expected columns. |
+| **2.1** | Unit | Canonicalization | Same string → same bytes; `\r\n` vs `\n` → same result. |
+| **2.2** | Unit | HashService | Known input → known SHA-256 hex (64 chars). |
+| **2.3** | Unit | SignatureService | sign(hash) then verify(hash, signature) → true; tampered signature → false. |
+| **2.4** | Unit | TimestampService | Mock TSA: request returns non-empty token; invalid response handled. |
+| **3.1** | Unit | LLMClient | Mock: complete(prompt) returns non-empty text and modelId. |
+| **3.2** | — | Data flow | LLMResult / audit context contains model id and optional params. |
+| **4.1** | Unit | Repository | save(entity); findById(id); assert fields. Use H2 or Testcontainers. |
+| **4.2** | Unit | AuditRecordService | save(request) → id; load by id, assert all fields. |
+| **5.1** | Integration | POST /api/ai/ask | 200; body has response, responseHash, signature, tsaToken, id, model; DB has one row. |
+| **5.2** | Unit / Integration | GET /api/ai/verify/:id | 200 with record; 404 for unknown id. |
+| **6.1** | Manual / E2E | Frontend → backend | Send prompt → response and status displayed; errors shown on failure. |
+| **6.2** | Manual | UI | Signed, timestamped, verifiable badges; "Verify" link with id. |
+| **6.3** | Manual | Verify page | Fetches by id; shows hash, signature, TSA token; optional client-side hash check. |
+| **7.1** | Unit | Verification | hashMatch and signatureValid in response when implemented. |
+| **7.2** | Manual | README | All run instructions and env vars documented. |
+
+**Backend test command:** From `backend/`: `./mvnw test` or `mvn test`. Ensure H2 is available for tests (default Spring Boot test profile uses in-memory DB).
 
 ---
 

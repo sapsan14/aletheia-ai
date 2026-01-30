@@ -1,0 +1,41 @@
+# Build & runtime
+backend/target/
+backend/.mvn/wrapper/maven-wrapper.jar
+node_modules/
+.next/
+out/
+dist/
+build/
+*.class
+
+# Environment & secrets (do not commit keys or API keys)
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+!**/docs/**/*.pem
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.settings/
+.springBeans
+.sts4-cache
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs & cache
+*.log
+.cache/
+.npm/
+.yarn/
+.pnpm-store/
+
+# Optional: Liquibase / DB
+# *.liquibase-backup

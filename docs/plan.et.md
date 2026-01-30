@@ -32,9 +32,9 @@ Samm-sammuline plaan PoC koostamiseks: kontrollitavad AI vastused krüptograafil
 | **Kirjeldus** | Loo Spring Boot rakendus pakettidega: llm, crypto, audit, api, db. Äriloogikat veel mitte; üks health/readiness endpoint. |
 
 **Koodi juhend (LLM-readable):**
-- Loo uus Spring Boot 3.x projekt (Maven või Gradle). Java 17+. Baaspakett nt ai.aletheia.
+- Loo uus Spring Boot 3.x projekt (Maven või Gradle). Java 21+. Baaspakett nt ai.aletheia.
 - Loo tühi pakettide struktuur: ai.aletheia.llm, ai.aletheia.crypto, ai.aletheia.audit, ai.aletheia.api, ai.aletheia.db. Klasse pole veel vaja, välja arvatud üks REST kontroller api all GET /actuator/health või GET /health, tagastab 200 ja lihtsa JSONi nt {"status":"UP"}.
-- Lisa sõltuvused: spring-boot-starter-web, spring-boot-starter-data-jpa (hiljem), BouncyCastle (bcmail, bcpkix, bcprov). Selles ülesandes ära rakenda LLM-, crypto- ega DB-loogikat.
+- Lisa sõltuvused: spring-boot-starter-web, spring-boot-starter-data-jpa (hiljem), BouncyCastle (bcpkix, bcprov). Selles ülesandes ära rakenda LLM-, crypto- ega DB-loogikat.
 
 ---
 
@@ -269,7 +269,7 @@ Samm-sammuline plaan PoC koostamiseks: kontrollitavad AI vastused krüptograafil
 | **Kirjeldus** | README: kuidas genereerida võti, seada env, käivitada PostgreSQL, backend, frontend, lokaalne TSA (kui on). Loetle env: API võtmed, DB URL, TSA URL, võtme tee. |
 
 **Koodi juhend (LLM-readable):**
-- Uuenda README: (1) Eeldused: Java 17+, Node 18+, PostgreSQL 15+, valikuliselt Docker. (2) Keskkonnamuutujad: OPENAI_API_KEY või GEMINI_API_KEY (või Mistral), DB URL, TSA URL, privaatvõtme tee allkirjastamiseks. (3) Võtme genereerimine: openssl genpkey -algorithm RSA -out ai.key. (4) DB käivitamine: docker-compose up -d või lokaalne install, migratsioonid. (5) Backend käivitamine: ./mvnw spring-boot:run env-iga. (6) Frontend käivitamine: npm run dev, NEXT_PUBLIC_API_URL. (7) Valikuliselt: lokaalse RFC 3161 TSA käivitamine arenduseks. Sektsioonid lühikesed; viide docs/PoC-le arhitektuuri jaoks.
+- Uuenda README: (1) Eeldused: Java 21+, Node 18+, PostgreSQL 15+, valikuliselt Docker. (2) Keskkonnamuutujad: OPENAI_API_KEY või GEMINI_API_KEY (või Mistral), DB URL, TSA URL, privaatvõtme tee allkirjastamiseks. (3) Võtme genereerimine: openssl genpkey -algorithm RSA -out ai.key. (4) DB käivitamine: docker-compose up -d või lokaalne install, migratsioonid. (5) Backend käivitamine: ./mvnw spring-boot:run env-iga. (6) Frontend käivitamine: npm run dev, NEXT_PUBLIC_API_URL. (7) Valikuliselt: lokaalse RFC 3161 TSA käivitamine arenduseks. Sektsioonid lühikesed; viide docs/PoC-le arhitektuuri jaoks.
 
 ---
 
@@ -285,6 +285,37 @@ Samm-sammuline plaan PoC koostamiseks: kontrollitavad AI vastused krüptograafil
 | 6 — Frontend | 6–8 |
 | 7 — Kontroll ja dokumentatsioon | 2–4 |
 | **Kokku** | **38–54** |
+
+---
+
+## Testimine (sammude kaupa)
+
+Iga sammu testide ulatus ja vastuvõtukriteeriumid. Backend: `mvn test` kaustast `backend/`; frontend: `npm test` kui olemas.
+
+| Samm | Testi tüüp | Mida testida | Vastuvõtukriteerium |
+|------|------------|--------------|---------------------|
+| **1.1** | Käsitsi / dok | README ja diagramm | README: Prerequisites, Run backend/frontend/DB; Mermaid renderdub; link docs/PoC-le. |
+| **1.2** | Üksiktest | Health endpoint | GET /health → 200 ja JSON {"status":"UP"}. @WebMvcTest(HealthController.class) + MockMvc. |
+| **1.2** | Integratsioon | Kontekst | @SpringBootTest kontekst käivitub. |
+| **1.3** | Käsitsi | Frontend | npm run dev; leht: Prompt, Send, Response. |
+| **1.4** | Käsitsi / migratsioon | DB skeem | Liquibase/Flyway käivub; tabel ai_response olemas. |
+| **2.1** | Üksiktest | Kanoniseerimine | Sama tekst → samad baitid; \r\n vs \n → sama tulemus. |
+| **2.2** | Üksiktest | HashService | Teadaolev sisend → teadaolev SHA-256 hex (64 tähemärki). |
+| **2.3** | Üksiktest | SignatureService | sign(hash), verify(hash, signature) → true; võltsitud allkiri → false. |
+| **2.4** | Üksiktest | TimestampService | Mock TSA: päring tagastab mitte-tühja tokeni; kehtetu vastus käsitletud. |
+| **3.1** | Üksiktest | LLMClient | Mock: complete(prompt) tagastab mitte-tühja teksti ja modelId. |
+| **3.2** | — | Andmevoog | LLMResult / audit sisaldab model id ja valikuliselt parameetreid. |
+| **4.1** | Üksiktest | Repository | save(entity); findById(id); kontrolli välju. H2 või Testcontainers. |
+| **4.2** | Üksiktest | AuditRecordService | save(request) → id; laadi id järgi, kontrolli välju. |
+| **5.1** | Integratsioon | POST /api/ai/ask | 200; kehas response, responseHash, signature, tsaToken, id, model; DB-s üks kirje. |
+| **5.2** | Üksiktest / integratsioon | GET /api/ai/verify/:id | 200 koos kirjega; 404 tundmatu id korral. |
+| **6.1** | Käsitsi / E2E | Frontend → backend | Saada prompt → vastus ja staatus; vea korral teade. |
+| **6.2** | Käsitsi | UI | Signed, timestamped, verifiable märgid; link "Verify" id-ga. |
+| **6.3** | Käsitsi | Verify leht | Laadi id järgi; kuva hash, allkiri, TSA token; valikuliselt hash kontroll kliendis. |
+| **7.1** | Üksiktest | Kontroll | hashMatch ja signatureValid vastuses kui rakendatud. |
+| **7.2** | Käsitsi | README | Kõik käivitamise ja env juhised dokumenteeritud. |
+
+**Backend testide käsk:** kaustast `backend/`: `./mvnw test` või `mvn test`. Testide jaoks kasutatakse H2 (vaikeprofiil).
 
 ---
 

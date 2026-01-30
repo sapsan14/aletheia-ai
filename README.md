@@ -10,7 +10,7 @@ Stack (PoC): Next.js, Java Spring Boot, PostgreSQL, OpenSSL/BouncyCastle, RFC 31
 
 ## Prerequisites
 
-- **Java 17+** (backend)
+- **Java 21+** (backend)
 - **Node.js 18+** (frontend)
 - **PostgreSQL 15+** (or Docker)
 - **OpenSSL** (key generation, optional local TSA)
@@ -51,6 +51,21 @@ npm run dev
 ```
 
 Set `NEXT_PUBLIC_API_URL=http://localhost:8080` (or backend URL). Open http://localhost:3000.
+
+---
+
+## Run tests
+
+**Backend (from `backend/`):**
+```bash
+./mvnw test
+# or: mvn test
+```
+Runs JUnit 5 tests: `HealthControllerTest` (GET /health → 200, `{"status":"UP"}`) and `AletheiaBackendApplicationTests` (context load). Uses H2 in-memory for tests.
+
+**Frontend:** `npm test` when test script is added.
+
+Detailed test scope and acceptance criteria per step: see [plan (EN)](docs/plan.en.md#testing-by-step), [plan (RU)](docs/plan.ru.md#тестирование-по-шагам), [plan (ET)](docs/plan.et.md#testimine-sammude-kaupa).
 
 ---
 

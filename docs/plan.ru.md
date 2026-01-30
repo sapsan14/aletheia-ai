@@ -32,9 +32,9 @@
 | **Описание** | Создать приложение Spring Boot с пакетами: llm, crypto, audit, api, db. Без бизнес-логики; один health/readiness endpoint. |
 
 **Инструкция для кодинга (LLM-readable):**
-- Создать новый проект Spring Boot 3.x (Maven или Gradle). Java 17+. Базовый пакет например ai.aletheia.
+- Создать новый проект Spring Boot 3.x (Maven или Gradle). Java 21+. Базовый пакет например ai.aletheia.
 - Создать пустую структуру пакетов: ai.aletheia.llm, ai.aletheia.crypto, ai.aletheia.audit, ai.aletheia.api, ai.aletheia.db. Классы пока не обязательны, кроме одного REST-контроллера в api с GET /actuator/health или GET /health, возвращающим 200 и JSON вида {"status":"UP"}.
-- Добавить зависимости: spring-boot-starter-web, spring-boot-starter-data-jpa (на потом), BouncyCastle (bcmail, bcpkix, bcprov). В этой задаче не реализовывать логику LLM, crypto или БД.
+- Добавить зависимости: spring-boot-starter-web, spring-boot-starter-data-jpa (на потом), BouncyCastle (bcpkix, bcprov). В этой задаче не реализовывать логику LLM, crypto или БД.
 
 ---
 
@@ -269,7 +269,7 @@
 | **Описание** | README: как сгенерировать ключ, задать env, запустить PostgreSQL, backend, frontend, локальный TSA (если есть). Список env: API-ключи, URL БД, URL TSA, путь к ключу. |
 
 **Инструкция для кодинга (LLM-readable):**
-- Обновить README: (1) Требования: Java 17+, Node 18+, PostgreSQL 15+, опционально Docker. (2) Переменные окружения: OPENAI_API_KEY или GEMINI_API_KEY (или Mistral), URL БД, URL TSA, путь к приватному ключу для подписи. (3) Генерация ключа: openssl genpkey -algorithm RSA -out ai.key. (4) Запуск БД: docker-compose up -d или локальная установка, миграции. (5) Запуск backend: ./mvnw spring-boot:run с выставленным env. (6) Запуск frontend: npm run dev, NEXT_PUBLIC_API_URL. (7) Опционально: запуск локального RFC 3161 TSA для разработки. Разделы кратко; ссылка на docs/PoC для архитектуры.
+- Обновить README: (1) Требования: Java 21+, Node 18+, PostgreSQL 15+, опционально Docker. (2) Переменные окружения: OPENAI_API_KEY или GEMINI_API_KEY (или Mistral), URL БД, URL TSA, путь к приватному ключу для подписи. (3) Генерация ключа: openssl genpkey -algorithm RSA -out ai.key. (4) Запуск БД: docker-compose up -d или локальная установка, миграции. (5) Запуск backend: ./mvnw spring-boot:run с выставленным env. (6) Запуск frontend: npm run dev, NEXT_PUBLIC_API_URL. (7) Опционально: запуск локального RFC 3161 TSA для разработки. Разделы кратко; ссылка на docs/PoC для архитектуры.
 
 ---
 
@@ -285,6 +285,37 @@
 | 6 — Frontend | 6–8 |
 | 7 — Верификация и документация | 2–4 |
 | **Итого** | **38–54** |
+
+---
+
+## Тестирование (по шагам)
+
+Описание тестов и критериев приёмки по каждому шагу. Backend: `mvn test` из каталога `backend/`; frontend: `npm test` при наличии.
+
+| Шаг | Тип теста | Что тестировать | Критерий приёмки |
+|-----|------------|-----------------|------------------|
+| **1.1** | Ручная проверка / док | README и диаграмма | README: Prerequisites, Run backend/frontend/DB; Mermaid рендерится; ссылка на docs/PoC. |
+| **1.2** | Unit | Health endpoint | GET /health → 200 и JSON {"status":"UP"}. @WebMvcTest(HealthController.class) + MockMvc. |
+| **1.2** | Интеграция | Контекст | @SpringBootTest — контекст поднимается без ошибок. |
+| **1.3** | Ручная | Frontend | npm run dev; страница: Prompt, Send, Response. |
+| **1.4** | Ручная / миграция | Схема БД | Liquibase/Flyway выполняется; таблица ai_response с нужными колонками. |
+| **2.1** | Unit | Канонизация | Один и тот же текст → одни и те же байты; \r\n vs \n → один результат. |
+| **2.2** | Unit | HashService | Известный вход → известный SHA-256 hex (64 символа). |
+| **2.3** | Unit | SignatureService | sign(hash), затем verify(hash, signature) → true; подделанная подпись → false. |
+| **2.4** | Unit | TimestampService | Mock TSA: запрос возвращает непустой token; невалидный ответ обрабатывается. |
+| **3.1** | Unit | LLMClient | Mock: complete(prompt) возвращает непустой текст и modelId. |
+| **3.2** | — | Поток данных | LLMResult / audit содержит model id и опционально параметры. |
+| **4.1** | Unit | Repository | save(entity); findById(id); проверить поля. H2 или Testcontainers. |
+| **4.2** | Unit | AuditRecordService | save(request) → id; загрузка по id, проверка полей. |
+| **5.1** | Интеграция | POST /api/ai/ask | 200; в теле response, responseHash, signature, tsaToken, id, model; в БД одна запись. |
+| **5.2** | Unit / интеграция | GET /api/ai/verify/:id | 200 с записью; 404 для неизвестного id. |
+| **6.1** | Ручная / E2E | Frontend → backend | Отправка prompt → ответ и статус; при ошибке показывается сообщение. |
+| **6.2** | Ручная | UI | Блоки signed, timestamped, verifiable; ссылка "Verify" с id. |
+| **6.3** | Ручная | Страница Verify | Загрузка по id; отображение hash, signature, TSA token; опционально проверка hash на клиенте. |
+| **7.1** | Unit | Верификация | hashMatch и signatureValid в ответе при реализации. |
+| **7.2** | Ручная | README | Описаны запуск и все env. |
+
+**Команда тестов backend:** из каталога `backend/`: `./mvnw test` или `mvn test`. Для тестов используется H2 (профиль по умолчанию).
 
 ---
 
