@@ -207,7 +207,33 @@ graph LR
 
 ---
 
-## 6. Stack overview
+## 6. Trust chain
+
+Who attests what: we attest *content* (signature over hash); TSA attests *time* (timestamp over signature bytes). See [Trust model](../docs/TRUST_MODEL.md).
+
+```mermaid
+graph LR
+  subgraph Content["Content attestation (backend)"]
+    T[AI text]
+    C[Canonicalize]
+    H[Hash SHA-256]
+    S[Sign]
+    T --> C --> H --> S
+  end
+
+  subgraph Time["Time attestation (TSA)"]
+    TS[Timestamp RFC 3161]
+    ST[Store]
+    S --> TS --> ST
+  end
+
+  H -.->|"we attest: digest = content"| S
+  S -.->|"TSA attests: existed at T"| TS
+```
+
+---
+
+## 7. Stack overview
 
 ```mermaid
 graph TB
@@ -240,4 +266,13 @@ graph TB
 
 ---
 
-*See [PoC (RU)](../docs/PoC.ru.md) and [Plan](../docs/plan.en.md) for full spec and implementation steps.*
+---
+
+## Related documentation
+
+- **PoC:** [PoC (RU)](../docs/PoC.ru.md) · [PoC (ET)](../docs/PoC.et.md)
+- **Plan:** [plan.en.md](../docs/plan.en.md) · [plan.ru.md](../docs/plan.ru.md) · [plan.et.md](../docs/plan.et.md)
+- **Signing:** [SIGNING.md](../docs/SIGNING.md) · [SIGNING.ru.md](../docs/SIGNING.ru.md) · [SIGNING.et.md](../docs/SIGNING.et.md)
+- **Timestamping:** [TIMESTAMPING.md](../docs/TIMESTAMPING.md) · [TIMESTAMPING.ru.md](../docs/TIMESTAMPING.ru.md) · [TIMESTAMPING.et.md](../docs/TIMESTAMPING.et.md)
+- **Trust model & eIDAS:** [TRUST_MODEL.md](../docs/TRUST_MODEL.md) · [TRUST_MODEL.ru.md](../docs/TRUST_MODEL.ru.md) · [TRUST_MODEL.et.md](../docs/TRUST_MODEL.et.md)
+- **README:** [../README.md](../README.md)

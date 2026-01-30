@@ -6,6 +6,20 @@ Samm-sammuline plaan PoC koostamiseks: kontrollitavad AI vastused krüptograafil
 
 ---
 
+## Sisukord
+
+- [Samm 1 — Projekti seadistus ja raam](#samm-1--projekti-seadistus-ja-raam)
+- [Samm 2 — Krüpto kiht](#samm-2--krüpto-kiht)
+- [Samm 3 — LLM integratsioon](#samm-3--llm-integratsioon)
+- [Samm 4 — Audit ja persisteerimine](#samm-4--audit-ja-persisteerimine)
+- [Samm 5 — Backend API](#samm-5--backend-api)
+- [Samm 6 — Frontend](#samm-6--frontend)
+- [Samm 7 — Kontroll ja dokumentatsioon](#samm-7--kontroll-ja-dokumentatsioon)
+- [Kokkuvõte — Hinnang tundide järgi](#kokkuvõte--hinnang-tundide-järgi)
+- [Testimine (sammude kaupa)](#testimine-sammude-kaupa)
+
+---
+
 ## Samm 1 — Projekti seadistus ja raam
 
 **Eesmärk:** Repo struktuur, backend- ja frontend-projektid, andmebaasi skeemi mustand.  
@@ -109,10 +123,17 @@ Samm-sammuline plaan PoC koostamiseks: kontrollitavad AI vastused krüptograafil
 | Väli | Väärtus |
 |------|---------|
 | **Hinnang** | 4–5 t |
-| **Kirjeldus** | Päring RFC 3161 ajatemplile TSA-st (lokaalne server või stub). Sisend: vastuse räsi (või allkiri). Väljund: TSA vastuse token (baitid või Base64). |
+| **Kirjeldus** | Päring RFC 3161 ajatemplile TSA-st (lokaalne server või stub). Sisend: **allkirja baitid** (mitte AI teksti). Väljund: TSA token, salvestada läbipaistmatute baitidena. |
+
+**Disain (dokumenteeri koodis ja README-s):**
+- **Mida ajatempliga märgime:** TSA märgib **allkirja baitide** peale, mitte AI vastuse teksti. Ahel: `AI tekst → hash → sign(hash) → timestamp(allkiri)`. Me kinnitame sisu; TSA kinnitab aja.
+- **Liides:** TimestampService jääb neutraalseks: nt `timestamp(byte[] dataToTimestamp)` — ilma AI-spetsiifiliste tüüpideta. Kutsuja edastab signatureBytes; teenus on üldine PKI moodul.
+- **Kaks režiimi:** (1) **REAL_TSA** — RFC 3161 HTTP konfigureeritava URLi jaoks. (2) **MOCK_TSA** — deterministlik stub üksiktestide ja CI jaoks ilma TSA serverita (enterprise-testimine).
+- **Parsimine (valikuline):** parseeri tagastatud TimeStampToken, võta genTime, logi — annab "elusa" aja logides.
+- **Salvestamine ja ulatus:** TSA token salvestada **läbipaistmatute baitidena** (byte[] või Base64). **Tõendi kontrollimine on selle ülesande ulatusest väljas** — ära rakenda PKI kontrolli uuesti.
 
 **Koodi juhend (LLM-readable):**
-- Loo TimestampService, mis küsib RFC 3161 ajatemplit konfigureeritava TSA URLi järgi (nt http://localhost:3180). Sisend: digest (SHA-256 räsi baitidega andmetest, mida ajatempliga märgitud — nt vastuse räsi või allkiri; vali üks ja dokumenteeri). Väljund: ajatempli token byte[] või Base64 String. BouncyCastle TSP: genereeri päring digestiga, HTTP POST TSA-le, parseeri vastus ja võta token. Ühenduse vead ja kehtetu vastus: Optional või erand; dokumenteeri. Kui TSA serverit pole: (a) stub/mock, mis tagastab testide jaoks fikseeritud baitide jada, või (b) README-s kirjelda lihtsa RFC 3161 serveri käivitamine. Üksiktest: mock või reaalse lokaalse TSA-ga päri ajatempel teadaoleva räsi jaoks, kontrolli et token pole tühi ja parseeritav. TSA serverit enda selles ülesandes ära rakenda (v.a. minimaalne stub vajadusel).
+- Loo TimestampService liidesega nt `byte[] timestamp(byte[] dataToTimestamp)` — sisend: ajatempliga märgitavad andmed (pipeline-is: **allkirja baitid**). Väljund: ajatempli token byte[] või Base64; salvesta läbipaistmatult. BouncyCastle TSP: koosta päring digestiga, HTTP POST TSA-le, parseeri vastus, võta token. Toeta REAL_TSA (URL konfigust) ja MOCK_TSA (deterministlik stub testideks). Ühenduse vead ja kehtetu vastus: Optional või erand; dokumenteeri. Valikuliselt: parseeri TimeStampToken, võta genTime, logi. Üksiktest: token pole tühi ja parseeritav; MOCK_TSA-ga päris serverit pole vaja. TSA tokeni kontrollimine on ulatusest väljas. TSA serverit ise ära rakenda (v.a. minimaalne stub vajadusel).
 
 ---
 

@@ -6,6 +6,20 @@ Step-by-step plan for building the PoC: verifiable AI responses with cryptograph
 
 ---
 
+## Table of contents
+
+- [Step 1 — Project setup and skeleton](#step-1--project-setup-and-skeleton)
+- [Step 2 — Crypto layer](#step-2--crypto-layer)
+- [Step 3 — LLM integration](#step-3--llm-integration)
+- [Step 4 — Audit and persistence](#step-4--audit-and-persistence)
+- [Step 5 — Backend API](#step-5--backend-api)
+- [Step 6 — Frontend](#step-6--frontend)
+- [Step 7 — Verification and docs](#step-7--verification-and-docs)
+- [Summary — Estimated total](#summary--estimated-total)
+- [Testing (by step)](#testing-by-step)
+
+---
+
 ## Step 1 — Project setup and skeleton
 
 **Goal:** Repository structure, backend and frontend projects, DB schema stub.  
@@ -109,10 +123,17 @@ Step-by-step plan for building the PoC: verifiable AI responses with cryptograph
 | Field | Value |
 |-------|--------|
 | **Est.** | 4–5 h |
-| **Description** | Request RFC 3161 timestamp from a TSA (local server or stub). Input: hash of the response (or of the signature). Output: TSA response token (bytes or Base64). |
+| **Description** | Request RFC 3161 timestamp from a TSA (local server or stub). Input: **signature bytes** (not the AI text). Output: TSA response token stored as opaque bytes. |
+
+**Design (document in code and README):**
+- **What is timestamped:** The TSA timestamp is applied to the **signature bytes**, not to the original AI response. Chain: `AI text → hash → sign(hash) → timestamp(signature)`. We attest content; TSA attests time.
+- **Interface:** Keep TimestampService neutral: e.g. `timestamp(byte[] dataToTimestamp)` or `requestTimestamp(byte[] digest)` — no AI-specific types. Caller passes `signatureBytes`; service is a generic PKI module.
+- **Two modes:** (1) **REAL_TSA** — RFC 3161 HTTP request to configurable URL. (2) **MOCK_TSA** — deterministic fake token for unit tests and CI without a running TSA server (enterprise-style testing).
+- **Parsing (optional but valuable):** Parse the returned `TimeStampToken`, extract `genTime`, log it — gives a clear “live” time in logs.
+- **Storage and scope:** TSA token must be stored as **opaque bytes** (byte[] or Base64). **Verification of the token is out of scope** for this task — do not reimplement PKI verification.
 
 **Coding prompt (LLM-readable):**
-- Create TimestampService that requests an RFC 3161 timestamp from a configurable TSA URL (e.g. http://localhost:3180). Input: digest (SHA-256 hash bytes of the data to be timestamped — e.g. the response hash or the signature, choose one and document). Output: timestamp token as byte[] or Base64 String. Use BouncyCastle's TSP (Time-Stamp Protocol) APIs: generate request with the digest, send HTTP POST to TSA, parse response and extract token. Handle connection errors and invalid response (return Optional or throw; document). If no TSA server is available: (a) provide a stub/mock that returns a fixed byte sequence for tests, or (b) document how to run a simple RFC 3161 server (e.g. OpenTSA or similar) in README. Unit test: with mock TSA or real local TSA, request timestamp for a known hash and assert token is non-empty and parseable. Do not implement the TSA server itself in this task unless it is a minimal stub.
+- Create TimestampService with interface e.g. `byte[] timestamp(byte[] dataToTimestamp)` or `requestTimestamp(byte[] digest)` — input is the data to be timestamped (in the pipeline: **signature bytes**). Output: timestamp token as byte[] or Base64 String; store as opaque bytes. Use BouncyCastle TSP: build request from digest, HTTP POST to TSA, parse response, extract token. Support REAL_TSA (configurable URL) and MOCK_TSA (deterministic stub for tests). Handle connection errors and invalid response (Optional or throw; document). Optional: parse TimeStampToken, extract genTime, log it. Unit test: token non-empty and parseable; with MOCK_TSA no real server needed. TSA token verification is out of scope. Do not implement the TSA server itself unless a minimal stub.
 
 ---
 

@@ -2,9 +2,54 @@
 
 **Verifiable AI responses with signing and timestamps.**
 
-PoC for cryptographically signed and timestamped LLM answers so that responses can be proven, not just trusted. See **[PoC (architecture & stack)](docs/PoC.ru.md)** for full spec — also [docs/PoC.et.md](docs/PoC.et.md), [plan](docs/plan.en.md), [diagrams](diagrams/architecture.md).
+PoC for cryptographically signed and timestamped LLM answers so that responses can be proven, not just trusted.
 
 Stack (PoC): Next.js, Java Spring Boot, PostgreSQL, OpenSSL/BouncyCastle, RFC 3161 TSA, one LLM (OpenAI/Gemini/Mistral).
+
+---
+
+## Documentation
+
+| Topic | EN | RU | ET |
+|-------|----|----|-----|
+| **PoC (architecture & stack)** | — | [PoC.ru.md](docs/PoC.ru.md) | [PoC.et.md](docs/PoC.et.md) |
+| **Implementation plan** | [plan.en.md](docs/plan.en.md) | [plan.ru.md](docs/plan.ru.md) | [plan.et.md](docs/plan.et.md) |
+| **Signing** | [SIGNING.md](docs/SIGNING.md) | [SIGNING.ru.md](docs/SIGNING.ru.md) | [SIGNING.et.md](docs/SIGNING.et.md) |
+| **Timestamping** | [TIMESTAMPING.md](docs/TIMESTAMPING.md) | [TIMESTAMPING.ru.md](docs/TIMESTAMPING.ru.md) | [TIMESTAMPING.et.md](docs/TIMESTAMPING.et.md) |
+| **Trust model & eIDAS** | [TRUST_MODEL.md](docs/TRUST_MODEL.md) | [TRUST_MODEL.ru.md](docs/TRUST_MODEL.ru.md) | [TRUST_MODEL.et.md](docs/TRUST_MODEL.et.md) |
+| **Architecture diagrams** | [diagrams/architecture.md](diagrams/architecture.md) (Mermaid: pipeline, trust chain, stack) | | |
+
+### README contents
+
+- [Design: PKI chain and RFC 3161](#design-pki-chain-and-rfc-3161)
+- [Prerequisites](#prerequisites)
+- [Run PostgreSQL](#run-postgresql-or-docker)
+- [Run backend](#run-backend)
+- [Run frontend](#run-frontend)
+- [Run tests](#run-tests)
+- [Authorship and License](#authorship-and-license)
+
+---
+
+## Design: PKI chain and RFC 3161
+
+**RFC 3161** is a real cryptographic standard used in eIDAS, legal evidence, archival storage, and enterprise PKI — not a toy. This PoC uses the same timestamping mechanism as production PKI systems.
+
+**What we timestamp:** The TSA timestamp is applied to the **signature bytes**, not to the original AI response text. The chain is:
+
+```
+AI response text  →  hash(text)  →  sign(hash)  →  timestamp(signature)
+                         ↑               ↑                  ↑
+                   content digest   we attest content   TSA attests time
+```
+
+So: we attest *what* was said (signature over hash); the TSA attests *when* it was signed. This is the classic PKI trust chain.
+
+**In short:** *Timestamp is applied to the signature bytes, not to the original AI response text.*
+
+**BouncyCastle TSP** is used for RFC 3161 requests — the standard, eIDAS-compatible approach. The TSA token is stored as **opaque bytes**; verification of the token is out of scope for this PoC (no need to reimplement PKI).
+
+For details: [Signing](docs/SIGNING.md), [Timestamping](docs/TIMESTAMPING.md), [Trust model & eIDAS mapping](docs/TRUST_MODEL.md), [diagrams (trust chain)](diagrams/architecture.md#6-trust-chain).
 
 ---
 
