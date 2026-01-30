@@ -164,5 +164,5 @@ Once an AI response is signed and timestamped, history can no longer be rewritte
 
 - [Signing](SIGNING.md) — what we sign; signature bytes are what we timestamp.
 - [Trust model](TRUST_MODEL.md) — who attests what, eIDAS mapping.
-- [Architecture diagrams](../diagrams/architecture.md) — pipeline and trust chain.
-- [README](../README.md) — design overview, run instructions.
+- [Architecture diagrams](../../diagrams/architecture.md) — pipeline and trust chain.
+- [README](../../README.md) — design overview, run instructions.

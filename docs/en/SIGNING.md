@@ -35,7 +35,7 @@ AI response text  →  canonicalize  →  hash (SHA-256)  →  sign (RSA)
 - **Hash** (SHA-256) produces a fixed-size digest; we sign that digest.
 - **Signature** binds the digest to our private key; the TSA then timestamps the **signature bytes** (see [Timestamping](TIMESTAMPING.md)).
 
-So we attest *what* was said; the TSA attests *when* it was signed. See [Trust model](TRUST_MODEL.md) and [diagrams](../diagrams/architecture.md).
+So we attest *what* was said; the TSA attests *when* it was signed. See [Trust model](TRUST_MODEL.md) and [diagrams](../../diagrams/architecture.md).
 
 ---
 
@@ -119,5 +119,5 @@ The **architecture** is designed so that the same pipeline can later be wired to
 
 - [Timestamping](TIMESTAMPING.md) — what we timestamp (signature bytes), TSA, storage.
 - [Trust model](TRUST_MODEL.md) — trust chain, who attests what, eIDAS mapping.
-- [Architecture diagrams](../diagrams/architecture.md) — pipeline and crypto layer.
-- [README](../README.md) — design overview, run instructions.
+- [Architecture diagrams](../../diagrams/architecture.md) — pipeline and crypto layer.
+- [README](../../README.md) — design overview, run instructions.

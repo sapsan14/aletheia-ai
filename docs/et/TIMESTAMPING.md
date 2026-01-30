@@ -158,7 +158,7 @@ Kui AI vastus on allkirjastatud ja ajatempliga märgitud, ei saa ajalugu enam ü
 
 ## Seotud dokumendid
 
-- [Allkirjastamine](SIGNING.et.md) — mida allkirjastame; allkirja baitid on see, mida ajatempliga märgime.
-- [Usaldusmudel](TRUST_MODEL.et.md) — kes mida kinnitab, eIDAS vastendus.
-- [Arhitektuuri diagrammid](../diagrams/architecture.md) — pipeline ja usaldusahel.
-- [README](../README.md) — disaini ülevaade, käivitamise juhised.
+- [Allkirjastamine](SIGNING.md) — mida allkirjastame; allkirja baitid on see, mida ajatempliga märgime.
+- [Usaldusmudel](TRUST_MODEL.md) — kes mida kinnitab, eIDAS vastendus.
+- [Arhitektuuri diagrammid](../../diagrams/architecture.md) — pipeline ja usaldusahel.
+- [README](../../README.md) — disaini ülevaade, käivitamise juhised.

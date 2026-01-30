@@ -39,7 +39,7 @@ The pipeline builds a **classic PKI trust chain**:
 - **Step 5** is delegated to an external TSA (RFC 3161). The TSA attests *when* the signature existed.
 - **Step 6** preserves the chain for verification and audit.
 
-A visual diagram is in [Architecture diagrams → Trust chain](../diagrams/architecture.md#6-trust-chain).
+A visual diagram is in [Architecture diagrams → Trust chain](../../diagrams/architecture.md#6-trust-chain).
 
 ---
 
@@ -61,7 +61,7 @@ This separation is the standard PKI pattern and keeps the chain clean for eIDAS 
 
 ## Mermaid: trust chain
 
-The same flow as in the [architecture diagrams](../diagrams/architecture.md) — here focused on trust:
+The same flow as in the [architecture diagrams](../../diagrams/architecture.md) — here focused on trust:
 
 ```mermaid
 graph LR
@@ -118,5 +118,5 @@ The PoC uses **non-qualified** components. The architecture is designed so that 
 
 - [Signing](SIGNING.md) — what we sign, key, interface, storage.
 - [Timestamping](TIMESTAMPING.md) — what we timestamp, TSA, storage, scope.
-- [Architecture diagrams](../diagrams/architecture.md) — pipeline, crypto layer, **trust chain**.
-- [README](../README.md) — design overview, run instructions.
+- [Architecture diagrams](../../diagrams/architecture.md) — pipeline, crypto layer, **trust chain**.
+- [README](../../README.md) — design overview, run instructions.

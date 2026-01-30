@@ -39,7 +39,7 @@ Pipeline ehitab **klassikalise PKI usaldusahela**:
 - **Samm 5** on delegeeritud välistele TSA-le (RFC 3161). TSA kinnitab *millal* allkiri eksisteeris.
 - **Samm 6** säilitab ahela kontrollimiseks ja auditeerimiseks.
 
-Visuaalne diagramm on [Arhitektuuri diagrammid → Usaldusahel](../diagrams/architecture.md#6-trust-chain).
+Visuaalne diagramm on [Arhitektuuri diagrammid → Usaldusahel](../../diagrams/architecture.md#6-trust-chain).
 
 ---
 
@@ -47,8 +47,8 @@ Visuaalne diagramm on [Arhitektuuri diagrammid → Usaldusahel](../diagrams/arch
 
 | Osaleja | Kinnitab | Mehhanism |
 |---------|----------|-----------|
-| **Aletheia backend** | *Sisu* — "see täpne räsi vastab sellele kanoonilisele vastusele" | Digitaalne allkiri SHA-256 räsi peal (RSA PKCS#1). Vaata [Allkirjastamine](SIGNING.et.md). |
-| **TSA (Time-Stamp Authority)** | *Aeg* — "see allkiri eksisteeris sel hetkel" | RFC 3161 ajatempel **allkirja baitide** peal (mitte toorest teksti). Vaata [Ajatemplid](TIMESTAMPING.et.md). |
+| **Aletheia backend** | *Sisu* — "see täpne räsi vastab sellele kanoonilisele vastusele" | Digitaalne allkiri SHA-256 räsi peal (RSA PKCS#1). Vaata [Allkirjastamine](SIGNING.md). |
+| **TSA (Time-Stamp Authority)** | *Aeg* — "see allkiri eksisteeris sel hetkel" | RFC 3161 ajatempel **allkirja baitide** peal (mitte toorest teksti). Vaata [Ajatemplid](TIMESTAMPING.md). |
 
 Me **ei** märgi AI teksti otse ajatempliga. Märgime **allkirja**. Nii:
 
@@ -61,7 +61,7 @@ See eraldamine on standardne PKI muster ja hoiab ahela puhtana eIDAS ja auditi j
 
 ## Mermaid: usaldusahel
 
-Sama voog nagu [arhitektuuri diagrammides](../diagrams/architecture.md) — siin fookusega usaldusele:
+Sama voog nagu [arhitektuuri diagrammides](../../diagrams/architecture.md) — siin fookusega usaldusele:
 
 ```mermaid
 graph LR
@@ -101,7 +101,7 @@ PoC kasutab **mittekvalifitseeritud** komponente. Arhitektuur on kavandatud nii,
 | **Salvestamine** | Sama: vastus, räsi, allkiri, tsa_token (läbipaistmatud baitid) | Sama salvestamise mudel; tokenid kvalifitseeritud TSA-st |
 | **Nõue** | "Ajas tõestatav" — õiguslikku kehtivust ei väideta | "Õiguslikult kehtiv" kohaldatavalt (qtST, QES) |
 
-**Kokkuvõte:** Asenda "meie võti" kvalifitseeritud allkirja võtmega ja "meie TSA" kvalifitseeritud TSA-ga; pipeline (kanoniseerimine → räsi → allkiri → ajatempel → salvestamine) jääb samaks. Vaata [Allkirjastamine](SIGNING.et.md) ja [Ajatemplid](TIMESTAMPING.et.md) praeguse ulatuse ja tulevase töö kohta.
+**Kokkuvõte:** Asenda "meie võti" kvalifitseeritud allkirja võtmega ja "meie TSA" kvalifitseeritud TSA-ga; pipeline (kanoniseerimine → räsi → allkiri → ajatempel → salvestamine) jääb samaks. Vaata [Allkirjastamine](SIGNING.md) ja [Ajatemplid](TIMESTAMPING.md) praeguse ulatuse ja tulevase töö kohta.
 
 ---
 
@@ -116,7 +116,7 @@ PoC kasutab **mittekvalifitseeritud** komponente. Arhitektuur on kavandatud nii,
 
 ## Seotud dokumendid
 
-- [Allkirjastamine](SIGNING.et.md) — mida allkirjastame, võti, liides, salvestamine.
-- [Ajatemplid](TIMESTAMPING.et.md) — mida ajatempliga märgime, TSA, salvestamine, ulatus.
-- [Arhitektuuri diagrammid](../diagrams/architecture.md) — pipeline, krüptokiht, **usaldusahel**.
-- [README](../README.md) — disaini ülevaade, käivitamise juhised.
+- [Allkirjastamine](SIGNING.md) — mida allkirjastame, võti, liides, salvestamine.
+- [Ajatemplid](TIMESTAMPING.md) — mida ajatempliga märgime, TSA, salvestamine, ulatus.
+- [Arhitektuuri diagrammid](../../diagrams/architecture.md) — pipeline, krüptokiht, **usaldusahel**.
+- [README](../../README.md) — disaini ülevaade, käivitamise juhised.

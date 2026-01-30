@@ -33,9 +33,9 @@ AI vastuse tekst  →  kanoniseerimine  →  räsi (SHA-256)  →  allkiri (RSA)
 
 - **Kanoniseerimine** tagab, et sama loogiline sisu annab alati samad baitid (Unicode NFC, rea lõpud, tühikud).
 - **Räsi** (SHA-256) annab fikseeritud suurusega räsi; allkirjastame selle räsi.
-- **Allkiri** seob räsi meie privaatvõtmega; TSA märgib seejärel **allkirja baitide** peale ajatempli (vaata [Ajatemplid](TIMESTAMPING.et.md)).
+- **Allkiri** seob räsi meie privaatvõtmega; TSA märgib seejärel **allkirja baitide** peale ajatempli (vaata [Ajatemplid](TIMESTAMPING.md)).
 
-Me kinnitame *mida* öeldi; TSA kinnitab *millal* see allkirjastati. Vaata [Usaldusmudel](TRUST_MODEL.et.md) ja [diagrammid](../diagrams/architecture.md).
+Me kinnitame *mida* öeldi; TSA kinnitab *millal* see allkirjastati. Vaata [Usaldusmudel](TRUST_MODEL.md) ja [diagrammid](../../diagrams/architecture.md).
 
 ---
 
@@ -87,7 +87,7 @@ Allkiri salvestatakse koos:
 
 - AI vastusega (tekst),
 - vastuse räsiga (SHA-256 hex või baitid),
-- ajatempli tokeniga (läbipaistmatud baitid — vaata [Ajatemplid](TIMESTAMPING.et.md)),
+- ajatempli tokeniga (läbipaistmatud baitid — vaata [Ajatemplid](TIMESTAMPING.md)),
 - metaandmetega (mudel, parameetrid, aeg).
 
 Näide andmebaasi väljast:
@@ -108,13 +108,13 @@ See PoC **tahtlikult**:
 - ei kasuta HSM-i ega võtme tseremooniat;
 - kasutab **üht** võtit; rotatsioon on ulatusest väljas.
 
-**Arhitektuur** on kavandatud nii, et sama pipeline saab hiljem ühendada kvalifitseeritud usaldusteenuse pakkujate ja eIDAS-ga ühilduva allkirjastamisega (vaata [Usaldusmudel — eIDAS](TRUST_MODEL.et.md#eidas-vastendus-mittekvalifitseeritud--kvalifitseeritud)).
+**Arhitektuur** on kavandatud nii, et sama pipeline saab hiljem ühendada kvalifitseeritud usaldusteenuse pakkujate ja eIDAS-ga ühilduva allkirjastamisega (vaata [Usaldusmudel — eIDAS](TRUST_MODEL.md#eidas-vastendus-mittekvalifitseeritud--kvalifitseeritud)).
 
 ---
 
 ## Seotud dokumendid
 
-- [Ajatemplid](TIMESTAMPING.et.md) — mida ajatempliga märgime (allkirja baitid), TSA, salvestamine.
-- [Usaldusmudel](TRUST_MODEL.et.md) — usaldusahel, kes mida kinnitab, eIDAS vastendus.
-- [Arhitektuuri diagrammid](../diagrams/architecture.md) — pipeline ja krüptokiht.
-- [README](../README.md) — disaini ülevaade, käivitamise juhised.
+- [Ajatemplid](TIMESTAMPING.md) — mida ajatempliga märgime (allkirja baitid), TSA, salvestamine.
+- [Usaldusmudel](TRUST_MODEL.md) — usaldusahel, kes mida kinnitab, eIDAS vastendus.
+- [Arhitektuuri diagrammid](../../diagrams/architecture.md) — pipeline ja krüptokiht.
+- [README](../../README.md) — disaini ülevaade, käivitamise juhised.

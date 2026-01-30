@@ -209,7 +209,7 @@ graph LR
 
 ## 6. Trust chain
 
-Who attests what: we attest *content* (signature over hash); TSA attests *time* (timestamp over signature bytes). See [Trust model](../docs/TRUST_MODEL.md).
+Who attests what: we attest *content* (signature over hash); TSA attests *time* (timestamp over signature bytes). See [Trust model (EN)](../docs/en/TRUST_MODEL.md).
 
 ```mermaid
 graph LR
@@ -270,9 +270,9 @@ graph TB
 
 ## Related documentation
 
-- **PoC:** [PoC (RU)](../docs/PoC.ru.md) · [PoC (ET)](../docs/PoC.et.md)
-- **Plan:** [plan.en.md](../docs/plan.en.md) · [plan.ru.md](../docs/plan.ru.md) · [plan.et.md](../docs/plan.et.md)
-- **Signing:** [SIGNING.md](../docs/SIGNING.md) · [SIGNING.ru.md](../docs/SIGNING.ru.md) · [SIGNING.et.md](../docs/SIGNING.et.md)
-- **Timestamping:** [TIMESTAMPING.md](../docs/TIMESTAMPING.md) · [TIMESTAMPING.ru.md](../docs/TIMESTAMPING.ru.md) · [TIMESTAMPING.et.md](../docs/TIMESTAMPING.et.md)
-- **Trust model & eIDAS:** [TRUST_MODEL.md](../docs/TRUST_MODEL.md) · [TRUST_MODEL.ru.md](../docs/TRUST_MODEL.ru.md) · [TRUST_MODEL.et.md](../docs/TRUST_MODEL.et.md)
+- **PoC:** [EN](../docs/en/PoC.md) · [RU](../docs/ru/PoC.md) · [ET](../docs/et/PoC.md)
+- **Plan:** [EN](../docs/en/plan.md) · [RU](../docs/ru/plan.md) · [ET](../docs/et/plan.md)
+- **Signing:** [EN](../docs/en/SIGNING.md) · [RU](../docs/ru/SIGNING.md) · [ET](../docs/et/SIGNING.md)
+- **Timestamping:** [EN](../docs/en/TIMESTAMPING.md) · [RU](../docs/ru/TIMESTAMPING.md) · [ET](../docs/et/TIMESTAMPING.md)
+- **Trust model & eIDAS:** [EN](../docs/en/TRUST_MODEL.md) · [RU](../docs/ru/TRUST_MODEL.md) · [ET](../docs/et/TRUST_MODEL.md)
 - **README:** [../README.md](../README.md)

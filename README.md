@@ -10,13 +10,15 @@ Stack (PoC): Next.js, Java Spring Boot, PostgreSQL, OpenSSL/BouncyCastle, RFC 31
 
 ## Documentation
 
+Docs are grouped by language in `docs/<lang>/` (en, ru, et). Same filenames in each folder: `PoC.md`, `plan.md`, `SIGNING.md`, `TIMESTAMPING.md`, `TRUST_MODEL.md`.
+
 | Topic | EN | RU | ET |
 |-------|----|----|-----|
-| **PoC (architecture & stack)** | — | [PoC.ru.md](docs/PoC.ru.md) | [PoC.et.md](docs/PoC.et.md) |
-| **Implementation plan** | [plan.en.md](docs/plan.en.md) | [plan.ru.md](docs/plan.ru.md) | [plan.et.md](docs/plan.et.md) |
-| **Signing** | [SIGNING.md](docs/SIGNING.md) | [SIGNING.ru.md](docs/SIGNING.ru.md) | [SIGNING.et.md](docs/SIGNING.et.md) |
-| **Timestamping** | [TIMESTAMPING.md](docs/TIMESTAMPING.md) | [TIMESTAMPING.ru.md](docs/TIMESTAMPING.ru.md) | [TIMESTAMPING.et.md](docs/TIMESTAMPING.et.md) |
-| **Trust model & eIDAS** | [TRUST_MODEL.md](docs/TRUST_MODEL.md) | [TRUST_MODEL.ru.md](docs/TRUST_MODEL.ru.md) | [TRUST_MODEL.et.md](docs/TRUST_MODEL.et.md) |
+| **PoC (architecture & stack)** | [docs/en/PoC.md](docs/en/PoC.md) | [docs/ru/PoC.md](docs/ru/PoC.md) | [docs/et/PoC.md](docs/et/PoC.md) |
+| **Implementation plan** | [docs/en/plan.md](docs/en/plan.md) | [docs/ru/plan.md](docs/ru/plan.md) | [docs/et/plan.md](docs/et/plan.md) |
+| **Signing** | [docs/en/SIGNING.md](docs/en/SIGNING.md) | [docs/ru/SIGNING.md](docs/ru/SIGNING.md) | [docs/et/SIGNING.md](docs/et/SIGNING.md) |
+| **Timestamping** | [docs/en/TIMESTAMPING.md](docs/en/TIMESTAMPING.md) | [docs/ru/TIMESTAMPING.md](docs/ru/TIMESTAMPING.md) | [docs/et/TIMESTAMPING.md](docs/et/TIMESTAMPING.md) |
+| **Trust model & eIDAS** | [docs/en/TRUST_MODEL.md](docs/en/TRUST_MODEL.md) | [docs/ru/TRUST_MODEL.md](docs/ru/TRUST_MODEL.md) | [docs/et/TRUST_MODEL.md](docs/et/TRUST_MODEL.md) |
 | **Architecture diagrams** | [diagrams/architecture.md](diagrams/architecture.md) (Mermaid: pipeline, trust chain, stack) | | |
 
 ### README contents
@@ -49,7 +51,7 @@ So: we attest *what* was said (signature over hash); the TSA attests *when* it w
 
 **BouncyCastle TSP** is used for RFC 3161 requests — the standard, eIDAS-compatible approach. The TSA token is stored as **opaque bytes**; verification of the token is out of scope for this PoC (no need to reimplement PKI).
 
-For details: [Signing](docs/SIGNING.md), [Timestamping](docs/TIMESTAMPING.md), [Trust model & eIDAS mapping](docs/TRUST_MODEL.md), [diagrams (trust chain)](diagrams/architecture.md#6-trust-chain).
+For details: [Signing](docs/en/SIGNING.md), [Timestamping](docs/en/TIMESTAMPING.md), [Trust model & eIDAS mapping](docs/en/TRUST_MODEL.md), [diagrams (trust chain)](diagrams/architecture.md#6-trust-chain).
 
 ---
 
@@ -59,7 +61,7 @@ For details: [Signing](docs/SIGNING.md), [Timestamping](docs/TIMESTAMPING.md), [
 - **Node.js 18+** (frontend)
 - **PostgreSQL 15+** (or Docker)
 - **OpenSSL** (key generation, optional local TSA)
-- Env: LLM API key (OpenAI/Gemini/Mistral), DB URL, TSA URL, signing key path — see [PoC](docs/PoC.ru.md) and plan for details.
+- Env: LLM API key (OpenAI/Gemini/Mistral), DB URL, TSA URL, signing key path — see [PoC](docs/en/PoC.md) and [plan](docs/en/plan.md) for details.
 
 ---
 
@@ -116,7 +118,7 @@ Runs JUnit 5 tests: `HealthControllerTest` (GET /health → 200, `{"status":"UP"
 
 **Frontend:** `npm test` when test script is added.
 
-Detailed test scope and acceptance criteria per step: see [plan (EN)](docs/plan.en.md#testing-by-step), [plan (RU)](docs/plan.ru.md#тестирование-по-шагам), [plan (ET)](docs/plan.et.md#testimine-sammude-kaupa).
+Detailed test scope and acceptance criteria per step: see [plan (EN)](docs/en/plan.md#testing-by-step), [plan (RU)](docs/ru/plan.md#тестирование-по-шагам), [plan (ET)](docs/et/plan.md#testimine-sammude-kaupa).
 
 ---
 
