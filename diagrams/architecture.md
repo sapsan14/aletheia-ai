@@ -275,4 +275,8 @@ graph TB
 - **Signing:** [EN](../docs/en/SIGNING.md) · [RU](../docs/ru/SIGNING.md) · [ET](../docs/et/SIGNING.md)
 - **Timestamping:** [EN](../docs/en/TIMESTAMPING.md) · [RU](../docs/ru/TIMESTAMPING.md) · [ET](../docs/et/TIMESTAMPING.md)
 - **Trust model & eIDAS:** [EN](../docs/en/TRUST_MODEL.md) · [RU](../docs/ru/TRUST_MODEL.md) · [ET](../docs/et/TRUST_MODEL.md)
+- **MOCK_TSA:** [EN](../docs/en/MOCK_TSA.md) · [RU](../docs/ru/MOCK_TSA.md)
+- **Cryptographic Oracle:** [EN](../docs/en/CRYPTO_ORACLE.md) · [RU](../docs/ru/CRYPTO_ORACLE.md) · [ET](../docs/et/CRYPTO_ORACLE.md)
+- **Agent Audit Model:** [EN](../docs/en/AGENT_AUDIT_MODEL.md) · [RU](../docs/ru/AGENT_AUDIT_MODEL.md) · [ET](../docs/et/AGENT_AUDIT_MODEL.md)
+- **Testing Strategy:** [EN](../docs/en/TESTING_STRATEGY.md) · [RU](../docs/ru/TESTING_STRATEGY.md) · [ET](../docs/et/TESTING_STRATEGY.md)
 - **README:** [../README.md](../README.md)

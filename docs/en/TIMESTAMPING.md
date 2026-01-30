@@ -160,9 +160,43 @@ Once an AI response is signed and timestamped, history can no longer be rewritte
 
 ---
 
+## Testing with RFC 3161 Test Vectors
+
+For implementation testing, **RFC 3161 test vectors** and **golden fixtures** provide deterministic reference outputs:
+
+- **Test vectors** = concrete examples: given hash/digest → expected TSA response
+- **Golden fixtures** = stored reference tokens for regression testing
+
+**Example test vector:**
+
+```json
+{
+  "digest_sha256": "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9",
+  "tst_token_base64": "MIIC...",
+  "expected_time": "2026-01-01T00:00:00Z",
+  "policy_oid": "1.2.3.4.5.6.7.8"
+}
+```
+
+**Purpose:**
+- Verify RFC 3161 client/server behaves correctly
+- Include valid cases and edge cases (invalid hashes, wrong algorithms)
+- Enable byte-level regression testing against known-good outputs
+
+**Sources:**
+- BouncyCastle `tsp` test suites
+- Open-source TSA implementations
+- Aletheia MOCK_TSA (see [MOCK_TSA](MOCK_TSA.md))
+
+For deterministic testing in Aletheia, use MOCK_TSA to generate reproducible tokens. See [Cryptographic Oracle](CRYPTO_ORACLE.md) for the testing philosophy.
+
+---
+
 ## Related documents
 
 - [Signing](SIGNING.md) — what we sign; signature bytes are what we timestamp.
 - [Trust model](TRUST_MODEL.md) — who attests what, eIDAS mapping.
+- [MOCK_TSA](MOCK_TSA.md) — deterministic TSA for testing, RFC 3161 test vectors.
+- [Cryptographic Oracle](CRYPTO_ORACLE.md) — oracle pattern for timestamp testing.
 - [Architecture diagrams](../../diagrams/architecture.md) — pipeline and trust chain.
 - [README](../../README.md) — design overview, run instructions.

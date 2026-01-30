@@ -156,9 +156,43 @@ Kui AI vastus on allkirjastatud ja ajatempliga märgitud, ei saa ajalugu enam ü
 
 ---
 
+## Testimine RFC 3161 testvektoritega
+
+Implementatsiooni testimiseks **RFC 3161 testvektorid** ja **golden fixtures** pakuvad deterministlikke etalonväljundeid:
+
+- **Testvektorid** = konkreetsed näited: antud räsi/digest → oodatav TSA vastus
+- **Golden fixtures** = salvestatud etalonväljundid regressiooni testimiseks
+
+**Näide testvektorist:**
+
+```json
+{
+  "digest_sha256": "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9",
+  "tst_token_base64": "MIIC...",
+  "expected_time": "2026-01-01T00:00:00Z",
+  "policy_oid": "1.2.3.4.5.6.7.8"
+}
+```
+
+**Eesmärk:**
+- Kontrollida, et RFC 3161 klient/server käitub õigesti
+- Lisada valideerivad juhtumid ja edge case'id (vigased räsid, valed algoritmid)
+- Võimaldada baidipõhist regressioonitestimist teadaolevate hea väljundite vastu
+
+**Allikad:**
+- BouncyCastle `tsp` test suites
+- Avatud lähtekoodiga TSA implementatsioonid
+- Aletheia MOCK_TSA (vt [MOCK_TSA](MOCK_TSA.md))
+
+Deterministlikuks testimiseks Aletheias kasuta MOCK_TSA reprodutseeritavate tokenite genereerimiseks. Vt [Krüptograafiline oraakel](CRYPTO_ORACLE.md) testimise filosoofia jaoks.
+
+---
+
 ## Seotud dokumendid
 
 - [Allkirjastamine](SIGNING.md) — mida allkirjastame; allkirja baitid on see, mida ajatempliga märgime.
 - [Usaldusmudel](TRUST_MODEL.md) — kes mida kinnitab, eIDAS vastendus.
+- [MOCK_TSA](MOCK_TSA.md) — deterministlik TSA testimiseks, RFC 3161 testvektorid.
+- [Krüptograafiline oraakel](CRYPTO_ORACLE.md) — oraakli muster ajatempli testimiseks.
 - [Arhitektuuri diagrammid](../../diagrams/architecture.md) — pipeline ja usaldusahel.
 - [README](../../README.md) — disaini ülevaade, käivitamise juhised.

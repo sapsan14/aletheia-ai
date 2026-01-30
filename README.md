@@ -10,7 +10,7 @@ Stack (PoC): Next.js, Java Spring Boot, PostgreSQL, OpenSSL/BouncyCastle, RFC 31
 
 ## Documentation
 
-Docs are grouped by language in `docs/<lang>/` (en, ru, et). Same filenames in each folder: `PoC.md`, `plan.md`, `SIGNING.md`, `TIMESTAMPING.md`, `TRUST_MODEL.md`.
+Docs are grouped by language in `docs/<lang>/` (en, ru, et). Core documents are available in all three languages.
 
 | Topic | EN | RU | ET |
 |-------|----|----|-----|
@@ -19,6 +19,10 @@ Docs are grouped by language in `docs/<lang>/` (en, ru, et). Same filenames in e
 | **Signing** | [docs/en/SIGNING.md](docs/en/SIGNING.md) | [docs/ru/SIGNING.md](docs/ru/SIGNING.md) | [docs/et/SIGNING.md](docs/et/SIGNING.md) |
 | **Timestamping** | [docs/en/TIMESTAMPING.md](docs/en/TIMESTAMPING.md) | [docs/ru/TIMESTAMPING.md](docs/ru/TIMESTAMPING.md) | [docs/et/TIMESTAMPING.md](docs/et/TIMESTAMPING.md) |
 | **Trust model & eIDAS** | [docs/en/TRUST_MODEL.md](docs/en/TRUST_MODEL.md) | [docs/ru/TRUST_MODEL.md](docs/ru/TRUST_MODEL.md) | [docs/et/TRUST_MODEL.md](docs/et/TRUST_MODEL.md) |
+| **MOCK_TSA (testing)** | [docs/en/MOCK_TSA.md](docs/en/MOCK_TSA.md) | [docs/ru/MOCK_TSA.md](docs/ru/MOCK_TSA.md) | — |
+| **Cryptographic Oracle** | [docs/en/CRYPTO_ORACLE.md](docs/en/CRYPTO_ORACLE.md) | [docs/ru/CRYPTO_ORACLE.md](docs/ru/CRYPTO_ORACLE.md) | [docs/et/CRYPTO_ORACLE.md](docs/et/CRYPTO_ORACLE.md) |
+| **Agent Audit Model** | [docs/en/AGENT_AUDIT_MODEL.md](docs/en/AGENT_AUDIT_MODEL.md) | [docs/ru/AGENT_AUDIT_MODEL.md](docs/ru/AGENT_AUDIT_MODEL.md) | [docs/et/AGENT_AUDIT_MODEL.md](docs/et/AGENT_AUDIT_MODEL.md) |
+| **Testing Strategy** | [docs/en/TESTING_STRATEGY.md](docs/en/TESTING_STRATEGY.md) | [docs/ru/TESTING_STRATEGY.md](docs/ru/TESTING_STRATEGY.md) | [docs/et/TESTING_STRATEGY.md](docs/et/TESTING_STRATEGY.md) |
 | **Architecture diagrams** | [diagrams/architecture.md](diagrams/architecture.md) (Mermaid: pipeline, trust chain, stack) | | |
 
 ### README contents
