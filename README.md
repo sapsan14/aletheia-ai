@@ -294,7 +294,7 @@ docker run -p 8080:8080 \
 
 ### Frontend
 
-`NEXT_PUBLIC_API_URL` must be set at **build time** (baked into the client bundle):
+`NEXT_PUBLIC_API_URL` must be set at **build time** (baked into the client bundle). Empty = relative `/api` URLs (used when behind ngrok; [frontend/app/api/[...path]/route.ts](frontend/app/api/[...path]/route.ts) proxies to the backend at runtime using `BACKEND_INTERNAL_URL`). See [deploy/ansible/README.md](deploy/ansible/README.md#api-proxy-docker) and [CORS when using ngrok](deploy/ansible/README.md#cors-when-opening-app-via-ngrok-fetch-to-localhost8080-blocked).
 
 ```bash
 cd frontend
@@ -302,7 +302,7 @@ docker build --build-arg NEXT_PUBLIC_API_URL=http://localhost:8080 -t aletheia-f
 docker run -p 3000:3000 aletheia-frontend
 ```
 
-For production, use the backend URL: `--build-arg NEXT_PUBLIC_API_URL=https://api.example.com`
+For production (no ngrok), use the backend URL: `--build-arg NEXT_PUBLIC_API_URL=http://YOUR_VM_IP:8080`. For ngrok, build with empty: `--build-arg NEXT_PUBLIC_API_URL=`.
 
 ### .dockerignore
 

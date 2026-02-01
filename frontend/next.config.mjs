@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // /api/* is proxied at runtime by app/api/[...path]/route.ts (uses BACKEND_INTERNAL_URL in container)
+  // /api/* is proxied at runtime by app/api/[...path]/route.ts (reads BACKEND_INTERNAL_URL
+  // from process.env per request). No rewrites here so the same image works in Docker and locally.
   async headers() {
     return [
       {

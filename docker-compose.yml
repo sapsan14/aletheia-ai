@@ -52,12 +52,15 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      # NEXT_PUBLIC_API_URL: empty = relative /api (ngrok); set for direct backend URL (see deploy/ansible/README.md).
+      # BACKEND_INTERNAL_URL: used at build time only if rewrites were used; runtime proxy reads env at request time.
       args:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8080}
         BACKEND_INTERNAL_URL: ${BACKEND_INTERNAL_URL:-http://backend:8080}
     container_name: aletheia-frontend
     ports:
       - "3000:3000"
+    # Runtime proxy (app/api/[...path]/route.ts) reads this to forward /api/* to the backend container.
     environment:
       BACKEND_INTERNAL_URL: http://backend:8080
     depends_on:

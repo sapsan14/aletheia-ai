@@ -16,6 +16,10 @@ WORKDIR /app
 ARG NEXT_PUBLIC_API_URL=http://localhost:8080
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
+# Build-time backend URL for Next.js rewrites (/api/* → backend). Required in Docker so proxy targets backend:8080, not localhost.
+ARG BACKEND_INTERNAL_URL=http://localhost:8080
+ENV BACKEND_INTERNAL_URL=$BACKEND_INTERNAL_URL
+
 # Install dependencies
 COPY package.json package-lock.json ./
 RUN npm ci

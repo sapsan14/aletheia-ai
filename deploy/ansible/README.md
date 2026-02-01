@@ -107,7 +107,7 @@ Get your authtoken at https://dashboard.ngrok.com/get-started/your-authtoken
 
 The service runs `ngrok http 3000 --domain=<ngrok_domain>` (direct CLI, not config file) and restarts on failure. Authtoken from `NGROK_AUTHTOKEN` in `.env` or `/etc/ngrok/ngrok.env`. Ensure CORS includes your ngrok URL (see above).
 
-**Full ngrok (one command):** Exposes app via single tunnel (free plan = 1 endpoint). API calls go through Next.js rewrite, no CORS issues.
+**Full ngrok (one command):** Exposes app via single tunnel (free plan = 1 endpoint). API calls go through the [Next.js runtime proxy](frontend/app/api/[...path]/route.ts) (same origin → no CORS).
 
 ```bash
 ansible-playbook -i deploy/ansible/inventory.yml deploy/ansible/playbook.yml -e ngrok_enabled=true
@@ -115,8 +115,12 @@ ansible-playbook -i deploy/ansible/inventory.yml deploy/ansible/playbook.yml -e 
 
 Add `NGROK_AUTHTOKEN` to `.env` (project root). The playbook will:
 - Start ngrok tunnel for frontend (port 3000, your free domain)
-- Set `NEXT_PUBLIC_API_URL=` so frontend uses relative `/api` (proxied to backend by Next.js)
-- Rebuild frontend, set CORS
+- Set `NEXT_PUBLIC_API_URL=` so the client uses relative `/api` URLs (proxied to backend by [frontend/app/api/[...path]/route.ts](frontend/app/api/[...path]/route.ts))
+- Rebuild frontend with empty API URL, set CORS on backend
+
+## API proxy (Docker)
+
+In Docker Compose the frontend talks to the backend via a **runtime proxy**: requests to `/api/*` are handled by [frontend/app/api/[...path]/route.ts](frontend/app/api/[...path]/route.ts), which reads `BACKEND_INTERNAL_URL` from the container env (set to `http://backend:8080` in [docker-compose.yml](../../docker-compose.yml)) and forwards each request to the backend. No build-time `BACKEND_INTERNAL_URL` is required. For ngrok, set `NEXT_PUBLIC_API_URL=` so the client uses relative `/api` URLs (same origin); the proxy then forwards to the backend. See [CORS when opening app via ngrok](#cors-when-opening-app-via-ngrok-fetch-to-localhost8080-blocked).
 
 ## Idempotency
 
@@ -246,7 +250,13 @@ sudo systemctl status ngrok
 
 **Cause:** The frontend was built with `NEXT_PUBLIC_API_URL=http://localhost:8080`. The client then calls that URL from the browser; when you open the app via the ngrok URL, the browser sends the request to *your* machine’s localhost, not the server, and the backend (or lack of it) doesn’t allow the ngrok origin.
 
-**Fix:** Use `-e ngrok_enabled=true` so the playbook sets `NEXT_PUBLIC_API_URL=` and rebuilds. The frontend uses relative `/api` URLs; Next.js rewrites `/api/*` to the backend internally. Same origin → no CORS. Or manually on the VM: `sed -i 's|^NEXT_PUBLIC_API_URL=.*|NEXT_PUBLIC_API_URL=|' .env` then `docker compose build frontend --no-cache && docker compose up -d`.
+**Fix:** Use relative `/api` URLs so the browser talks only to the ngrok origin; the [Next.js runtime proxy](frontend/app/api/[...path]/route.ts) forwards `/api/*` to the backend. Either run the playbook with `-e ngrok_enabled=true` (it sets `NEXT_PUBLIC_API_URL=` and rebuilds), or on the VM:
+
+```bash
+sed -i 's|^NEXT_PUBLIC_API_URL=.*|NEXT_PUBLIC_API_URL=|' .env
+docker compose build frontend --no-cache --build-arg NEXT_PUBLIC_API_URL=
+docker compose up -d
+```
 
 ### University network / firewall — use ngrok
 
@@ -256,7 +266,7 @@ If VM ports (3000, 8080) are blocked from outside (e.g. university network), exp
 ansible-playbook -i deploy/ansible/inventory.yml deploy/ansible/playbook.yml -e ngrok_enabled=true
 ```
 
-Add `NGROK_AUTHTOKEN` to `.env`. The playbook starts one tunnel (frontend on port 3000), sets `NEXT_PUBLIC_API_URL=` so the frontend uses relative `/api` URLs. Next.js rewrites `/api/*` to the backend internally — no second tunnel or CORS needed.
+Add `NGROK_AUTHTOKEN` to `.env`. The playbook starts one tunnel (frontend on port 3000), sets `NEXT_PUBLIC_API_URL=` and rebuilds so the client uses relative `/api` URLs. The [Next.js runtime proxy](frontend/app/api/[...path]/route.ts) forwards `/api/*` to the backend at `BACKEND_INTERNAL_URL` (set to `http://backend:8080` in docker-compose). No second tunnel or CORS needed.
 
 ### Other causes
 

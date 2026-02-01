@@ -12,7 +12,7 @@ Documentation is grouped by language in `docs/<lang>/` (en, ru, et). This page g
 | **Implement or extend** | [Implementation plan](en/plan.md) | [Signing](en/SIGNING.md), [Timestamping](en/TIMESTAMPING.md) |
 | **Understand crypto** | [Crypto reference](en/CRYPTO_REFERENCE.md) (algorithms, keys, why tsaToken) | [Signing](en/SIGNING.md), [Trust model](en/TRUST_MODEL.md) |
 | **Test or CI** | [MOCK_TSA](en/MOCK_TSA.md), [Cryptographic Oracle](en/CRYPTO_ORACLE.md) | [Testing strategy](en/TESTING_STRATEGY.md) |
-| **Deploy** | [README → Deployment](../README.md#deployment) | [deploy/ansible/README](../deploy/ansible/README.md) |
+| **Deploy** | [README → Deployment](../README.md#deployment) | [deploy/ansible/README](../deploy/ansible/README.md) (includes [API proxy (Docker)](../deploy/ansible/README.md#api-proxy-docker), ngrok, CORS) |
 
 Same topics exist in **Russian** ([docs/ru/](ru/)) and **Estonian** ([docs/et/](et/)). [Crypto reference](en/CRYPTO_REFERENCE.md) is EN-only; [MOCK_TSA](en/MOCK_TSA.md) has no ET translation.
 

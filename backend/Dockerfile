@@ -1,7 +1,7 @@
 # =============================================================================
 # Aletheia AI Backend — Multi-stage Dockerfile
 # =============================================================================
-# Build: ./mvnw -DskipTests package
+# Build: mvn -DskipTests package
 # Run: java -jar /app/app.jar
 # Env: SPRING_DATASOURCE_URL, AI_ALETHEIA_SIGNING_KEY_PATH, AI_ALETHEIA_TSA_MODE,
 #      AI_ALETHEIA_TSA_URL, OPENAI_API_KEY
@@ -9,21 +9,18 @@
 # =============================================================================
 
 # --- Stage 1: Build ---
-FROM eclipse-temurin:21-jdk-alpine AS builder
+FROM maven:3.9-eclipse-temurin-21-alpine AS builder
 
 WORKDIR /build
 
-# Copy Maven wrapper and pom
-COPY mvnw .
-COPY .mvn .mvn
 COPY pom.xml .
 
 # Download dependencies (cached if pom unchanged)
-RUN ./mvnw dependency:resolve -B
+RUN mvn dependency:resolve -B
 
 # Copy source and build (skip tests for faster image build)
 COPY src src
-RUN ./mvnw -DskipTests package -B
+RUN mvn -DskipTests package -B
 
 # --- Stage 2: Runtime ---
 FROM eclipse-temurin:21-jre-alpine

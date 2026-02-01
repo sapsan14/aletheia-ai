@@ -70,6 +70,7 @@ export default function Home() {
         body: JSON.stringify({ prompt: trimmed }),
       });
 
+      // Backend may return 500/502/503 with plain text or HTML; avoid res.json() throwing.
       const contentType = res.headers.get("content-type") ?? "";
       let data: unknown;
       try {

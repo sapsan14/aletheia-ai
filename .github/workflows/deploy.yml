@@ -35,7 +35,7 @@ jobs:
           cache: maven
 
       - name: Backend tests
-        run: ./mvnw test -q
+        run: mvn test -q
         working-directory: backend
 
       - name: Set up Node.js 20
