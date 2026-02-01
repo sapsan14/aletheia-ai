@@ -2,6 +2,8 @@
 
 Dokument kirjeldab ettepanekul olevat PoC-arhitektuuri süsteemile, mis tagab tehisintellekti vastuste kinnitamise krüptograafilise allkirja ja ajatemplite abil.
 
+**Seotud:** [Visioon ja teekond](VISION_AND_ROADMAP.md) (sammud pärast PoC-d) · [Rakendusplaan](plan.md) · [Usaldusmudel](TRUST_MODEL.md)
+
 ---
 
 ## Arhitektuur
@@ -275,9 +277,21 @@ Minimaalne, kuid võimas:
 | Backend | Java Spring Boot |
 | Crypto | OpenSSL + BouncyCastle |
 | Allkiri | lokaalne RSA/ECDSA võti |
-| Ajatempel | RFC 3161 lokaalne TSA |
+| Ajatempel | RFC 3161 TSA (vaikimisi: DigiCert) |
 | DB | PostgreSQL |
 | LLM | üks (Gemini / OpenAI / Mistral) |
+
+---
+
+## 🚀 Deploy
+
+**Valitud lähenemine:** Full stack (Docker + Ansible + GitHub Actions) automatiseeritud deploy'iks siht-VM-le (nt `ssh ubuntu@193.40.157.132`).
+
+- **Docker:** Backend ja frontend konteinerites; docker-compose koos PostgreSQLiga.
+- **Ansible:** VM seadistus (Docker install), .env mall, `docker-compose up`.
+- **GitHub Actions:** Push main'ile: testid → build → deploy üle SSH/Ansible.
+
+**Alternatiivid:** Ainult Ansible, ainult skript (bash üle SSH), ainult Docker Compose. Üksikasjad [plan.md](plan.md) Samm 8.
 
 ---
 

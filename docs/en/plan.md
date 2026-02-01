@@ -4,6 +4,8 @@ Step-by-step plan for building the PoC: verifiable AI responses with cryptograph
 
 **Stack (from PoC):** Next.js, Java Spring Boot, PostgreSQL, OpenSSL/BouncyCastle, one LLM (OpenAI/Gemini/Mistral), local RFC 3161 TSA.
 
+**Related:** [Vision & roadmap](VISION_AND_ROADMAP.md) (next steps) · [PoC](PoC.md) · [Trust model](TRUST_MODEL.md)
+
 ---
 
 ## Table of contents
@@ -15,6 +17,7 @@ Step-by-step plan for building the PoC: verifiable AI responses with cryptograph
 - [Step 5 — Backend API](#step-5--backend-api)
 - [Step 6 — Frontend](#step-6--frontend)
 - [Step 7 — Verification and docs](#step-7--verification-and-docs)
+- [Step 8 — Deployment (CI/CD)](#step-8--deployment-cicd)
 - [Summary — Estimated total](#summary--estimated-total)
 - [Testing (by step)](#testing-by-step)
 
@@ -370,6 +373,95 @@ Step-by-step plan for building the PoC: verifiable AI responses with cryptograph
 
 ---
 
+## Step 8 — Deployment (CI/CD)
+
+**Goal:** Automated deployment of a working copy to a target VM (e.g. `ssh ubuntu@193.40.157.132`). Full-stack approach: Docker + Ansible + GitHub Actions.
+
+**Chosen option:** **Full stack** (Docker, Ansible, GitHub Actions) — production-ready, repeatable, automated.
+
+**Alternative options (documented for reference):**
+
+| Option | Tools | Use case |
+|--------|-------|----------|
+| **Full stack** ✓ | Docker + Ansible + GitHub Actions | Production, repeatable, automated deploy on push |
+| **Ansible + Docker** | Ansible + docker-compose | Manual or script-triggered deploy; no CI |
+| **Ansible only** | Ansible (Java, Node, systemd) | No containers; direct install on VM |
+| **Script only** | Bash over SSH | Quick one-off; fragile, no idempotency |
+| **Docker Compose only** | docker-compose over SSH | Minimal; good for single-server dev/staging |
+
+**Est. total:** 12–16 h
+
+---
+
+### Task 8.1 — Dockerfiles for backend and frontend
+
+| Field | Value |
+|-------|--------|
+| **Est.** | 3–4 h |
+| **Description** | Create Dockerfile for backend (multi-stage: Maven build → JRE runtime) and frontend (multi-stage: npm build → nginx or Node serve). |
+
+**Coding prompt (LLM-readable):**
+- Create `Dockerfile` (or `Dockerfile.backend`) in `backend/` or project root. Multi-stage: (1) stage `builder`: FROM eclipse-temurin:21-jdk, COPY pom.xml and src, run `./mvnw -DskipTests package`. (2) stage `runtime`: FROM eclipse-temurin:21-jre-alpine, COPY jar from builder to /app/app.jar, expose 8080, ENTRYPOINT ["java","-jar","/app/app.jar"]. Accept env: SPRING_DATASOURCE_URL, AI_ALETHEIA_SIGNING_KEY_PATH, AI_ALETHEIA_TSA_MODE, AI_ALETHEIA_TSA_URL, OPENAI_API_KEY. Mount or copy signing key; document in README.
+- Create `Dockerfile` (or `Dockerfile.frontend`) for Next.js. Multi-stage: (1) stage `builder`: FROM node:20-alpine, COPY package*.json, npm ci, COPY ., npm run build. (2) stage `runner`: FROM node:20-alpine or nginx:alpine; if Node: copy .next and node_modules, CMD ["npm","start"]; if nginx: copy `out` (static export) or proxy to Node. Set NEXT_PUBLIC_API_URL at build time. Document in README.
+- Ensure .dockerignore excludes node_modules, .next, target, .git, .env (secrets via env at runtime). Do not commit .env with real keys.
+
+---
+
+### Task 8.2 — Extend docker-compose for app services
+
+| Field | Value |
+|-------|--------|
+| **Est.** | 2 h |
+| **Description** | Add backend and frontend services to docker-compose.yml; keep postgres; configure networking and env. |
+
+**Coding prompt (LLM-readable):**
+- Extend `docker-compose.yml`: add services `backend` and `frontend`. Backend: build from backend/Dockerfile or context; depends_on postgres; env from .env or env_file; SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/aletheia; expose 8080. Frontend: build from frontend/; depends_on backend; NEXT_PUBLIC_API_URL=http://backend:8080 or external URL; expose 3000. Use shared network (aletheia-network). Optional: add nginx as reverse proxy for production (single port 80).
+- Verify locally: `docker-compose up --build` brings up postgres, backend, frontend. Backend connects to DB; frontend reaches backend API.
+
+---
+
+### Task 8.3 — Ansible playbook for VM setup and deploy
+
+| Field | Value |
+|-------|--------|
+| **Est.** | 4–5 h |
+| **Description** | Ansible playbook: install Docker and Docker Compose on target VM, clone repo (or receive artifacts), create .env from template, run docker-compose up. |
+
+**Coding prompt (LLM-readable):**
+- Create `deploy/ansible/` directory. `inventory.yml` (or `inventory.ini`): define host group e.g. `[deploy]` with `193.40.157.132` (or variable for IP). Use `ansible_user=ubuntu` and SSH key auth.
+- Create `playbook.yml`: (1) become root or use sudo. (2) Install Docker (apt: docker.io, docker-compose plugin or standalone). (3) Ensure docker group exists; add ubuntu user. (4) Create app directory e.g. /opt/aletheia-ai. (5) Copy or sync repo files (copy module or git clone). (6) Use template module: `templates/.env.j2` with variables (DB password, OPENAI_API_KEY, TSA_URL, signing key path). Secrets: use `ansible-vault` or `--extra-vars` from CI; never commit secrets. (7) Copy signing key (e.g. from secure location or vault) if needed. (8) Run `docker-compose pull` (if using registry) or `docker-compose build` then `docker-compose up -d`.
+- Create `templates/.env.j2`: Jinja2 template for .env. Variables: POSTGRES_PASSWORD, SPRING_DATASOURCE_URL, AI_ALETHEIA_SIGNING_KEY_PATH, AI_ALETHEIA_TSA_MODE, AI_ALETHEIA_TSA_URL, OPENAI_API_KEY, NEXT_PUBLIC_API_URL. Default TSA: DigiCert (http://timestamp.digicert.com).
+- Document: `ansible-playbook -i inventory.yml playbook.yml` (with --ask-vault-pass if using vault). Ensure idempotency: running again should not break state.
+
+---
+
+### Task 8.4 — GitHub Actions workflow for deploy
+
+| Field | Value |
+|-------|--------|
+| **Est.** | 3–4 h |
+| **Description** | GitHub Actions: on push to main (or tag), run tests, build Docker images, deploy via SSH + Ansible. |
+
+**Coding prompt (LLM-readable):**
+- Create `.github/workflows/deploy.yml`. Trigger: on push to `main` (or `release/*`) or on workflow_dispatch. Jobs: (1) `test`: checkout, setup Java and Node, run `./mvnw test` in backend, `npm ci && npm run build` in frontend if tests exist. (2) `build`: build Docker images (backend, frontend); optionally push to GitHub Container Registry (ghcr.io) or Docker Hub. (3) `deploy`: use `appleboy/ssh-action` or `ansible/ansible-action` to SSH to target host and run Ansible playbook; or use `rsync` + `ssh` to copy files and run `docker-compose up -d`.
+- Secrets: add `DEPLOY_HOST`, `DEPLOY_USER`, `SSH_PRIVATE_KEY` (or `DEPLOY_SSH_KEY`), and optionally `OPENAI_API_KEY`, `POSTGRES_PASSWORD` to GitHub repo Secrets. Pass to Ansible via `--extra-vars` or env. Never log secrets.
+- Document in README: "Deploy: push to main triggers GitHub Actions. Ensure GitHub Secrets are set."
+
+---
+
+### Task 8.5 — README and deployment docs
+
+| Field | Value |
+|-------|--------|
+| **Est.** | 1–2 h |
+| **Description** | Update README with deployment section; document manual deploy steps and alternative options. |
+
+**Coding prompt (LLM-readable):**
+- Add README section "Deployment". Subsections: (1) Quick deploy (Docker Compose): `docker-compose up -d`. (2) Full deploy (Ansible): `ansible-playbook -i deploy/ansible/inventory.yml deploy/ansible/playbook.yml`. (3) CI/CD: GitHub Actions on push to main. (4) Alternatives: Ansible-only (no Docker), script-only (bash over SSH) — briefly describe when to use. (5) Target VM: e.g. `ssh ubuntu@193.40.157.132`; list prerequisites (Ubuntu 22.04, SSH access).
+- Add link to docs/en/plan.md Step 8 for full task breakdown. Ensure LLM-readable prompts are included for future automation.
+
+---
+
 ## Summary — Estimated total
 
 | Step | Est. hours |
@@ -381,7 +473,8 @@ Step-by-step plan for building the PoC: verifiable AI responses with cryptograph
 | 5 — Backend API | 6–8 |
 | 6 — Frontend | 6–8 |
 | 7 — Verification and docs | 2–4 |
-| **Total** | **38–54** |
+| 8 — Deployment (CI/CD) | 12–16 |
+| **Total** | **50–70** |
 
 ---
 
@@ -413,6 +506,11 @@ Detailed test scope and acceptance criteria for each step. Run backend tests wit
 | **7.1** | Unit | Verification | hashMatch and signatureValid in response when implemented. |
 | **7.2** | Manual | README | All run instructions and env vars documented. |
 | **7.3** | Manual | Swagger UI | Open /swagger-ui.html; endpoints listed; "Try it out" works. (Optional; implement when 3+ endpoints.) |
+| **8.1** | Manual | Docker build | `docker build` backend and frontend succeed; containers start. |
+| **8.2** | Manual | docker-compose | `docker-compose up --build` runs postgres, backend, frontend; API and UI reachable. |
+| **8.3** | Manual | Ansible | `ansible-playbook` runs without errors; VM has Docker and app running. |
+| **8.4** | Manual | GitHub Actions | Workflow runs on push; deploy job completes; app accessible on target host. |
+| **8.5** | Manual | README | Deployment section documents all options and commands. |
 
 **Backend test command:** From `backend/`: `./mvnw test` or `mvn test`. Ensure H2 is available for tests (default Spring Boot test profile uses in-memory DB).
 

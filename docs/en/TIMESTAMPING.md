@@ -291,6 +291,7 @@ For deterministic testing in Aletheia, use MOCK_TSA to generate reproducible tok
 
 ## Related documents
 
+- [Vision & roadmap](VISION_AND_ROADMAP.md) — next steps: trusted time, multi-TSA, anchoring.
 - [Crypto Reference](CRYPTO_REFERENCE.md) — algorithms, keys, key generation, why tsaToken (noob-friendly).
 - [Signing](SIGNING.md) — what we sign; signature bytes are what we timestamp.
 - [Trust model](TRUST_MODEL.md) — who attests what, eIDAS mapping.

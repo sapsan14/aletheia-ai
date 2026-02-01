@@ -21,6 +21,7 @@ Docs are grouped by language in `docs/<lang>/` (en, ru, et). Core documents are 
 | Topic | EN | RU | ET |
 |-------|----|----|-----|
 | **PoC (architecture & stack)** | [docs/en/PoC.md](docs/en/PoC.md) | [docs/ru/PoC.md](docs/ru/PoC.md) | [docs/et/PoC.md](docs/et/PoC.md) |
+| **Vision & roadmap** (next steps, AI Claim, evidence package) | [docs/en/VISION_AND_ROADMAP.md](docs/en/VISION_AND_ROADMAP.md) | [docs/ru/VISION_AND_ROADMAP.md](docs/ru/VISION_AND_ROADMAP.md) | [docs/et/VISION_AND_ROADMAP.md](docs/et/VISION_AND_ROADMAP.md) |
 | **Implementation plan** | [docs/en/plan.md](docs/en/plan.md) | [docs/ru/plan.md](docs/ru/plan.md) | [docs/et/plan.md](docs/et/plan.md) |
 | **Signing** | [docs/en/SIGNING.md](docs/en/SIGNING.md) | [docs/ru/SIGNING.md](docs/ru/SIGNING.md) | [docs/et/SIGNING.md](docs/et/SIGNING.md) |
 | **Timestamping** | [docs/en/TIMESTAMPING.md](docs/en/TIMESTAMPING.md) | [docs/ru/TIMESTAMPING.md](docs/ru/TIMESTAMPING.md) | [docs/et/TIMESTAMPING.md](docs/et/TIMESTAMPING.md) |

@@ -116,6 +116,7 @@ The PoC uses **non-qualified** components. The architecture is designed so that 
 
 ## Related documents
 
+- [Vision & roadmap](VISION_AND_ROADMAP.md) — next steps: AI Claim, offline verification, key model, evidence package.
 - [Signing](SIGNING.md) — what we sign, key, interface, storage.
 - [Timestamping](TIMESTAMPING.md) — what we timestamp, TSA, storage, scope.
 - [Architecture diagrams](../../diagrams/architecture.md) — pipeline, crypto layer, **trust chain**.

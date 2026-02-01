@@ -4,6 +4,8 @@ Samm-sammuline plaan PoC koostamiseks: kontrollitavad AI vastused krüptograafil
 
 **Stekk (PoC põhjal):** Next.js, Java Spring Boot, PostgreSQL, OpenSSL/BouncyCastle, üks LLM (OpenAI/Gemini/Mistral), lokaalne RFC 3161 TSA.
 
+**Seotud:** [Visioon ja teekond](VISION_AND_ROADMAP.md) (järgmised sammud) · [PoC](PoC.md) · [Usaldusmudel](TRUST_MODEL.md)
+
 ---
 
 ## Sisukord
@@ -15,6 +17,7 @@ Samm-sammuline plaan PoC koostamiseks: kontrollitavad AI vastused krüptograafil
 - [Samm 5 — Backend API](#samm-5--backend-api)
 - [Samm 6 — Frontend](#samm-6--frontend)
 - [Samm 7 — Kontroll ja dokumentatsioon](#samm-7--kontroll-ja-dokumentatsioon)
+- [Samm 8 — Deploy (CI/CD)](#samm-8--deploy-cicd)
 - [Kokkuvõte — Hinnang tundide järgi](#kokkuvõte--hinnang-tundide-järgi)
 - [Testimine (sammude kaupa)](#testimine-sammude-kaupa)
 
@@ -347,7 +350,8 @@ Samm-sammuline plaan PoC koostamiseks: kontrollitavad AI vastused krüptograafil
 | 5 — Backend API | 6–8 |
 | 6 — Frontend | 6–8 |
 | 7 — Kontroll ja dokumentatsioon | 2–4 |
-| **Kokku** | **38–54** |
+| 8 — Deploy (CI/CD) | 12–16 |
+| **Kokku** | **50–70** |
 
 ---
 
@@ -379,6 +383,11 @@ Iga sammu testide ulatus ja vastuvõtukriteeriumid. Backend: `mvn test` kaustast
 | **7.1** | Üksiktest | Kontroll | hashMatch ja signatureValid vastuses kui rakendatud. |
 | **7.2** | Käsitsi | README | Kõik käivitamise ja env juhised dokumenteeritud. |
 | **7.3** | Käsitsi | Swagger UI | Ava /swagger-ui.html; endpointid loendis; "Try it out" töötab. (Valikuline; kui 3+ endpointi.) |
+| **8.1** | Käsitsi | Docker build | docker build backend ja frontend õnnestub; konteinerid käivituvad. |
+| **8.2** | Käsitsi | docker-compose | docker-compose up --build käivitab postgres, backend, frontend; API ja UI kättesaadavad. |
+| **8.3** | Käsitsi | Ansible | ansible-playbook töötab vigadeta; VM-l Docker ja rakendus töötavad. |
+| **8.4** | Käsitsi | GitHub Actions | Workflow push'il; deploy lõpeb; rakendus kättesaadav sihtmasinal. |
+| **8.5** | Käsitsi | README | Deploy sektsioon kirjeldab kõik valikud ja käsud. |
 
 **Backend testide käsk:** kaustast `backend/`: `./mvnw test` või `mvn test`. Testide jaoks kasutatakse H2 (vaikeprofiil).
 

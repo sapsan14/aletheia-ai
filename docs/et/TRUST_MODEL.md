@@ -116,6 +116,7 @@ PoC kasutab **mittekvalifitseeritud** komponente. Arhitektuur on kavandatud nii,
 
 ## Seotud dokumendid
 
+- [Visioon ja teekond](VISION_AND_ROADMAP.md) — järgmised sammud: AI Claim, võrguühenduseta kontroll, võtmemudel, evidence package.
 - [Allkirjastamine](SIGNING.md) — mida allkirjastame, võti, liides, salvestamine.
 - [Ajatemplid](TIMESTAMPING.md) — mida ajatempliga märgime, TSA, salvestamine, ulatus.
 - [Arhitektuuri diagrammid](../../diagrams/architecture.md) — pipeline, krüptokiht, **usaldusahel**.

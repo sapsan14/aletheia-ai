@@ -275,9 +275,21 @@ Minimal but powerful:
 | Backend | Java Spring Boot |
 | Crypto | OpenSSL + BouncyCastle |
 | Signing | local RSA/ECDSA key |
-| Timestamp | RFC 3161 local TSA |
+| Timestamp | RFC 3161 TSA (default: DigiCert) |
 | DB | PostgreSQL |
 | LLM | one (Gemini / OpenAI / Mistral) |
+
+---
+
+## Deployment
+
+**Chosen approach:** Full stack (Docker + Ansible + GitHub Actions) for automated deployment to a target VM (e.g. `ssh ubuntu@193.40.157.132`).
+
+- **Docker:** Backend and frontend containerized; docker-compose with PostgreSQL.
+- **Ansible:** VM setup (Docker install), .env template, `docker-compose up`.
+- **GitHub Actions:** On push to main: tests → build → deploy via SSH/Ansible.
+
+**Alternatives:** Ansible-only (no containers), script-only (bash over SSH), Docker Compose only. See [plan.md](plan.md) Step 8 for detailed tasks and LLM-readable prompts.
 
 ---
 

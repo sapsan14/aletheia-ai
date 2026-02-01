@@ -4,6 +4,8 @@
 
 **Стек (из PoC):** Next.js, Java Spring Boot, PostgreSQL, OpenSSL/BouncyCastle, один LLM (OpenAI/Gemini/Mistral), локальный RFC 3161 TSA.
 
+**Связанные документы:** [Видение и дорожная карта](VISION_AND_ROADMAP.md) (следующие шаги) · [PoC](PoC.md) · [Модель доверия](TRUST_MODEL.md)
+
 ---
 
 ## Содержание
@@ -15,6 +17,7 @@
 - [Этап 5 — Backend API](#этап-5--backend-api)
 - [Этап 6 — Frontend](#этап-6--frontend)
 - [Этап 7 — Верификация и документация](#этап-7--верификация-и-документация)
+- [Этап 8 — Деплой (CI/CD)](#этап-8--деплой-cicd)
 - [Сводка — Оценка по времени](#сводка--оценка-по-времени)
 - [Тестирование (по шагам)](#тестирование-по-шагам)
 
@@ -336,6 +339,81 @@
 
 ---
 
+## Этап 8 — Деплой (CI/CD)
+
+**Цель:** Автоматизированный деплой рабочей копии на целевую VM (например, `ssh ubuntu@193.40.157.132`). Полноценный стек: Docker + Ansible + GitHub Actions.
+
+**Выбранный вариант:** **Full stack** (Docker, Ansible, GitHub Actions) — production-ready, повторяемый, автоматизированный деплой.
+
+**Альтернативные варианты (для справки):**
+
+| Вариант | Инструменты | Когда использовать |
+|---------|-------------|-------------------|
+| **Full stack** ✓ | Docker + Ansible + GitHub Actions | Продакшен, повторяемый деплой по push |
+| **Ansible + Docker** | Ansible + docker-compose | Ручной или скриптовый деплой; без CI |
+| **Только Ansible** | Ansible (Java, Node, systemd) | Без контейнеров; прямая установка на VM |
+| **Только скрипт** | Bash по SSH | Быстрый разовый деплой; хрупко |
+| **Только Docker Compose** | docker-compose по SSH | Минимум; для dev/staging на одном сервере |
+
+**Оценка:** 12–16 ч
+
+---
+
+### Задача 8.1 — Dockerfile для backend и frontend
+
+| Поле | Значение |
+|------|----------|
+| **Оценка** | 3–4 ч |
+| **Описание** | Создать Dockerfile для backend (multi-stage: Maven → JRE) и frontend (multi-stage: npm build → nginx/Node). |
+
+**Инструкция для кодинга (LLM-readable):** см. [docs/en/plan.md](../en/plan.md#task-81--dockerfiles-for-backend-and-frontend).
+
+---
+
+### Задача 8.2 — Расширить docker-compose сервисами приложения
+
+| Поле | Значение |
+|------|----------|
+| **Оценка** | 2 ч |
+| **Описание** | Добавить backend и frontend в docker-compose.yml; настроить сеть и env. |
+
+**Инструкция для кодинга (LLM-readable):** см. [docs/en/plan.md](../en/plan.md#task-82--extend-docker-compose-for-app-services).
+
+---
+
+### Задача 8.3 — Ansible playbook для настройки VM и деплоя
+
+| Поле | Значение |
+|------|----------|
+| **Оценка** | 4–5 ч |
+| **Описание** | Playbook: установка Docker, клонирование репо, шаблон .env, docker-compose up. TSA по умолчанию: DigiCert. |
+
+**Инструкция для кодинга (LLM-readable):** см. [docs/en/plan.md](../en/plan.md#task-83--ansible-playbook-for-vm-setup-and-deploy).
+
+---
+
+### Задача 8.4 — GitHub Actions workflow для деплоя
+
+| Поле | Значение |
+|------|----------|
+| **Оценка** | 3–4 ч |
+| **Описание** | При push в main: тесты, сборка образов, деплой по SSH + Ansible. |
+
+**Инструкция для кодинга (LLM-readable):** см. [docs/en/plan.md](../en/plan.md#task-84--github-actions-workflow-for-deploy).
+
+---
+
+### Задача 8.5 — README и документация по деплою
+
+| Поле | Значение |
+|------|----------|
+| **Оценка** | 1–2 ч |
+| **Описание** | Раздел Deployment в README; альтернативные варианты. |
+
+**Инструкция для кодинга (LLM-readable):** см. [docs/en/plan.md](../en/plan.md#task-85--readme-and-deployment-docs).
+
+---
+
 ## Сводка — Оценка по времени
 
 | Этап | Часы |
@@ -347,7 +425,8 @@
 | 5 — Backend API | 6–8 |
 | 6 — Frontend | 6–8 |
 | 7 — Верификация и документация | 2–4 |
-| **Итого** | **38–54** |
+| 8 — Деплой (CI/CD) | 12–16 |
+| **Итого** | **50–70** |
 
 ---
 
@@ -379,6 +458,11 @@
 | **7.1** | Unit | Верификация | hashMatch и signatureValid в ответе при реализации. |
 | **7.2** | Ручная | README | Описаны запуск и все env. |
 | **7.3** | Ручная | Swagger UI | Открыть /swagger-ui.html; endpoints в списке; "Try it out" работает. (Опционально; при 3+ endpoints.) |
+| **8.1** | Ручная | Docker build | `docker build` backend и frontend успешен; контейнеры запускаются. |
+| **8.2** | Ручная | docker-compose | `docker-compose up --build` поднимает postgres, backend, frontend; API и UI доступны. |
+| **8.3** | Ручная | Ansible | `ansible-playbook` выполняется без ошибок; на VM Docker и приложение работают. |
+| **8.4** | Ручная | GitHub Actions | Workflow при push; deploy завершается; приложение доступно на целевом хосте. |
+| **8.5** | Ручная | README | Раздел Deployment описывает все варианты и команды. |
 
 **Команда тестов backend:** из каталога `backend/`: `./mvnw test` или `mvn test`. Для тестов используется H2 (профиль по умолчанию).
 

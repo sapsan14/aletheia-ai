@@ -197,6 +197,7 @@ Deterministlikuks testimiseks Aletheias kasuta MOCK_TSA reprodutseeritavate toke
 
 ## Seotud dokumendid
 
+- [Visioon ja teekond](VISION_AND_ROADMAP.md) — järgmised sammud: usaldusväärne aeg, multi-TSA, ankurdamine.
 - [Allkirjastamine](SIGNING.md) — mida allkirjastame; allkirja baitid on see, mida ajatempliga märgime.
 - [Usaldusmudel](TRUST_MODEL.md) — kes mida kinnitab, eIDAS vastendus.
 - [MOCK_TSA](MOCK_TSA.md) — deterministlik TSA testimiseks, RFC 3161 testvektorid.
