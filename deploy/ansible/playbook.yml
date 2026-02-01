@@ -115,10 +115,43 @@
         mode: "0600"
       when: signing_key_stat.stat.exists | default(false)
 
+    - name: Ensure ai.key exists on server (required for backend)
+      ansible.builtin.stat:
+        path: "{{ app_dir }}/ai.key"
+      register: server_key_stat
+
+    - name: Fail if signing key is missing on server
+      ansible.builtin.fail:
+        msg: "ai.key not found on server at {{ app_dir }}/ai.key. Ensure signing_key_src exists locally and playbook copied it, or manually copy ai.key to server. Create key with: openssl genpkey -algorithm RSA -out ai.key -pkeyopt rsa_keygen_bits:2048"
+      when: not (server_key_stat.stat.exists | default(false))
+
     - name: Build and start containers with docker compose
       ansible.builtin.shell: |
-        cd {{ app_dir }} && (docker compose up -d --build 2>/dev/null || docker-compose up -d --build)
+        cd {{ app_dir }} && docker compose up -d --build
       args:
         executable: /bin/bash
       register: docker_up
-      changed_when: true  # always report change; idempotent due to docker compose
+
+    - name: Show docker compose status
+      ansible.builtin.command: docker compose ps -a
+      args:
+        chdir: "{{ app_dir }}"
+      register: compose_ps
+      changed_when: false
+
+    - name: Display container status
+      ansible.builtin.debug:
+        var: compose_ps.stdout_lines
+
+    - name: Show backend logs if it exited
+      ansible.builtin.shell: docker compose logs --tail=50 backend
+      args:
+        chdir: "{{ app_dir }}"
+      register: backend_logs
+      changed_when: false
+      failed_when: false
+
+    - name: Display backend logs (check for startup errors)
+      ansible.builtin.debug:
+        var: backend_logs.stdout_lines
+      when: backend_logs.stdout_lines | default([]) | length > 0

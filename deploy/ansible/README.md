@@ -57,3 +57,20 @@ All `.env.j2` template variables can be overridden via `-e`.
 ## Idempotency
 
 Running the playbook again is safe: it updates the repo, recreates `.env`, and runs `docker compose up -d --build` (which recreates only changed containers).
+
+## Troubleshooting: only postgres running
+
+If `docker ps` shows only `aletheia-db` (postgres), backend/frontend may have failed to build or exited. **On the VM** run:
+
+```bash
+cd /opt/aletheia-ai
+docker compose ps -a          # All containers including exited
+docker compose logs backend   # Backend startup errors
+docker compose logs frontend  # Frontend build/start errors
+docker compose up --build     # Run in foreground to see build output
+```
+
+Common causes:
+- **ai.key missing** — Ensure `ai.key` exists before running the playbook; or copy it manually to `/opt/aletheia-ai/ai.key`.
+- **Build failure** — Maven/npm may fail (network, memory). Run `docker compose up --build` to see full output.
+- **Backend exits** — Check `docker compose logs backend` for DB connection, TSA, or signing key errors.

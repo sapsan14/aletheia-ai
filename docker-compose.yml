@@ -1,5 +1,4 @@
-version: '3.8'
-
+# version is obsolete in Docker Compose v2+ and triggers a warning
 services:
   # PostgreSQL Database
   postgres:
