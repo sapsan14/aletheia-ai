@@ -284,6 +284,7 @@ Step-by-step plan for building the PoC: verifiable AI responses with cryptograph
 | Field | Value |
 |-------|--------|
 | **Est.** | 2 h |
+| **Status** | ✅ Done |
 | **Description** | Show AI response text and a status block: ✔ signed, ✔ timestamped, ✔ verifiable (based on presence of signature and tsaToken). Link "Verify this response" to /verify?id=... |
 
 **Coding prompt (LLM-readable):**

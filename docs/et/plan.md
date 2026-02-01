@@ -271,6 +271,7 @@ Samm-sammuline plaan PoC koostamiseks: kontrollitavad AI vastused krüptograafil
 | Väli | Väärtus |
 |------|---------|
 | **Hinnang** | 2 t |
+| **Staatus** | ✅ Tehtud |
 | **Kirjeldus** | Pärast edukat POST-i näita AI vastuse teksti ja staatuse plokki: ✔ signed, ✔ timestamped, ✔ verifiable (vastavalt signature ja tsaToken olemasolule). Link "Verify this response" → /verify?id=... |
 
 **Koodi juhend (LLM-readable):**

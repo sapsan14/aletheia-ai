@@ -1,12 +1,14 @@
 /**
- * Task 1.3 + 6.1 — Frontend (Next.js)
+ * Task 1.3 + 6.1 + 6.2 — Frontend (Next.js)
  *
- * Main page: prompt input, Send button (connected to POST /api/ai/ask),
- * loading state, error handling. Response stored in state for Task 6.2.
+ * Main page: prompt input, Send button, loading indicator,
+ * response display with status (signed, timestamped, verifiable),
+ * link to verify page.
  */
 
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 
 /** Response from POST /api/ai/ask */
@@ -17,6 +19,31 @@ interface AiAskResponse {
   tsaToken: string | null;
   id: number;
   model: string;
+}
+
+function StatusItem({
+  label,
+  ok,
+}: {
+  label: string;
+  ok: boolean;
+}) {
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 rounded px-2 py-0.5 text-sm ${
+        ok
+          ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400"
+          : "bg-zinc-100 text-zinc-500 dark:bg-zinc-700 dark:text-zinc-400"
+      }`}
+    >
+      {ok ? (
+        <span className="text-emerald-600 dark:text-emerald-500" aria-hidden>✓</span>
+      ) : (
+        <span className="text-zinc-400 dark:text-zinc-500" aria-hidden>—</span>
+      )}
+      {label}
+    </span>
+  );
 }
 
 export default function Home() {
@@ -56,6 +83,10 @@ export default function Home() {
       setIsLoading(false);
     }
   }
+
+  const signed = !!(responseData?.signature?.trim());
+  const timestamped = !!(responseData?.tsaToken?.trim());
+  const verifiable = signed && timestamped;
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-50 p-8 dark:bg-zinc-900">
@@ -103,13 +134,38 @@ export default function Home() {
             className="min-h-[120px] rounded-md border border-zinc-200 bg-zinc-50 px-3 py-4 dark:border-zinc-600 dark:bg-zinc-700/50"
             aria-live="polite"
           >
-            {error && (
+            {isLoading && (
+              <p className="flex items-center gap-2 text-zinc-600 dark:text-zinc-400">
+                <span
+                  className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-zinc-400 border-t-transparent"
+                  aria-hidden
+                />
+                Working on it…
+              </p>
+            )}
+            {error && !isLoading && (
               <p className="text-red-600 dark:text-red-400">{error}</p>
             )}
-            {responseData && !error && (
-              <p className="text-zinc-700 dark:text-zinc-300">
-                Response received (id: {responseData.id})
-              </p>
+            {responseData && !error && !isLoading && (
+              <div className="space-y-3">
+                <p className="whitespace-pre-wrap text-zinc-700 dark:text-zinc-300">
+                  {responseData.response}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <StatusItem label="Signed" ok={signed} />
+                  <StatusItem label="Timestamped" ok={timestamped} />
+                  <StatusItem label="Verifiable" ok={verifiable} />
+                </div>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                  Model: {responseData.model} · ID: {responseData.id}
+                </p>
+                <Link
+                  href={`/verify?id=${responseData.id}`}
+                  className="inline-flex items-center text-sm font-medium text-blue-600 hover:underline dark:text-blue-400"
+                >
+                  Verify this response →
+                </Link>
+              </div>
             )}
             {!responseData && !error && !isLoading && (
               <span className="italic text-zinc-500 dark:text-zinc-400">
