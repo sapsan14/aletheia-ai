@@ -315,6 +315,7 @@ Step-by-step plan for building the PoC: verifiable AI responses with cryptograph
 | Field | Value |
 |-------|--------|
 | **Est.** | 1–2 h |
+| **Status** | ✅ Done |
 | **Description** | GET /api/ai/verify/:id could optionally return verification result: hashMatch (recompute hash from stored response and compare), signatureValid (SignatureService.verify). |
 
 **Coding prompt (LLM-readable):**

@@ -36,7 +36,9 @@ class AiVerifyControllerTest {
                 .andExpect(jsonPath("$.response").value("A"))
                 .andExpect(jsonPath("$.responseHash").value("hash123"))
                 .andExpect(jsonPath("$.llmModel").value("gpt-4"))
-                .andExpect(jsonPath("$.createdAt").exists());
+                .andExpect(jsonPath("$.createdAt").exists())
+                .andExpect(jsonPath("$.hashMatch").exists())
+                .andExpect(jsonPath("$.signatureValid").exists());
     }
 
     @Test

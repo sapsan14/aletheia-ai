@@ -2,8 +2,13 @@ package ai.aletheia.api;
 
 import ai.aletheia.api.dto.AiVerifyResponse;
 import ai.aletheia.api.dto.ErrorResponse;
+import ai.aletheia.crypto.CanonicalizationService;
+import ai.aletheia.crypto.HashService;
+import ai.aletheia.crypto.SignatureService;
 import ai.aletheia.db.AiResponseRepository;
 import ai.aletheia.db.entity.AiResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,17 +19,29 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Returns stored audit record by id for the verification page.
  *
- * <p>No verification logic (hash check, signature check) — only data retrieval.
- * Returns 404 with JSON body when id not found.
+ * <p>Includes hashMatch and signatureValid: backend recomputes hash and verifies
+ * signature. Returns 404 with JSON body when id not found.
  */
 @RestController
 @RequestMapping("/api/ai")
 public class AiVerifyController {
 
-    private final AiResponseRepository repository;
+    private static final Logger log = LoggerFactory.getLogger(AiVerifyController.class);
 
-    public AiVerifyController(AiResponseRepository repository) {
+    private final AiResponseRepository repository;
+    private final CanonicalizationService canonicalizationService;
+    private final HashService hashService;
+    private final SignatureService signatureService;
+
+    public AiVerifyController(
+            AiResponseRepository repository,
+            CanonicalizationService canonicalizationService,
+            HashService hashService,
+            SignatureService signatureService) {
         this.repository = repository;
+        this.canonicalizationService = canonicalizationService;
+        this.hashService = hashService;
+        this.signatureService = signatureService;
     }
 
     @GetMapping(value = "/verify/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -37,6 +54,8 @@ public class AiVerifyController {
     }
 
     private AiVerifyResponse toResponse(AiResponse e) {
+        boolean hashMatch = computeHashMatch(e);
+        String signatureValid = computeSignatureValid(e);
         return new AiVerifyResponse(
                 e.getId(),
                 e.getPrompt(),
@@ -49,7 +68,41 @@ public class AiVerifyController {
                 e.getRequestId(),
                 e.getTemperature(),
                 e.getSystemPrompt(),
-                e.getVersion()
+                e.getVersion(),
+                hashMatch,
+                signatureValid
         );
+    }
+
+    private boolean computeHashMatch(AiResponse e) {
+        String stored = e.getResponseHash();
+        if (stored == null || stored.isBlank()) return false;
+        try {
+            byte[] canonical = canonicalizationService.canonicalize(e.getResponse());
+            String computed = hashService.hash(canonical);
+            return computed.equalsIgnoreCase(stored);
+        } catch (Exception ex) {
+            log.warn("Hash verification failed for id={}: {}", e.getId(), ex.getMessage());
+            return false;
+        }
+    }
+
+    private String computeSignatureValid(AiResponse e) {
+        String sig = e.getSignature();
+        String hash = e.getResponseHash();
+        if (sig == null || sig.isBlank() || hash == null || hash.isBlank()) {
+            return "n_a";
+        }
+        try {
+            return signatureService.verify(hash, sig) ? "valid" : "invalid";
+        } catch (IllegalStateException ex) {
+            if (ex.getMessage() != null && ex.getMessage().contains("Signing key not configured")) {
+                return "n_a";
+            }
+            throw ex;
+        } catch (Exception ex) {
+            log.warn("Signature verification failed for id={}: {}", e.getId(), ex.getMessage());
+            return "invalid";
+        }
     }
 }

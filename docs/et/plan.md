@@ -302,6 +302,7 @@ Samm-sammuline plaan PoC koostamiseks: kontrollitavad AI vastused krüptograafil
 | Väli | Väärtus |
 |------|---------|
 | **Hinnang** | 1–2 t |
+| **Staatus** | ✅ Tehtud |
 | **Kirjeldus** | GET /api/ai/verify/:id võib valikuliselt tagastada hashMatch (räsi ümberarvestus salvestatud response-ist) ja signatureValid (SignatureService.verify). |
 
 **Koodi juhend (LLM-readable):**

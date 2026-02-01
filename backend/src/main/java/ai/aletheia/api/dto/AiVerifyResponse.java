@@ -5,6 +5,9 @@ import java.time.Instant;
 /**
  * Response for GET /api/ai/verify/:id.
  * Full record for the verification page.
+ *
+ * @param hashMatch       true if recomputed hash equals stored responseHash; false otherwise
+ * @param signatureValid  "valid" | "invalid" | "n_a" (not applicable: no signature or key not configured)
  */
 public record AiVerifyResponse(
         Long id,
@@ -18,5 +21,7 @@ public record AiVerifyResponse(
         String requestId,
         Double temperature,
         String systemPrompt,
-        Integer version
+        Integer version,
+        Boolean hashMatch,
+        String signatureValid
 ) {}

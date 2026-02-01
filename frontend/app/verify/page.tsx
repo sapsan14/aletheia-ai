@@ -21,6 +21,8 @@ interface VerifyRecord {
   tsaToken: string | null;
   llmModel: string;
   createdAt: string;
+  hashMatch?: boolean;
+  signatureValid?: string; // "valid" | "invalid" | "n_a"
 }
 
 /** Canonicalize text (same rules as backend). */
@@ -164,6 +166,36 @@ function VerifyContent() {
         <p className="whitespace-pre-wrap rounded bg-zinc-100 px-3 py-2 text-zinc-800 dark:bg-zinc-700 dark:text-zinc-200">
           {record.response}
         </p>
+      </div>
+
+      <div>
+        <h2 className="mb-1 text-sm font-medium text-zinc-600 dark:text-zinc-400">
+          Backend verification
+        </h2>
+        <div className="flex flex-wrap gap-3">
+          <span
+            className={
+              record.hashMatch === true
+                ? "text-emerald-600 dark:text-emerald-400"
+                : record.hashMatch === false
+                  ? "text-red-600 dark:text-red-400"
+                  : "text-zinc-500"
+            }
+          >
+            Hash match: {record.hashMatch === true ? "✓ yes" : record.hashMatch === false ? "✗ no" : "—"}
+          </span>
+          <span
+            className={
+              record.signatureValid === "valid"
+                ? "text-emerald-600 dark:text-emerald-400"
+                : record.signatureValid === "invalid"
+                  ? "text-red-600 dark:text-red-400"
+                  : "text-zinc-500"
+            }
+          >
+            Signature: {record.signatureValid === "valid" ? "✓ valid" : record.signatureValid === "invalid" ? "✗ invalid" : "n/a"}
+          </span>
+        </div>
       </div>
 
       <div>
