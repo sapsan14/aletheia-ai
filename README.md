@@ -36,8 +36,9 @@ Docs are grouped by language in `docs/<lang>/` (en, ru, et). Core documents are 
 
 - [Design: PKI chain and RFC 3161](#design-pki-chain-and-rfc-3161)
 - [Prerequisites](#prerequisites)
-- [Run PostgreSQL](#run-postgresql-or-docker)
 - [Run backend](#run-backend)
+- [H2 (default) — file-based DB](#h2-default--file-based-db)
+- [Run PostgreSQL](#run-postgresql-or-docker)
 - [Crypto demo endpoint](#crypto-demo-endpoint)
 - [Run frontend](#run-frontend)
 - [Run tests](#run-tests)
@@ -72,29 +73,27 @@ For details: [Signing](docs/en/SIGNING.md), [Timestamping](docs/en/TIMESTAMPING.
 1. **Copy environment template:**
    ```bash
    cp .env.example .env
-   # Edit .env with your API keys and configuration
+   # Edit .env: at minimum, set AI_ALETHEIA_SIGNING_KEY_PATH=../ai.key
    ```
 
-2. **Start PostgreSQL:**
-   ```bash
-   docker-compose up -d postgres
-   ```
-
-3. **Generate signing key:**
+2. **Generate signing key:**
    ```bash
    openssl genpkey -algorithm RSA -out ai.key -pkeyopt rsa_keygen_bits:2048
    ```
 
-4. **Run backend:**
+3. **Run backend:**
    ```bash
    cd backend && ./mvnw spring-boot:run
    ```
+   Uses H2 file-based DB by default — no PostgreSQL needed for local dev.
 
-5. **Run frontend:**
+4. **Run frontend:**
    ```bash
    cd frontend && npm install && npm run dev
    ```
    Open http://localhost:3000
+
+**Optional:** For PostgreSQL, start `docker-compose up -d postgres` and set `SPRING_DATASOURCE_URL` in `.env` (see [Run PostgreSQL](#run-postgresql-or-docker)).
 
 ---
 
@@ -102,15 +101,15 @@ For details: [Signing](docs/en/SIGNING.md), [Timestamping](docs/en/TIMESTAMPING.
 
 - **Java 21+** (backend)
 - **Node.js 18+** (frontend)
-- **PostgreSQL 15+** (or Docker via docker-compose.yml)
-- **OpenSSL** (key generation, optional local TSA)
-- Env: LLM API key (OpenAI/Gemini/Mistral), DB URL, TSA URL, signing key path — see [PoC](docs/en/PoC.md) and [plan](docs/en/plan.md) for details.
+- **OpenSSL** (key generation)
+- **PostgreSQL 15+** (optional — only when using PostgreSQL; default is H2)
+- Env: LLM API key (OpenAI/Gemini/Mistral), signing key path — see [PoC](docs/en/PoC.md) and [plan](docs/en/plan.md) for details.
 
 ---
 
-## Run PostgreSQL (or Docker)
+## Run PostgreSQL (optional)
 
-**Option A — Docker Compose (recommended):**
+Use when you want PostgreSQL instead of H2. **Option A — Docker Compose:**
 
 ```bash
 docker-compose up -d postgres
@@ -137,12 +136,30 @@ SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect
 ## Run backend
 
 ```bash
-# From backend directory (when implemented)
+cd backend
 ./mvnw spring-boot:run
 # Or: java -jar target/aletheia-backend.jar
 ```
 
-**Default DB:** H2 file-based at `backend/data/aletheia.mv.db` — data persists between runs. **H2 Console** at `http://localhost:8080/h2-console` (JDBC URL: `jdbc:h2:file:./data/aletheia`, user: `sa`, password: empty). Override with `SPRING_DATASOURCE_URL` for PostgreSQL. Default API: `http://localhost:8080`.
+**.env loading:** Spring Boot loads `.env` from the project root automatically (`spring.config.import`). Set `SPRING_DATASOURCE_URL`, signing key path, TSA mode, etc. in `.env`.
+
+**Default DB:** H2 file-based at `backend/data/aletheia.mv.db` — data persists between runs. Override with `SPRING_DATASOURCE_URL` for PostgreSQL. Default API: `http://localhost:8080`.
+
+---
+
+## H2 (default) — file-based DB
+
+**No PostgreSQL needed** for local development. H2 stores data in `backend/data/aletheia.mv.db`; the folder is created on first run (and ignored by git).
+
+**H2 Console** — inspect the DB at `http://localhost:8080/h2-console` while the backend is running:
+
+| Field | Value |
+|-------|-------|
+| **JDBC URL** | `jdbc:h2:file:./data/aletheia` |
+| **User Name** | `sa` |
+| **Password** | *(leave empty)* |
+
+Path `./data/aletheia` is relative to the backend process working directory (`backend/`). For in-memory or PostgreSQL, set `SPRING_DATASOURCE_URL` in `.env`.
 
 **Signing key (required for backend):** PEM path in `ai.aletheia.signing.key-path` or env. Generate:
 ```bash
