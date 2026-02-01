@@ -14,6 +14,7 @@ build/
 !.env.example
 !deploy/**/templates/.env.j2
 *.key
+!**/mock-tsa/mock-tsa.key
 *.pem
 !**/docs/**/*.pem
 # Test-only signing key (required for backend tests in CI)
