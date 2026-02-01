@@ -208,6 +208,7 @@ Samm-sammuline plaan PoC koostamiseks: kontrollitavad AI vastused krüptograafil
 | Väli | Väärtus |
 |------|---------|
 | **Hinnang** | 2–3 t |
+| **Staatus** | ✅ Tehtud |
 | **Kirjeldus** | Teenus võtab vastu prompt, response, hash, signature, tsa_token, llm_model (ja valikuliselt metadata) ja persisteerib ühe rea. |
 
 **Koodi juhend (LLM-readable):**
@@ -237,6 +238,7 @@ Samm-sammuline plaan PoC koostamiseks: kontrollitavad AI vastused krüptograafil
 | Väli | Väärtus |
 |------|---------|
 | **Hinnang** | 2 t |
+| **Staatus** | ✅ Tehtud |
 | **Kirjeldus** | Tagasta salvestatud kirje id järgi kontrolli lehe jaoks: prompt, response, hash, signature, tsa_token, model, created_at. |
 
 **Koodi juhend (LLM-readable):**

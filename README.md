@@ -39,6 +39,7 @@ Docs are grouped by language in `docs/<lang>/` (en, ru, et). Core documents are 
 - [Run backend](#run-backend)
 - [H2 (default) — file-based DB](#h2-default--file-based-db)
 - [Run PostgreSQL](#run-postgresql-or-docker)
+- [Audit demo (tangible test)](#audit-demo-tangible-test)
 - [Crypto demo endpoint](#crypto-demo-endpoint)
 - [Run frontend](#run-frontend)
 - [Run tests](#run-tests)
@@ -159,7 +160,9 @@ cd backend
 | **User Name** | `sa` |
 | **Password** | *(leave empty)* |
 
-Path `./data/aletheia` is relative to the backend process working directory (`backend/`). For in-memory or PostgreSQL, set `SPRING_DATASOURCE_URL` in `.env`.
+Path `./data/aletheia` is relative to the backend process working directory (`backend/`). **Run backend from `backend/`** so the path resolves correctly.
+
+**H2 Console shows 0 rows but API returns data?** The console must use the **same** JDBC URL as the app. Check `SPRING_DATASOURCE_URL` in `.env` — if it's `jdbc:h2:mem:aletheia`, the console must use that too (not `file:`). For file-based, use `jdbc:h2:file:./data/aletheia`.
 
 **Signing key (required for backend):** PEM path in `ai.aletheia.signing.key-path` or env. Generate:
 ```bash
@@ -180,6 +183,22 @@ Or with JAR: `java -jar backend.jar --ai.aletheia.signing.key-path=/path/to/ai.k
 CLI args override env vars and `application.properties`.
 
 **API documentation (Swagger):** When implemented (see [plan — Task 7.3](docs/en/plan.md#task-73--swagger--openapi-implement-when-needed)), available at `http://localhost:8080/swagger-ui.html`.
+
+---
+
+## Audit demo (tangible test)
+
+**POST /api/audit/demo** — crypto pipeline + save to DB. Accepts `{ "text": "..." }`, runs canonicalize → hash → sign → timestamp, persists the record, returns the id. Use to verify the full flow without LLM.
+
+```bash
+curl -X POST http://localhost:8080/api/audit/demo -H "Content-Type: application/json" -d '{"text":"hello world"}'
+# → { "id": 1, "hash": "...", "signature": "...", "tsaToken": "...", ... }
+
+curl http://localhost:8080/api/ai/verify/1
+# → full record for verification page
+```
+
+Check H2 console (`http://localhost:8080/h2-console`) to see the saved row in `ai_response`.
 
 ---
 

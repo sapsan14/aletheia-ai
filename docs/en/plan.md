@@ -221,6 +221,7 @@ Step-by-step plan for building the PoC: verifiable AI responses with cryptograph
 | Field | Value |
 |-------|--------|
 | **Est.** | 2–3 h |
+| **Status** | ✅ Done |
 | **Description** | Service that receives prompt, response, hash, signature, tsa_token, llm_model (and optional metadata) and persists one row. |
 
 **Coding prompt (LLM-readable):**
@@ -250,6 +251,7 @@ Step-by-step plan for building the PoC: verifiable AI responses with cryptograph
 | Field | Value |
 |-------|--------|
 | **Est.** | 2 h |
+| **Status** | ✅ Done |
 | **Description** | Return stored record by id for verification page: prompt, response, hash, signature, tsa_token, model, created_at. |
 
 **Coding prompt (LLM-readable):**
