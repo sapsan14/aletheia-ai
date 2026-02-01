@@ -89,7 +89,7 @@ For details: [Signing](docs/en/SIGNING.md), [Timestamping](docs/en/TIMESTAMPING.
 
 ## Environment variables
 
-**All backend config comes from `.env`** — no hardcoded values in `application.properties`. Copy `.env.example` to `.env` and configure. Key variables:
+**Backend config from `.env`** — copy `.env.example` to `.env` to override defaults. Key variables:
 
 | Variable | When needed | Default / note |
 |----------|-------------|----------------|
