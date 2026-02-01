@@ -227,6 +227,7 @@ Samm-sammuline plaan PoC koostamiseks: kontrollitavad AI vastused krüptograafil
 | Väli | Väärtus |
 |------|---------|
 | **Hinnang** | 4–5 t |
+| **Staatus** | ✅ Tehtud |
 | **Kirjeldus** | Üks endpoint: body { "prompt": "..." }; voog: LLM → canonicalize → hash → sign → timestamp → store; vastus: { "response", "responseHash", "signature", "tsaToken", "id", "model" }. |
 
 **Koodi juhend (LLM-readable):**

@@ -240,6 +240,7 @@ Step-by-step plan for building the PoC: verifiable AI responses with cryptograph
 | Field | Value |
 |-------|--------|
 | **Est.** | 4–5 h |
+| **Status** | ✅ Done |
 | **Description** | Single endpoint: body { "prompt": "..." }; flow: LLM → canonicalize → hash → sign → timestamp → store; response: { "response", "responseHash", "signature", "tsaToken", "id", "model" }. |
 
 **Coding prompt (LLM-readable):**

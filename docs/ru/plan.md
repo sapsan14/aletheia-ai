@@ -227,6 +227,7 @@
 | Поле | Значение |
 |------|----------|
 | **Оценка** | 4–5 ч |
+| **Статус** | ✅ Готово |
 | **Описание** | Один endpoint: body { "prompt": "..." }; цепочка: LLM → canonicalize → hash → sign → timestamp → store; ответ: { "response", "responseHash", "signature", "tsaToken", "id", "model" }. |
 
 **Инструкция для кодинга (LLM-readable):**

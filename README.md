@@ -39,6 +39,7 @@ Docs are grouped by language in `docs/<lang>/` (en, ru, et). Core documents are 
 - [Run backend](#run-backend)
 - [H2 (default) — file-based DB](#h2-default--file-based-db)
 - [Run PostgreSQL](#run-postgresql-or-docker)
+- [Main AI endpoint](#main-ai-endpoint)
 - [LLM (OpenAI)](#llm-openai)
 - [Audit demo (tangible test)](#audit-demo-tangible-test)
 - [Crypto demo endpoint](#crypto-demo-endpoint)
@@ -187,9 +188,23 @@ CLI args override env vars and `application.properties`.
 
 ---
 
+## Main AI endpoint
+
+**POST /api/ai/ask** — full flow: prompt → LLM → canonicalize → hash → sign → timestamp → save to DB. Requires `OPENAI_API_KEY` and signing key. Returns verifiable response with `id` for GET /api/ai/verify/:id.
+
+```bash
+curl -X POST http://localhost:8080/api/ai/ask -H "Content-Type: application/json" -d '{"prompt":"What is 2+2?"}'
+# → { "response": "...", "responseHash": "...", "signature": "...", "tsaToken": "...", "id": 1, "model": "gpt-4" }
+
+curl http://localhost:8080/api/ai/verify/1
+# → full record for verification page
+```
+
+---
+
 ## LLM (OpenAI)
 
-**POST /api/llm/demo** — test LLM completion. Requires `OPENAI_API_KEY` in `.env`. Returns `{"responseText", "modelId"}`.
+**POST /api/llm/demo** — test LLM completion only (no persistence). Requires `OPENAI_API_KEY` in `.env`. Returns `{"responseText", "modelId"}`.
 
 ```bash
 curl -X POST http://localhost:8080/api/llm/demo -H "Content-Type: application/json" -d '{"prompt":"What is 2+2?"}'
