@@ -118,6 +118,22 @@ Samm-sammuline plaan PoC koostamiseks: kontrollitavad AI vastused krüptograafil
 
 ---
 
+### Ülesanne 2.3.5 — Crypto demo endpoint (sild API poole)
+
+| Väli | Väärtus |
+|------|---------|
+| **Hinnang** | 1 t |
+| **Staatus** | ✅ Valmis |
+| **Kirjeldus** | REST endpoint krüpto pipeline'i (canonicalize → hash → sign) kuvamiseks käsitsi kontrollimiseks ilma LLM ja TSAta. |
+
+**Eesmärk:** Võimaldab arendajatel "katsuda" krüpto pipeline'i curliga enne täieliku /api/ai/ask ehitamist. Töötab ilma allkirjavõtmeta (tagastab hash; signature = null kui võtit pole).
+
+**Koodi juhend (LLM-readable):** vt [docs/en/plan.md](../en/plan.md#task-235--crypto-demo-endpoint-bridge-to-api).
+
+**Vastuvõtt:** POST /api/crypto/demo → 200; body hash, canonicalBase64, signature-ga; käsitsi test — curl, vt README.
+
+---
+
 ### Ülesanne 2.4 — TimestampService (lokaalne RFC 3161 TSA)
 
 | Väli | Väärtus |
@@ -323,6 +339,7 @@ Iga sammu testide ulatus ja vastuvõtukriteeriumid. Backend: `mvn test` kaustast
 | **2.1** | Üksiktest | Kanoniseerimine | Sama tekst → samad baitid; \r\n vs \n → sama tulemus. |
 | **2.2** | Üksiktest | HashService | Teadaolev sisend → teadaolev SHA-256 hex (64 tähemärki). |
 | **2.3** | Üksiktest | SignatureService | sign(hash), verify(hash, signature) → true; võltsitud allkiri → false. |
+| **2.3.5** | Integratsioon / Käsitsi | POST /api/crypto/demo | 200; body: hash, canonicalBase64, signature; hash kattub pipeline'iga. Käsitsi test: curl, vt README. |
 | **2.4** | Üksiktest | TimestampService | Mock TSA: päring tagastab mitte-tühja tokeni; kehtetu vastus käsitletud. |
 | **3.1** | Üksiktest | LLMClient | Mock: complete(prompt) tagastab mitte-tühja teksti ja modelId. |
 | **3.2** | — | Andmevoog | LLMResult / audit sisaldab model id ja valikuliselt parameetreid. |

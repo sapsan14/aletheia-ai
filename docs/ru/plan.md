@@ -118,6 +118,22 @@
 
 ---
 
+### Задача 2.3.5 — Crypto demo endpoint (мостик к API)
+
+| Поле | Значение |
+|------|----------|
+| **Оценка** | 1 ч |
+| **Статус** | ✅ Готово |
+| **Описание** | REST endpoint, exposing crypto pipeline (canonicalize → hash → sign) для ручной проверки без LLM и TSA. |
+
+**Цель:** Позволяет разработчикам «потрогать руками» crypto pipeline через curl до реализации полного /api/ai/ask. Работает без ключа подписи (возвращает hash; signature = null при отсутствии ключа).
+
+**Инструкция для кодинга (LLM-readable):** см. [docs/en/plan.md](../en/plan.md#task-235--crypto-demo-endpoint-bridge-to-api).
+
+**Приёмка:** POST /api/crypto/demo → 200; body с hash, canonicalBase64, signature; ручной тест — curl, см. README.
+
+---
+
 ### Задача 2.4 — TimestampService (локальный RFC 3161 TSA)
 
 | Поле | Значение |
@@ -323,6 +339,7 @@
 | **2.1** | Unit | Канонизация | Один и тот же текст → одни и те же байты; \r\n vs \n → один результат. |
 | **2.2** | Unit | HashService | Известный вход → известный SHA-256 hex (64 символа). |
 | **2.3** | Unit | SignatureService | sign(hash), затем verify(hash, signature) → true; подделанная подпись → false. |
+| **2.3.5** | Integration / Manual | POST /api/crypto/demo | 200; body: hash, canonicalBase64, signature; hash совпадает с pipeline. Ручной тест: curl, см. README. |
 | **2.4** | Unit | TimestampService | Mock TSA: запрос возвращает непустой token; невалидный ответ обрабатывается. |
 | **3.1** | Unit | LLMClient | Mock: complete(prompt) возвращает непустой текст и modelId. |
 | **3.2** | — | Поток данных | LLMResult / audit содержит model id и опционально параметры. |

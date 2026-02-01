@@ -37,6 +37,7 @@ Docs are grouped by language in `docs/<lang>/` (en, ru, et). Core documents are 
 - [Prerequisites](#prerequisites)
 - [Run PostgreSQL](#run-postgresql-or-docker)
 - [Run backend](#run-backend)
+- [Crypto demo endpoint](#crypto-demo-endpoint)
 - [Run frontend](#run-frontend)
 - [Run tests](#run-tests)
 - [Authorship and License](#authorship-and-license)
@@ -127,6 +128,39 @@ Set env: `SPRING_DATASOURCE_URL`, `OPENAI_API_KEY` (or GEMINI/Mistral), TSA URL,
 openssl genpkey -algorithm RSA -out ai.key -pkeyopt rsa_keygen_bits:2048
 ```
 Then set `ai.aletheia.signing.key-path=/path/to/ai.key` (or equivalent env).
+
+---
+
+## Crypto demo endpoint
+
+Exposes the crypto pipeline (canonicalize → hash → sign) for manual verification. **Works without signing key** — returns hash; signature is `null` when key not configured.
+
+**Manual test:**
+
+```bash
+# Start backend first (see Run backend above)
+cd backend && ./mvnw spring-boot:run
+
+# In another terminal — hash only (no key needed):
+curl -X POST http://localhost:8080/api/crypto/demo \
+  -H "Content-Type: application/json" \
+  -d '{"text":"hello world"}'
+```
+
+**Expected response (without signing key — works out of the box):**
+```json
+{
+  "text": "hello world",
+  "canonicalBase64": "aGVsbG8gd29ybGQK",
+  "hash": "a948904f2f0f479b8f8197694b30184b0d2ed1c1cd2a1ec0fb85d299a192a447",
+  "signature": null,
+  "signatureStatus": "KEY_NOT_CONFIGURED"
+}
+```
+
+**With signing key:** `signature` contains Base64 RSA signature, `signatureStatus` is `"SIGNED"`.
+
+You can verify the hash using any SHA-256 tool (e.g. `echo -n "hello world" | shasum -a 256` — note: canonical form adds trailing newline, so hash may differ). See [SIGNING](docs/en/SIGNING.md) for canonicalization rules.
 
 ---
 

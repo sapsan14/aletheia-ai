@@ -118,6 +118,35 @@ Step-by-step plan for building the PoC: verifiable AI responses with cryptograph
 
 ---
 
+### Task 2.3.5 — Crypto demo endpoint (bridge to API)
+
+| Field | Value |
+|-------|--------|
+| **Est.** | 1 h |
+| **Status** | ✅ Done |
+| **Description** | REST endpoint that exposes the crypto pipeline (canonicalize → hash → sign) for manual verification without LLM or TSA. |
+
+**Purpose:** Allows developers to "touch with hands" the crypto pipeline via `curl` before building the full `/api/ai/ask` flow. Works without signing key (returns hash; signature is null when key not configured).
+
+**Coding prompt (LLM-readable):**
+- Create `CryptoDemoController` with POST /api/crypto/demo.
+- Request body: JSON with `"text"` (string). Reject with 400 if body is null or text is null.
+- Flow: (1) Canonicalize text via CanonicalizationService. (2) Hash canonical bytes via HashService. (3) If signing key configured: sign hash via SignatureService; else return signature=null and signatureStatus="KEY_NOT_CONFIGURED".
+- Response JSON: `text`, `canonicalBase64` (Base64 of canonical bytes), `hash` (64-char hex), `signature` (Base64 or null), `signatureStatus` ("SIGNED" | "KEY_NOT_CONFIGURED").
+- Integration test: POST with "hello world", assert 200, hash equals HashService.hashFromString("hello world"), signatureStatus=SIGNED when test key present.
+- Manual test: `curl -X POST http://localhost:8080/api/crypto/demo -H "Content-Type: application/json" -d '{"text":"hello world"}'` returns 200 and JSON with hash, canonicalBase64, signature fields.
+- Do not add LLM, TSA, or DB in this task.
+
+**Acceptance criteria:**
+
+| Test type | What to test | Acceptance criteria |
+|-----------|--------------|---------------------|
+| Integration | POST /api/crypto/demo | 200; body has text, canonicalBase64, hash (64 hex), signature (or null), signatureStatus. Hash matches pipeline output. |
+| Unit | Invalid input | 400 for null body or null text. |
+| Manual | curl | See README "Crypto demo endpoint" section. |
+
+---
+
 ### Task 2.4 — TimestampService (RFC 3161 local TSA)
 
 | Field | Value |
@@ -323,6 +352,7 @@ Detailed test scope and acceptance criteria for each step. Run backend tests wit
 | **2.1** | Unit | Canonicalization | Same string → same bytes; `\r\n` vs `\n` → same result. |
 | **2.2** | Unit | HashService | Known input → known SHA-256 hex (64 chars). |
 | **2.3** | Unit | SignatureService | sign(hash) then verify(hash, signature) → true; tampered signature → false. |
+| **2.3.5** | Integration / Manual | POST /api/crypto/demo | 200; body has hash, canonicalBase64, signature; hash matches pipeline. Manual: curl — see README. |
 | **2.4** | Unit | TimestampService | Mock TSA: request returns non-empty token; invalid response handled. |
 | **3.1** | Unit | LLMClient | Mock: complete(prompt) returns non-empty text and modelId. |
 | **3.2** | — | Data flow | LLMResult / audit context contains model id and optional params. |
