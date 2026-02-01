@@ -1,9 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  async rewrites() {
-    const backend = process.env.BACKEND_INTERNAL_URL || "http://localhost:8080";
-    return [{ source: "/api/:path*", destination: `${backend}/api/:path*` }];
-  },
+  // /api/* is proxied at runtime by app/api/[...path]/route.ts (uses BACKEND_INTERNAL_URL in container)
   async headers() {
     return [
       {
