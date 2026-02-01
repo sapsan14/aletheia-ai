@@ -341,7 +341,7 @@ Step-by-step plan for building the PoC: verifiable AI responses with cryptograph
 | Field | Value |
 |-------|--------|
 | **Est.** | 1–2 h |
-| **Status** | Optional — implement when needed |
+| **Status** | ✅ Done |
 | **Description** | Add SpringDoc OpenAPI + Swagger UI for API documentation and interactive testing. |
 
 **When to implement:**

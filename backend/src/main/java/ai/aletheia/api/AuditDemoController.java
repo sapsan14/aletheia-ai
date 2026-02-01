@@ -2,6 +2,8 @@ package ai.aletheia.api;
 
 import ai.aletheia.api.dto.AuditDemoRequest;
 import ai.aletheia.api.dto.AuditDemoResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import ai.aletheia.audit.AuditRecordService;
 import ai.aletheia.audit.dto.AuditRecordRequest;
 import ai.aletheia.crypto.CanonicalizationService;
@@ -56,6 +58,9 @@ public class AuditDemoController {
         this.auditRecordService = auditRecordService;
     }
 
+    @Operation(summary = "Audit demo", description = "Crypto pipeline + save to DB. Test flow without LLM.")
+    @ApiResponse(responseCode = "200", description = "Saved record with id, hash, signature, tsaToken")
+    @ApiResponse(responseCode = "400", description = "Missing or null text")
     @PostMapping(value = "/demo", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<AuditDemoResponse> demo(@RequestBody AuditDemoRequest request) {
         if (request == null || request.text() == null) {

@@ -125,6 +125,7 @@ cd backend && ./mvnw spring-boot:run
 ```
 - H2 DB created at `backend/data/` (no PostgreSQL)
 - API: http://localhost:8080
+- Swagger UI: http://localhost:8080/swagger-ui.html
 - H2 console: http://localhost:8080/h2-console
 
 **4. Run frontend:**
@@ -226,7 +227,7 @@ Or with JAR: `java -jar backend.jar --ai.aletheia.signing.key-path=/path/to/ai.k
 
 CLI args override env vars and `application.properties`.
 
-**API documentation (Swagger):** When implemented (see [plan — Task 7.3](docs/en/plan.md#task-73--swagger--openapi-implement-when-needed)), available at `http://localhost:8080/swagger-ui.html`.
+**API documentation (Swagger):** When the backend is running, available at [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html). OpenAPI JSON at `/v3/api-docs`.
 
 ---
 

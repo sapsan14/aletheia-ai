@@ -3,6 +3,8 @@ package ai.aletheia.api;
 import ai.aletheia.llm.LLMClient;
 import ai.aletheia.llm.LLMException;
 import ai.aletheia.llm.LLMResult;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +31,10 @@ public class LlmDemoController {
         this.llmClient = llmClient;
     }
 
+    @Operation(summary = "LLM demo", description = "Test LLM completion only (no persistence). Requires OPENAI_API_KEY.")
+    @ApiResponse(responseCode = "200", description = "responseText, modelId")
+    @ApiResponse(responseCode = "400", description = "Missing prompt")
+    @ApiResponse(responseCode = "502", description = "LLM failed")
     @PostMapping(value = "/demo", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> demo(@RequestBody Map<String, String> body) {
         String prompt = body != null ? body.get("prompt") : null;

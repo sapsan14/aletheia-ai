@@ -328,7 +328,7 @@ Samm-sammuline plaan PoC koostamiseks: kontrollitavad AI vastused krüptograafil
 | Väli | Väärtus |
 |------|---------|
 | **Hinnang** | 1–2 t |
-| **Staatus** | Valikuline — vajadusel |
+| **Staatus** | ✅ Tehtud |
 | **Kirjeldus** | Lisa SpringDoc OpenAPI + Swagger UI API dokumentatsiooniks ja interaktiivseks testimiseks. |
 
 **Millal rakendada:** Kui on 3+ REST endpoint'i või pärast Sammu 5. Üksikasjad ja LLM-readable prompt: vt [docs/en/plan.md](../en/plan.md#task-73--swagger--openapi-implement-when-needed).

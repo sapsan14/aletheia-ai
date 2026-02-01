@@ -328,7 +328,7 @@
 | Поле | Значение |
 |------|----------|
 | **Оценка** | 1–2 ч |
-| **Статус** | Опционально — при необходимости |
+| **Статус** | ✅ Готово |
 | **Описание** | Добавить SpringDoc OpenAPI + Swagger UI для документирования API и интерактивного тестирования. |
 
 **Когда реализовывать:** При наличии 3+ REST endpoints или после Этапа 5 (POST /api/ai/ask, GET /api/ai/verify/:id). Подробности и LLM-readable prompt: см. [docs/en/plan.md](../en/plan.md#task-73--swagger--openapi-implement-when-needed).

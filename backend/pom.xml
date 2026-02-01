@@ -64,6 +64,13 @@
 			<scope>runtime</scope>
 		</dependency>
 
+		<!-- SpringDoc OpenAPI + Swagger UI -->
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>2.8.4</version>
+		</dependency>
+
 		<!-- BouncyCastle for crypto (signing, TSA): bcpkix, bcprov -->
 		<dependency>
 			<groupId>org.bouncycastle</groupId>

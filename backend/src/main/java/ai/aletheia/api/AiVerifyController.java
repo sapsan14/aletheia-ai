@@ -7,6 +7,8 @@ import ai.aletheia.crypto.HashService;
 import ai.aletheia.crypto.SignatureService;
 import ai.aletheia.db.AiResponseRepository;
 import ai.aletheia.db.entity.AiResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
@@ -44,6 +46,9 @@ public class AiVerifyController {
         this.signatureService = signatureService;
     }
 
+    @Operation(summary = "Verify record", description = "Fetch stored record by id with hashMatch and signatureValid")
+    @ApiResponse(responseCode = "200", description = "Full record for verification page")
+    @ApiResponse(responseCode = "404", description = "Record not found")
     @GetMapping(value = "/verify/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> verify(@PathVariable Long id) {
         var opt = repository.findById(id);

@@ -7,6 +7,8 @@ import ai.aletheia.crypto.HashService;
 import ai.aletheia.crypto.SignatureService;
 import ai.aletheia.crypto.TimestampException;
 import ai.aletheia.crypto.TimestampService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -49,6 +51,9 @@ public class CryptoDemoController {
         this.timestampService = timestampService;
     }
 
+    @Operation(summary = "Crypto demo", description = "Canonicalize → hash → sign → timestamp. Works without signing key (returns hash only).")
+    @ApiResponse(responseCode = "200", description = "Pipeline result with hash, signature, tsaToken")
+    @ApiResponse(responseCode = "400", description = "Missing or null text")
     @PostMapping(value = "/demo", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CryptoDemoResponse> demo(@RequestBody CryptoDemoRequest request) {
         if (request == null || request.text() == null) {

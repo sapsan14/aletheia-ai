@@ -12,6 +12,8 @@ import ai.aletheia.crypto.TimestampService;
 import ai.aletheia.llm.LLMClient;
 import ai.aletheia.llm.LLMException;
 import ai.aletheia.llm.LLMResult;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -60,6 +62,11 @@ public class AiAskController {
         this.auditRecordService = auditRecordService;
     }
 
+    @Operation(summary = "Ask AI", description = "Full flow: prompt → LLM → canonicalize → hash → sign → timestamp → save. Requires OPENAI_API_KEY.")
+    @ApiResponse(responseCode = "200", description = "Verifiable response with id, hash, signature, tsaToken")
+    @ApiResponse(responseCode = "400", description = "Missing or empty prompt")
+    @ApiResponse(responseCode = "502", description = "LLM failed")
+    @ApiResponse(responseCode = "503", description = "Processing failed")
     @PostMapping(value = "/ask", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> ask(@RequestBody AiAskRequest request) {
         if (request == null || request.prompt() == null || request.prompt().isBlank()) {
