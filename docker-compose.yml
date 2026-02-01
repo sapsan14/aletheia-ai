@@ -23,6 +23,45 @@ services:
       timeout: 5s
       retries: 5
 
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: aletheia-backend
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-aletheia}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-aletheia}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-local}
+      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
+      AI_ALETHEIA_SIGNING_KEY_PATH: ${AI_ALETHEIA_SIGNING_KEY_PATH:-/app/ai.key}
+      AI_ALETHEIA_TSA_MODE: ${AI_ALETHEIA_TSA_MODE:-real}
+      AI_ALETHEIA_TSA_URL: ${AI_ALETHEIA_TSA_URL:-http://timestamp.digicert.com}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000}
+    volumes:
+      - ./ai.key:/app/ai.key:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - aletheia-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8080}
+    container_name: aletheia-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - aletheia-network
+
   # Local RFC 3161 TSA (OpenTSA or custom)
   # Note: This is a placeholder. For actual implementation, use:
   # - OpenTSA Docker image
@@ -56,7 +95,13 @@ networks:
 # Usage Instructions
 # ============================================
 #
-# Start PostgreSQL only (default):
+# Full stack (PostgreSQL + backend + frontend):
+#   1. Generate signing key: openssl genpkey -algorithm RSA -out ai.key -pkeyopt rsa_keygen_bits:2048
+#   2. Create .env with OPENAI_API_KEY=sk-your-key (and optional overrides)
+#   3. docker-compose up -d
+#   Frontend: http://localhost:3000  |  Backend: http://localhost:8080
+#
+# PostgreSQL only (for local dev without containers):
 #   docker-compose up -d postgres
 #
 # Start PostgreSQL + TSA:
