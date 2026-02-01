@@ -57,6 +57,7 @@ Samm-sammuline plaan PoC koostamiseks: kontrollitavad AI vastused krüptograafil
 | Väli | Väärtus |
 |------|---------|
 | **Hinnang** | 1.5 t |
+| **Staatus** | ✅ Valmis |
 | **Kirjeldus** | Next.js rakendus ühe lehega: placeholder prompti sisestuseks ja vastuse ala. API päringuid veel mitte. |
 
 **Koodi juhend (LLM-readable):**
@@ -310,6 +311,18 @@ Samm-sammuline plaan PoC koostamiseks: kontrollitavad AI vastused krüptograafil
 
 ---
 
+### Ülesanne 7.3 — Swagger / OpenAPI (rakendada vajadusel)
+
+| Väli | Väärtus |
+|------|---------|
+| **Hinnang** | 1–2 t |
+| **Staatus** | Valikuline — vajadusel |
+| **Kirjeldus** | Lisa SpringDoc OpenAPI + Swagger UI API dokumentatsiooniks ja interaktiivseks testimiseks. |
+
+**Millal rakendada:** Kui on 3+ REST endpoint'i või pärast Sammu 5. Üksikasjad ja LLM-readable prompt: vt [docs/en/plan.md](../en/plan.md#task-73--swagger--openapi-implement-when-needed).
+
+---
+
 ## Kokkuvõte — Hinnang tundide järgi
 
 | Samm | Tunnid |
@@ -334,7 +347,7 @@ Iga sammu testide ulatus ja vastuvõtukriteeriumid. Backend: `mvn test` kaustast
 | **1.1** | Käsitsi / dok | README ja diagramm | README: Prerequisites, Run backend/frontend/DB; Mermaid renderdub; link docs/PoC-le. |
 | **1.2** | Üksiktest | Health endpoint | GET /health → 200 ja JSON {"status":"UP"}. @WebMvcTest(HealthController.class) + MockMvc. |
 | **1.2** | Integratsioon | Kontekst | @SpringBootTest kontekst käivitub. |
-| **1.3** | Käsitsi | Frontend | npm run dev; leht: Prompt, Send, Response. |
+| **1.3** | Käsitsi | Frontend | npm run dev; leht: Prompt, Send (disabled/Coming soon), Response. |
 | **1.4** | Käsitsi / migratsioon | DB skeem | Liquibase/Flyway käivub; tabel ai_response olemas. |
 | **2.1** | Üksiktest | Kanoniseerimine | Sama tekst → samad baitid; \r\n vs \n → sama tulemus. |
 | **2.2** | Üksiktest | HashService | Teadaolev sisend → teadaolev SHA-256 hex (64 tähemärki). |
@@ -352,6 +365,7 @@ Iga sammu testide ulatus ja vastuvõtukriteeriumid. Backend: `mvn test` kaustast
 | **6.3** | Käsitsi | Verify leht | Laadi id järgi; kuva hash, allkiri, TSA token; valikuliselt hash kontroll kliendis. |
 | **7.1** | Üksiktest | Kontroll | hashMatch ja signatureValid vastuses kui rakendatud. |
 | **7.2** | Käsitsi | README | Kõik käivitamise ja env juhised dokumenteeritud. |
+| **7.3** | Käsitsi | Swagger UI | Ava /swagger-ui.html; endpointid loendis; "Try it out" töötab. (Valikuline; kui 3+ endpointi.) |
 
 **Backend testide käsk:** kaustast `backend/`: `./mvnw test` või `mvn test`. Testide jaoks kasutatakse H2 (vaikeprofiil).
 

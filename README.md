@@ -89,6 +89,12 @@ For details: [Signing](docs/en/SIGNING.md), [Timestamping](docs/en/TIMESTAMPING.
    cd backend && ./mvnw spring-boot:run
    ```
 
+5. **Run frontend:**
+   ```bash
+   cd frontend && npm install && npm run dev
+   ```
+   Open http://localhost:3000
+
 ---
 
 ## Prerequisites
@@ -129,6 +135,8 @@ openssl genpkey -algorithm RSA -out ai.key -pkeyopt rsa_keygen_bits:2048
 ```
 Then set `ai.aletheia.signing.key-path=/path/to/ai.key` (or equivalent env).
 
+**API documentation (Swagger):** When implemented (see [plan — Task 7.3](docs/en/plan.md#task-73--swagger--openapi-implement-when-needed)), available at `http://localhost:8080/swagger-ui.html`.
+
 ---
 
 ## Crypto demo endpoint
@@ -167,12 +175,18 @@ You can verify the hash using any SHA-256 tool (e.g. `echo -n "hello world" | sh
 ## Run frontend
 
 ```bash
-# From frontend directory (when implemented)
+# From frontend directory
+cd frontend
 npm install
 npm run dev
 ```
 
-Set `NEXT_PUBLIC_API_URL=http://localhost:8080` (or backend URL). Open http://localhost:3000.
+Open http://localhost:3000. You should see:
+- **Prompt** — text area for entering questions (Task 1.3)
+- **Send — Coming soon** — button (disabled; will connect to backend in Step 6)
+- **Response** — area where AI answer will appear
+
+Set `NEXT_PUBLIC_API_URL=http://localhost:8080` when connecting to backend (Step 6).
 
 ---
 

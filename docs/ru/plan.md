@@ -57,6 +57,7 @@
 | Поле | Значение |
 |------|----------|
 | **Оценка** | 1.5 ч |
+| **Статус** | ✅ Готово |
 | **Описание** | Приложение Next.js с одной страницей: заглушка для ввода prompt и области ответа. Без вызовов API. |
 
 **Инструкция для кодинга (LLM-readable):**
@@ -310,6 +311,18 @@
 
 ---
 
+### Задача 7.3 — Swagger / OpenAPI (реализовать при необходимости)
+
+| Поле | Значение |
+|------|----------|
+| **Оценка** | 1–2 ч |
+| **Статус** | Опционально — при необходимости |
+| **Описание** | Добавить SpringDoc OpenAPI + Swagger UI для документирования API и интерактивного тестирования. |
+
+**Когда реализовывать:** При наличии 3+ REST endpoints или после Этапа 5 (POST /api/ai/ask, GET /api/ai/verify/:id). Подробности и LLM-readable prompt: см. [docs/en/plan.md](../en/plan.md#task-73--swagger--openapi-implement-when-needed).
+
+---
+
 ## Сводка — Оценка по времени
 
 | Этап | Часы |
@@ -334,7 +347,7 @@
 | **1.1** | Ручная проверка / док | README и диаграмма | README: Prerequisites, Run backend/frontend/DB; Mermaid рендерится; ссылка на docs/PoC. |
 | **1.2** | Unit | Health endpoint | GET /health → 200 и JSON {"status":"UP"}. @WebMvcTest(HealthController.class) + MockMvc. |
 | **1.2** | Интеграция | Контекст | @SpringBootTest — контекст поднимается без ошибок. |
-| **1.3** | Ручная | Frontend | npm run dev; страница: Prompt, Send, Response. |
+| **1.3** | Ручная | Frontend | npm run dev; страница: Prompt, Send (disabled/Coming soon), Response. |
 | **1.4** | Ручная / миграция | Схема БД | Liquibase/Flyway выполняется; таблица ai_response с нужными колонками. |
 | **2.1** | Unit | Канонизация | Один и тот же текст → одни и те же байты; \r\n vs \n → один результат. |
 | **2.2** | Unit | HashService | Известный вход → известный SHA-256 hex (64 символа). |
@@ -352,6 +365,7 @@
 | **6.3** | Ручная | Страница Verify | Загрузка по id; отображение hash, signature, TSA token; опционально проверка hash на клиенте. |
 | **7.1** | Unit | Верификация | hashMatch и signatureValid в ответе при реализации. |
 | **7.2** | Ручная | README | Описаны запуск и все env. |
+| **7.3** | Ручная | Swagger UI | Открыть /swagger-ui.html; endpoints в списке; "Try it out" работает. (Опционально; при 3+ endpoints.) |
 
 **Команда тестов backend:** из каталога `backend/`: `./mvnw test` или `mvn test`. Для тестов используется H2 (профиль по умолчанию).
 

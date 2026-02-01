@@ -712,6 +712,10 @@ Include instructions for:
 - Running specific test suites
 - Updating golden fixtures
 
+### API Documentation (Swagger / OpenAPI)
+
+When the API grows (3+ endpoints), add Swagger/OpenAPI for interactive manual testing. See [plan.md — Task 7.3](plan.md#task-73--swagger--openapi-implement-when-needed) for the LLM-readable implementation prompt. Swagger UI at `/swagger-ui.html` complements curl-based manual testing.
+
 **Example:**
 
 ```markdown
@@ -769,7 +773,7 @@ void testSignatureService_invalidKey_throwsException()
 - [Timestamping](TIMESTAMPING.md) — RFC 3161 protocol, TSA endpoint
 - [Trust Model](TRUST_MODEL.md) — Who attests what, chain of trust
 - [Agent Audit Model](AGENT_AUDIT_MODEL.md) — LLM output auditing, audit records
-- [Implementation Plan](plan.md) — Task 2.4: TimestampService implementation
+- [Implementation Plan](plan.md) — Task 2.4: TimestampService; Task 7.3: Swagger (when needed)
 - [Architecture Diagrams](../../diagrams/architecture.md) — Pipeline overview
 - [README](../../README.md) — Project overview, run instructions
 

@@ -57,6 +57,7 @@ Step-by-step plan for building the PoC: verifiable AI responses with cryptograph
 | Field | Value |
 |-------|--------|
 | **Est.** | 1.5 h |
+| **Status** | ✅ Done |
 | **Description** | Next.js app with one page: placeholder for prompt input and response area. No API calls yet. |
 
 **Coding prompt (LLM-readable):**
@@ -323,6 +324,39 @@ Step-by-step plan for building the PoC: verifiable AI responses with cryptograph
 
 ---
 
+### Task 7.3 — Swagger / OpenAPI (implement when needed)
+
+| Field | Value |
+|-------|--------|
+| **Est.** | 1–2 h |
+| **Status** | Optional — implement when needed |
+| **Description** | Add SpringDoc OpenAPI + Swagger UI for API documentation and interactive testing. |
+
+**When to implement:**
+- **Trigger:** When you have 3+ REST endpoints, or after Step 5 (POST /api/ai/ask, GET /api/ai/verify/:id exist).
+- **Why later:** With a single endpoint (/api/crypto/demo), curl is sufficient. Swagger becomes valuable when the API grows.
+- **Value:** Self-documenting API, interactive "Try it out" in browser, OpenAPI spec for tooling.
+
+**Coding prompt (LLM-readable):**
+- Add SpringDoc OpenAPI to Spring Boot backend. Use `springdoc-openapi-starter-webmvc-ui` (for Spring Boot 3.x) or `springdoc-openapi-ui` with version matching your Spring Boot.
+- Maven dependency example: `org.springdoc:springdoc-openapi-starter-webmvc-ui:2.x.x` (check compatibility with Spring Boot version).
+- Configure: Swagger UI at `/swagger-ui.html` (or `/swagger-ui/index.html`), OpenAPI JSON at `/v3/api-docs`.
+- Add `@Operation`, `@ApiResponse` annotations to existing controllers for better descriptions (optional but recommended).
+- Application property (optional): `springdoc.api-docs.path=/v3/api-docs`, `springdoc.swagger-ui.path=/swagger-ui.html`.
+- Exclude actuator or health endpoints from Swagger if desired: `springdoc.show-actuator=false`.
+- Document in README: "API documentation: http://localhost:8080/swagger-ui.html when backend is running."
+- Manual test: Start backend, open `/swagger-ui.html`, verify endpoints are listed, test POST /api/crypto/demo via "Try it out".
+- Do not secure Swagger UI for dev (or document how to enable/disable for prod). Swagger is for developer convenience.
+
+**Acceptance criteria:**
+
+| Test type | What to test | Acceptance criteria |
+|-----------|--------------|---------------------|
+| Manual | Swagger UI | Open http://localhost:8080/swagger-ui.html; see API docs; can execute endpoints. |
+| Manual | OpenAPI spec | GET /v3/api-docs returns valid OpenAPI JSON. |
+
+---
+
 ## Summary — Estimated total
 
 | Step | Est. hours |
@@ -347,7 +381,7 @@ Detailed test scope and acceptance criteria for each step. Run backend tests wit
 | **1.1** | Manual / doc | README and diagram | README has Prerequisites, Run backend/frontend/DB; Mermaid diagram renders; link to docs/PoC works. |
 | **1.2** | Unit | Health endpoint | `GET /health` returns 200 and JSON `{"status":"UP"}`. Use `@WebMvcTest(HealthController.class)` + MockMvc. |
 | **1.2** | Integration | Context load | `@SpringBootTest` context loads (no missing beans). |
-| **1.3** | Manual | Frontend | App runs with `npm run dev`; page shows Prompt, Send, Response placeholders. |
+| **1.3** | Manual | Frontend | App runs with `npm run dev`; page shows Prompt, Send (disabled/Coming soon), Response placeholders. |
 | **1.4** | Manual / migration | DB schema | Liquibase/Flyway runs; table `ai_response` exists with expected columns. |
 | **2.1** | Unit | Canonicalization | Same string → same bytes; `\r\n` vs `\n` → same result. |
 | **2.2** | Unit | HashService | Known input → known SHA-256 hex (64 chars). |
@@ -365,6 +399,7 @@ Detailed test scope and acceptance criteria for each step. Run backend tests wit
 | **6.3** | Manual | Verify page | Fetches by id; shows hash, signature, TSA token; optional client-side hash check. |
 | **7.1** | Unit | Verification | hashMatch and signatureValid in response when implemented. |
 | **7.2** | Manual | README | All run instructions and env vars documented. |
+| **7.3** | Manual | Swagger UI | Open /swagger-ui.html; endpoints listed; "Try it out" works. (Optional; implement when 3+ endpoints.) |
 
 **Backend test command:** From `backend/`: `./mvnw test` or `mvn test`. Ensure H2 is available for tests (default Spring Boot test profile uses in-memory DB).
 
