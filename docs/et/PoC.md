@@ -2,7 +2,7 @@
 
 Dokument kirjeldab ettepanekul olevat PoC-arhitektuuri süsteemile, mis tagab tehisintellekti vastuste kinnitamise krüptograafilise allkirja ja ajatemplite abil.
 
-**Seotud:** [Visioon ja teekond](VISION_AND_ROADMAP.md) (sammud pärast PoC-d) · [Rakendusplaan](plan.md) · [Usaldusmudel](TRUST_MODEL.md)
+**Seotud:** [Visioon ja teekond](VISION_AND_ROADMAP.md) · [Rakendusplaan](plan.md) · [Usaldusmudel](TRUST_MODEL.md) · [Arhitektuuri diagrammid](../../diagrams/architecture.md)
 
 ---
 
@@ -305,8 +305,8 @@ See on põhimõtteline erinevus — ja see on suund, kuhu ELi regulatiiv tegelik
 
 ## 📋 Järgmised sammud
 
-1. 📐 arhitektuuri diagramm (Mermaid)
-2. 📄 PoC README kui GitHubi projekt
-3. 🧪 näide RFC3161 ajatempli voost
-4. 🔐 näide BouncyCastle ajatempli kontrollimisest
-5. 🗺️ teekond: PoC → demo → ELi-stiilis toode
+1. [Arhitektuuri diagrammid](../../diagrams/architecture.md) (Mermaid: pipeline, usaldusahel)
+2. PoC README kui GitHubi projekt
+3. Näide RFC 3161 ajatempli voost
+4. Näide BouncyCastle ajatempli kontrollimisest
+5. [Visioon ja teekond](VISION_AND_ROADMAP.md) — PoC → demo → ELi-stiilis toode

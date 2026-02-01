@@ -229,34 +229,18 @@
         mode: "0755"
       when: ngrok_enabled
 
-    - name: Create ngrok config (frontend + backend tunnels)
-      ansible.builtin.copy:
-        content: |
-          version: "2"
-          authtoken: {{ ngrok_authtoken }}
-          tunnels:
-            frontend:
-              proto: http
-              addr: {{ ngrok_port }}
-              domain: {{ ngrok_domain }}
-            backend:
-              proto: http
-              addr: 8080
-        dest: /etc/ngrok/ngrok.yml
-        mode: "0600"
-      when: ngrok_enabled
-
-    - name: Create ngrok systemd service (both tunnels)
+    - name: Create ngrok systemd service (single tunnel; free plan allows 1 endpoint)
       ansible.builtin.copy:
         content: |
           [Unit]
-          Description=ngrok tunnels (frontend + backend)
+          Description=ngrok tunnel for Aletheia frontend
           After=network-online.target docker.service
           Wants=network-online.target
 
           [Service]
           Type=simple
-          ExecStart={{ ngrok_executable | default('/usr/local/bin/ngrok') }} start --config /etc/ngrok/ngrok.yml --all
+          EnvironmentFile=/etc/ngrok/ngrok.env
+          ExecStart={{ ngrok_executable | default('/usr/local/bin/ngrok') }} http {{ ngrok_port }} --domain={{ ngrok_domain }}
           Restart=on-failure
           RestartSec=5
 
@@ -268,45 +252,19 @@
     - name: Enable and start ngrok service
       ansible.builtin.systemd:
         name: ngrok
-        state: started
+        state: restarted
         enabled: true
         daemon_reload: true
       when: ngrok_enabled
 
-    - name: Wait for ngrok API to be ready
-      ansible.builtin.uri:
-        url: http://127.0.0.1:4040/api/tunnels
-        method: GET
-        status_code: 200
-      register: ngrok_api_result
-      retries: 12
-      delay: 5
-      until: ngrok_api_result.status == 200
-      when: ngrok_enabled
-
-    - name: Extract backend ngrok URL from API
-      ansible.builtin.set_fact:
-        backend_ngrok_url: "{{ (backend_tunnels | length > 0 and backend_tunnels | first) or '' }}"
-      vars:
-        by_name: "{{ ngrok_api_result.json.tunnels | default([]) | selectattr('name', 'defined') | selectattr('name', 'equalto', 'backend') | map(attribute='public_url') | list }}"
-        by_url: "{{ ngrok_api_result.json.tunnels | default([]) | rejectattr('public_url', 'search', ngrok_domain) | map(attribute='public_url') | list }}"
-        backend_tunnels: "{{ (by_name | length > 0 and by_name) or by_url }}"
-      when: ngrok_enabled
-
-    - name: Fail if backend ngrok URL could not be extracted
-      ansible.builtin.fail:
-        msg: "Could not get backend ngrok URL from API. Check 'curl http://127.0.0.1:4040/api/tunnels' on the VM. ngrok config may need both tunnels."
-      when: ngrok_enabled and not (backend_ngrok_url | default('') | trim | length > 0)
-
-    - name: Update .env with backend ngrok URL and rebuild frontend
+    - name: Update .env and rebuild frontend for ngrok (API via Next.js rewrite)
       ansible.builtin.shell: |
         set -e
         cd {{ app_dir }}
-        sed -i 's|^NEXT_PUBLIC_API_URL=.*|NEXT_PUBLIC_API_URL={{ backend_ngrok_url }}|' .env
+        sed -i 's|^NEXT_PUBLIC_API_URL=.*|NEXT_PUBLIC_API_URL=|' .env
         sed -i 's|^CORS_ALLOWED_ORIGINS=.*|CORS_ALLOWED_ORIGINS=https://{{ ngrok_domain }},http://localhost:3000|' .env
         docker compose build frontend --no-cache
         docker compose up -d
-        docker compose restart backend
       args:
         executable: /bin/bash
-      when: ngrok_enabled and (backend_ngrok_url | default('') | trim | length > 0)
+      when: ngrok_enabled

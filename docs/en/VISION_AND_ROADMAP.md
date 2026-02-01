@@ -223,4 +223,4 @@ One AI answers; another AI **verifies** the assertion. Both answers are signed a
 
 ---
 
-*Part of Aletheia AI docs. See [README](../../README.md) and [plan](plan.md) for implementation details.*
+*Part of Aletheia AI docs. See [README](../../README.md), [plan](plan.md), and [doc index](../README.md) for implementation details and where to start.*

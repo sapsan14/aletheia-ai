@@ -16,7 +16,7 @@ Stack (PoC): Next.js, Java Spring Boot, PostgreSQL, OpenSSL/BouncyCastle, RFC 31
 
 ## Documentation
 
-Docs are grouped by language in `docs/<lang>/` (en, ru, et). Core documents are available in all three languages.
+Docs are grouped by language in `docs/<lang>/` (en, ru, et). **Overview and where to start:** [docs/README.md](docs/README.md). Core documents are available in all three languages.
 
 | Topic | EN | RU | ET |
 |-------|----|----|-----|
@@ -38,11 +38,8 @@ Docs are grouped by language in `docs/<lang>/` (en, ru, et). Core documents are 
 - [Design: PKI chain and RFC 3161](#design-pki-chain-and-rfc-3161)
 - [Prerequisites](#prerequisites)
 - [Environment variables](#environment-variables)
-- [Setup from scratch](#setup-from-scratch)
-- [Quick Start (minimal)](#quick-start-minimal)
-- [Run backend](#run-backend)
-- [H2 (default) — file-based DB](#h2-default--file-based-db)
-- [Run PostgreSQL](#run-postgresql-or-docker)
+- [Quick start](#quick-start)
+- [Backend & database](#backend--database)
 - [Main AI endpoint](#main-ai-endpoint)
 - [LLM (OpenAI)](#llm-openai)
 - [Audit demo (tangible test)](#audit-demo-tangible-test)
@@ -57,23 +54,11 @@ Docs are grouped by language in `docs/<lang>/` (en, ru, et). Core documents are 
 
 ## Design: PKI chain and RFC 3161
 
-**RFC 3161** is a real cryptographic standard used in eIDAS, legal evidence, archival storage, and enterprise PKI — not a toy. This PoC uses the same timestamping mechanism as production PKI systems.
+**RFC 3161** is the same standard used in eIDAS, legal evidence, and enterprise PKI. This PoC timestamps the **signature bytes** (not the raw AI text): we attest *what* was said; the TSA attests *when* it was signed. BouncyCastle TSP is used for requests; the TSA token is stored as opaque bytes.
 
-**What we timestamp:** The TSA timestamp is applied to the **signature bytes**, not to the original AI response text. The chain is:
+**Chain:** `AI response → canonicalize → hash → sign(hash) → timestamp(signature) → store`
 
-```
-AI response text  →  hash(text)  →  sign(hash)  →  timestamp(signature)
-                         ↑               ↑                  ↑
-                   content digest   we attest content   TSA attests time
-```
-
-So: we attest *what* was said (signature over hash); the TSA attests *when* it was signed. This is the classic PKI trust chain.
-
-**In short:** *Timestamp is applied to the signature bytes, not to the original AI response text.*
-
-**BouncyCastle TSP** is used for RFC 3161 requests — the standard, eIDAS-compatible approach. The TSA token is stored as **opaque bytes**; verification of the token is out of scope for this PoC (no need to reimplement PKI).
-
-For details: [Signing](docs/en/SIGNING.md), [Timestamping](docs/en/TIMESTAMPING.md), [Trust model & eIDAS mapping](docs/en/TRUST_MODEL.md), [diagrams (trust chain)](diagrams/architecture.md#6-trust-chain).
+For details: [Signing](docs/en/SIGNING.md), [Timestamping](docs/en/TIMESTAMPING.md), [Trust model & eIDAS](docs/en/TRUST_MODEL.md), [diagrams (trust chain)](diagrams/architecture.md#6-trust-chain). Doc index: [docs/README.md](docs/README.md).
 
 ---
 
@@ -110,129 +95,50 @@ Full list: [.env.example](.env.example). Architecture: [PoC](docs/en/PoC.md), [p
 
 ---
 
-## Setup from scratch
+## Quick start
 
-**1. Clone and env:**
+**One-time setup:** copy env, generate signing key, set key path in `.env`.
+
 ```bash
 git clone <repo> && cd aletheia-ai
 cp .env.example .env
-```
-
-**2. Generate signing key:**
-```bash
 openssl genpkey -algorithm RSA -out ai.key -pkeyopt rsa_keygen_bits:2048
+# In .env set: AI_ALETHEIA_SIGNING_KEY_PATH=../ai.key  (or absolute path)
 ```
-Set in `.env`: `AI_ALETHEIA_SIGNING_KEY_PATH=../ai.key` (or absolute path).
 
-**3. Run backend:**
+**Run backend** (from project root or `backend/`):
+
 ```bash
 cd backend && ./mvnw spring-boot:run
 ```
-- H2 DB created at `backend/data/` (no PostgreSQL)
-- API: http://localhost:8080
-- Swagger UI: http://localhost:8080/swagger-ui.html
-- H2 console: http://localhost:8080/h2-console
 
-**4. Run frontend:**
-```bash
-cd frontend && npm install && npm run dev
-```
-- Create `frontend/.env.local` with `NEXT_PUBLIC_API_URL=http://localhost:8080` (or copy from `frontend/.env.example`)
-- Open http://localhost:3000
+- H2 DB is created at `backend/data/` (no PostgreSQL required). API: http://localhost:8080, Swagger: http://localhost:8080/swagger-ui.html, H2 console: http://localhost:8080/h2-console.
 
-**5. Test:** On the main page, enter a prompt and click Send. Requires `OPENAI_API_KEY` in `.env`. For LLM-free test: `curl -X POST http://localhost:8080/api/audit/demo -H "Content-Type: application/json" -d '{"text":"hello"}'`.
-
----
-
-## Quick Start (minimal)
+**Run frontend** (in another terminal):
 
 ```bash
-cp .env.example .env
-openssl genpkey -algorithm RSA -out ai.key -pkeyopt rsa_keygen_bits:2048
-# Edit .env: AI_ALETHEIA_SIGNING_KEY_PATH=../ai.key
-cd backend && ./mvnw spring-boot:run
-# In another terminal:
 cd frontend && cp .env.example .env.local && npm install && npm run dev
 ```
-Open http://localhost:3000. For POST /api/ai/ask, add `OPENAI_API_KEY` to `.env`.
+
+Open http://localhost:3000. For POST /api/ai/ask set `OPENAI_API_KEY` in `.env`. LLM-free test: `curl -X POST http://localhost:8080/api/audit/demo -H "Content-Type: application/json" -d '{"text":"hello"}'`.
 
 ---
 
-## Run PostgreSQL (optional)
+## Backend & database
 
-Use when you want PostgreSQL instead of H2. **Option A — Docker Compose:**
+Spring Boot loads `.env` from the project root automatically. Default: **H2** file-based at `backend/data/aletheia.mv.db` (data persists). Override with [Environment variables](#environment-variables) for PostgreSQL.
 
-```bash
-docker-compose up -d postgres
-```
+**Run backend:** `cd backend && ./mvnw spring-boot:run` (or `java -jar target/aletheia-backend.jar`). API: http://localhost:8080.
 
-**Option B — Single container:**
+**H2 console** (while backend is running): http://localhost:8080/h2-console. Use the **same** JDBC URL as in `SPRING_DATASOURCE_URL` (e.g. `jdbc:h2:file:./data/aletheia` for file-based). User: `sa`, password: empty. Run backend from `backend/` so `./data/aletheia` resolves.
 
-```bash
-docker run -d --name aletheia-db -e POSTGRES_DB=aletheia -e POSTGRES_USER=aletheia -e POSTGRES_PASSWORD=local -p 5432:5432 postgres:15-alpine
-```
+**PostgreSQL (optional):** `docker-compose up -d postgres` or single container: `docker run -d --name aletheia-db -e POSTGRES_DB=aletheia -e POSTGRES_USER=aletheia -e POSTGRES_PASSWORD=local -p 5432:5432 postgres:15-alpine`. Then in `.env`: `SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/aletheia`, `SPRING_DATASOURCE_USERNAME=aletheia`, `SPRING_DATASOURCE_PASSWORD=local`, `SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect`. Flyway runs on startup; see `backend/src/main/resources/db/migration/README.md` and `schema-ai_response-standalone.sql` for manual SQL.
 
-**Migrations:** Flyway runs automatically when the backend starts. The `ai_response` table is created on first run. No manual migration step needed. For manual SQL, see `backend/src/main/resources/db/schema-ai_response-standalone.sql`. We may switch to Liquibase later for multi-DB support or rollbacks (see `backend/src/main/resources/db/migration/README.md`).
+**Signing key:** required for signing/TSA. Generate once (see [Quick start](#quick-start)); set `AI_ALETHEIA_SIGNING_KEY_PATH` in `.env`. Override via CLI: `./mvnw spring-boot:run -Dspring-boot.run.arguments="--ai.aletheia.signing.key-path=../ai.key"`.
 
-**Using PostgreSQL:** Set in `.env`:
-```
-SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/aletheia
-SPRING_DATASOURCE_USERNAME=aletheia
-SPRING_DATASOURCE_PASSWORD=local
-SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect
-```
+**TSA:** `AI_ALETHEIA_TSA_MODE=real` (default, DigiCert) or `mock` (tests/offline). See [TIMESTAMPING](docs/en/TIMESTAMPING.md).
 
----
-
-## Run backend
-
-```bash
-cd backend
-./mvnw spring-boot:run
-# Or: java -jar target/aletheia-backend.jar
-```
-
-**.env loading:** Spring Boot loads `.env` from the project root automatically (`spring.config.import`). Set `SPRING_DATASOURCE_URL`, signing key path, TSA mode, etc. in `.env`.
-
-**Default DB:** H2 file-based at `backend/data/aletheia.mv.db` — data persists between runs. Override with `SPRING_DATASOURCE_URL` for PostgreSQL. Default API: `http://localhost:8080`.
-
----
-
-## H2 (default) — file-based DB
-
-**No PostgreSQL needed** for local development. H2 stores data in `backend/data/aletheia.mv.db`; the folder is created on first run (and ignored by git).
-
-**H2 Console** — inspect the DB at `http://localhost:8080/h2-console` while the backend is running:
-
-| Field | Value |
-|-------|-------|
-| **JDBC URL** | `jdbc:h2:file:./data/aletheia` |
-| **User Name** | `sa` |
-| **Password** | *(leave empty)* |
-
-Path `./data/aletheia` is relative to the backend process working directory (`backend/`). **Run backend from `backend/`** so the path resolves correctly.
-
-**H2 Console shows 0 rows but API returns data?** The console must use the **same** JDBC URL as the app. Check `SPRING_DATASOURCE_URL` in `.env` — if it's `jdbc:h2:mem:aletheia`, the console must use that too (not `file:`). For file-based, use `jdbc:h2:file:./data/aletheia`.
-
-**Signing key (required for backend):** PEM path in `ai.aletheia.signing.key-path` or env. Generate:
-```bash
-openssl genpkey -algorithm RSA -out ai.key -pkeyopt rsa_keygen_bits:2048
-```
-Then set `ai.aletheia.signing.key-path=/path/to/ai.key` (or equivalent env).
-
-**TSA mode:** `AI_ALETHEIA_TSA_MODE=real` (default, DigiCert TSA) or `mock` (deterministic, no network; use for tests or offline dev). DigiCert URL is the default; alternatives: Sectigo, GlobalSign. For a self-hosted RFC 3161 TSA, see [TIMESTAMPING](docs/en/TIMESTAMPING.md).
-
-**Command-line arguments (override .env):** Spring Boot accepts `--property=value`. Useful for one-off runs or CI:
-
-```bash
-./mvnw spring-boot:run -Dspring-boot.run.arguments="--ai.aletheia.signing.key-path=../ai.key --ai.aletheia.tsa.mode=real --ai.aletheia.tsa.url=http://timestamp.digicert.com"
-```
-
-Or with JAR: `java -jar backend.jar --ai.aletheia.signing.key-path=/path/to/ai.key --ai.aletheia.tsa.mode=real --ai.aletheia.tsa.url=http://timestamp.digicert.com`
-
-CLI args override env vars and `application.properties`.
-
-**API documentation (Swagger):** When the backend is running, available at [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html). OpenAPI JSON at `/v3/api-docs`.
+**Swagger:** http://localhost:8080/swagger-ui.html, OpenAPI JSON: `/v3/api-docs`.
 
 ---
 
@@ -252,14 +158,12 @@ curl http://localhost:8080/api/ai/verify/1
 
 ## LLM (OpenAI)
 
-**POST /api/llm/demo** — test LLM completion only (no persistence). Requires `OPENAI_API_KEY` in `.env`. Returns `{"responseText", "modelId"}`.
+**POST /api/llm/demo** — test LLM completion only (no persistence). Returns `{"responseText", "modelId"}`. Requires `OPENAI_API_KEY`; see [Environment variables](#environment-variables).
 
 ```bash
 curl -X POST http://localhost:8080/api/llm/demo -H "Content-Type: application/json" -d '{"prompt":"What is 2+2?"}'
 # → { "responseText": "2+2 equals 4.", "modelId": "gpt-4" }
 ```
-
-**Env vars:** `OPENAI_API_KEY` (required for real calls), `OPENAI_MODEL` (default: gpt-4). See `.env.example`.
 
 ---
 
@@ -275,7 +179,7 @@ curl http://localhost:8080/api/ai/verify/1
 # → full record for verification page
 ```
 
-Check H2 console (`http://localhost:8080/h2-console`) to see the saved row in `ai_response`.
+Check [H2 console](http://localhost:8080/h2-console) to see the saved row in `ai_response`.
 
 ---
 
@@ -286,7 +190,7 @@ Exposes the crypto pipeline: canonicalize → hash → sign → timestamp. **Wor
 **Manual test:**
 
 ```bash
-# Start backend first (see Run backend above)
+# Start backend first (see [Backend & database](#backend--database))
 cd backend && ./mvnw spring-boot:run
 
 # In another terminal — hash only (no key needed):
@@ -329,7 +233,7 @@ Open http://localhost:3000. You should see:
 - **Response** — AI answer, status (Signed, Timestamped, Verifiable), link to verify page
 - **Verify page** — `/verify?id=...` shows hash, signature, TSA token, model, date; backend verification (hashMatch, signatureValid); "Verify hash" for client-side check
 
-**Required:** Set `NEXT_PUBLIC_API_URL=http://localhost:8080` in `frontend/.env.local` (or copy from `frontend/.env.example`). Start the backend first. CORS allows `http://localhost:3000` by default; override with `CORS_ALLOWED_ORIGINS` if needed.
+**Required:** `NEXT_PUBLIC_API_URL=http://localhost:8080` in `frontend/.env.local` (see [Environment variables](#environment-variables)). Start the backend first. CORS allows `http://localhost:3000` by default.
 
 ---
 
@@ -434,9 +338,7 @@ ansible-playbook -i deploy/ansible/inventory.yml deploy/ansible/playbook.yml \
   -e next_public_api_url=http://YOUR_VM_IP:8080
 ```
 
-**Result:** Frontend at `http://VM:3000`, Backend at `http://VM:8080`. See [deploy/ansible/README.md](deploy/ansible/README.md) for variables, troubleshooting, ngrok (university/firewall), and verified flow.
-
-**ngrok (university/firewall):** If VM ports are blocked, use `-e ngrok_enabled=true` and CORS. Add `NGROK_AUTHTOKEN` to `.env`. See [deploy/ansible/README.md#ngrok-auto-start](deploy/ansible/README.md#ngrok-auto-start-systemd).
+**Result:** Frontend at `http://VM:3000`, Backend at `http://VM:8080`. Variables, troubleshooting, ngrok (firewall/university): [deploy/ansible/README.md](deploy/ansible/README.md).
 
 ### GitHub Actions (CI/CD)
 
@@ -470,21 +372,6 @@ You are free to use, copy, modify, and distribute the code with attribution.
 
 The author retains the right to continue development of the project independently 
 of the course or project group.
-
-For full details, see [LICENSE](LICENSE).
-
-## Private Development / Future Work
-
-This project is open for exploration, experimentation, and contributions.  
-**Please note:** the original author intends to continue developing certain features independently in future branches (`future/` or `dev/`).  
-
-When forking or contributing:  
-- Always retain proper attribution to the original author.  
-- Do **not modify, merge, or claim ownership** of ongoing private work in `future/` or `dev/`.  
-- Contributions to main or feature branches outside these reserved areas are welcome and appreciated.  
-
-This approach helps the community experiment, while preserving the author's right to continue personal development.
- group.
 
 For full details, see [LICENSE](LICENSE).
 

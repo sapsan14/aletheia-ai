@@ -2,7 +2,7 @@
 
 **Digital signatures make AI output attributable and tamper-evident.**
 
-This document describes how signing is integrated into the Aletheia backend: what we sign, key management, error handling, testing, storage, and scope.
+This document describes how signing is integrated into the Aletheia backend: what we sign, key management, error handling, testing, storage, and scope. For algorithms and key generation, see [Crypto reference](CRYPTO_REFERENCE.md).
 
 ---
 

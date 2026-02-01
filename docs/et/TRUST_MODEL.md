@@ -2,7 +2,7 @@
 
 **Kes mida kinnitab — ja kuidas ahel sobib eIDAS-iga.**
 
-See dokument kirjeldab Aletheia PoC usaldusmudelit: krüptograafiline ahel, kes kinnitab sisu vs. aega, ja kuidas praegune (mittekvalifitseeritud) seadistus vastab tulevasele kvalifitseeritud (eIDAS) seadistusele.
+Dokument kirjeldab Aletheia PoC usaldusmudelit: krüptograafiline ahel, kes kinnitab sisu ja aega, ja vastavus praeguse (mittekvalifitseeritud) ja tulevase kvalifitseeritud (eIDAS) seadistuse vahel. Rakenduse üksikasjad: [Allkirjastamine](SIGNING.md), [Ajatemplid](TIMESTAMPING.md).
 
 ---
 

@@ -116,5 +116,6 @@ See PoC **tahtlikult**:
 
 - [Ajatemplid](TIMESTAMPING.md) — mida ajatempliga märgime (allkirja baitid), TSA, salvestamine.
 - [Usaldusmudel](TRUST_MODEL.md) — usaldusahel, kes mida kinnitab, eIDAS vastendus.
+- [Crypto reference (EN)](../en/CRYPTO_REFERENCE.md) — algoritmid, võtmed, miks tsaToken (inglise keeles).
 - [Arhitektuuri diagrammid](../../diagrams/architecture.md) — pipeline ja krüptokiht.
 - [README](../../README.md) — disaini ülevaade, käivitamise juhised.

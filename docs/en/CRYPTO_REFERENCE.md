@@ -262,4 +262,6 @@ See [mock-tsa/README](../../backend/src/main/resources/mock-tsa/README.md).
 - [TIMESTAMPING](TIMESTAMPING.md) — TSA modes, switching mock/real
 - [MOCK_TSA](MOCK_TSA.md) — deterministic TSA for tests
 - [TRUST_MODEL](TRUST_MODEL.md) — who attests what
+- [Architecture diagrams](../../diagrams/architecture.md) — pipeline, crypto layer, trust chain
+- [README](../../README.md) — project overview, run instructions
 - [KINDERGARDEN](../../KINDERGARDEN.md) — analogies and concepts (Russian)

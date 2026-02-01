@@ -2,6 +2,8 @@
 
 This document describes the proposed PoC architecture for a system of verifiable AI responses with cryptographic signing and timestamps.
 
+**Related:** [Vision & roadmap](VISION_AND_ROADMAP.md) · [Implementation plan](plan.md) · [Trust model](TRUST_MODEL.md) · [Architecture diagrams](../../diagrams/architecture.md)
+
 ---
 
 ## Architecture
@@ -303,8 +305,8 @@ That is a fundamental difference — and the direction EU regulation is actually
 
 ## Next steps
 
-1. Architecture diagram (Mermaid)
+1. [Architecture diagrams](../../diagrams/architecture.md) (Mermaid: pipeline, trust chain, stack)
 2. README PoC as GitHub project
 3. Example RFC 3161 timestamp flow
 4. Example BouncyCastle timestamp verification
-5. Roadmap: PoC → demo → EU-style product
+5. Roadmap: [Vision & roadmap](VISION_AND_ROADMAP.md) — PoC → demo → EU-style product

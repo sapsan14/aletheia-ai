@@ -2,7 +2,7 @@
 
 **RFC 3161 ajatemplid teevad AI väljundi ajas tõestatavaks.**
 
-See dokument kirjeldab, kuidas ajatemplid on Aletheia backendi sisse viidud: TSA endpointi valikud, vigade käsitlemine, testimise strateegia, salvestamine ja ulatus.
+Dokument kirjeldab ajatemplite integreerimist Aletheia backendi: TSA valikud, mock/real lülitumine, vigade käsitlemine, testimine, salvestamine ja ulatus. Selge selgitus, miks tsaToken: [Crypto reference (EN)](../en/CRYPTO_REFERENCE.md#why-tsatoken-not-a-simple-timestamp).
 
 ---
 
@@ -198,6 +198,7 @@ Deterministlikuks testimiseks Aletheias kasuta MOCK_TSA reprodutseeritavate toke
 ## Seotud dokumendid
 
 - [Visioon ja teekond](VISION_AND_ROADMAP.md) — järgmised sammud: usaldusväärne aeg, multi-TSA, ankurdamine.
+- [Crypto reference (EN)](../en/CRYPTO_REFERENCE.md) — algoritmid, võtmed, miks tsaToken (inglise keeles).
 - [Allkirjastamine](SIGNING.md) — mida allkirjastame; allkirja baitid on see, mida ajatempliga märgime.
 - [Usaldusmudel](TRUST_MODEL.md) — kes mida kinnitab, eIDAS vastendus.
 - [MOCK_TSA](MOCK_TSA.md) — deterministlik TSA testimiseks, RFC 3161 testvektorid.

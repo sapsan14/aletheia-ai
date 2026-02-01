@@ -2,7 +2,7 @@
 
 **RFC 3161 timestamps make AI output provable in time.**
 
-This document describes how timestamping is integrated into the Aletheia backend: TSA endpoint options, error handling, testing strategy, storage, and scope.
+This document describes how timestamping is integrated into the Aletheia backend: TSA endpoint options, mock/real switching, error handling, testing, storage, and scope. For a gentle explanation of why we use tsaToken (not a simple timestamp), see [Crypto reference](CRYPTO_REFERENCE.md#why-tsatoken-not-a-simple-timestamp).
 
 ---
 

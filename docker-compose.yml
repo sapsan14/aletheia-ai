@@ -57,6 +57,8 @@ services:
     container_name: aletheia-frontend
     ports:
       - "3000:3000"
+    environment:
+      BACKEND_INTERNAL_URL: http://backend:8080
     depends_on:
       - backend
     networks:

@@ -2,7 +2,7 @@
 
 **Who attests what — and how the chain fits eIDAS.**
 
-This document describes the trust model of the Aletheia PoC: the cryptographic chain, who attests content vs. time, and how the current (non-qualified) setup maps to a future qualified (eIDAS) setup.
+This document describes the trust model of the Aletheia PoC: the cryptographic chain, who attests content vs. time, and how the current (non-qualified) setup maps to a future qualified (eIDAS) setup. See [Signing](SIGNING.md) and [Timestamping](TIMESTAMPING.md) for implementation details.
 
 ---
 

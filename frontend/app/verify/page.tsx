@@ -73,7 +73,7 @@ function VerifyContent() {
   const [hashMatch, setHashMatch] = useState<boolean | null>(null);
   const [hashChecking, setHashChecking] = useState(false);
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
 
   useEffect(() => {
     if (!id) {

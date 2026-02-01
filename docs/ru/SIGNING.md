@@ -116,5 +116,6 @@ signature BYTEA
 
 - [Временные метки](TIMESTAMPING.md) — что метим по времени (байты подписи), TSA, хранение.
 - [Модель доверия](TRUST_MODEL.md) — цепочка доверия, кто что удостоверяет, соответствие eIDAS.
+- [Crypto reference (EN)](../en/CRYPTO_REFERENCE.md) — алгоритмы, ключи, почему tsaToken (на англ.).
 - [Диаграммы архитектуры](../../diagrams/architecture.md) — пайплайн и крипто-слой.
 - [README](../../README.md) — обзор дизайна, инструкции по запуску.

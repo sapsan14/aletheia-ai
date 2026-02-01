@@ -223,4 +223,4 @@ Vaata: [Ajatemplid](TIMESTAMPING.md).
 
 ---
 
-*Dokument kuulub Aletheia AI dokumentatsiooni. Rakendamise üksikasjad: [README](../../README.md), [plaan](plan.md).*
+*Dokument kuulub Aletheia AI dokumentatsiooni. Rakendamise üksikasjad ja navigeerimine: [README](../../README.md), [plaan](plan.md), [dokumendite indeks](../README.md).*
