@@ -279,6 +279,7 @@ Open http://localhost:3000. You should see:
 - **Prompt** — text area for entering questions
 - **Send** — button (connects to POST /api/ai/ask)
 - **Response** — AI answer, status (Signed, Timestamped, Verifiable), link to verify page
+- **Verify page** — `/verify?id=...` shows hash, signature, TSA token, model, date; "Verify hash" button for client-side check
 
 **Required:** Set `NEXT_PUBLIC_API_URL=http://localhost:8080` in `frontend/.env.local` (or copy from `frontend/.env.example`). Start the backend first. CORS allows `http://localhost:3000` by default; override with `CORS_ALLOWED_ORIGINS` if needed.
 

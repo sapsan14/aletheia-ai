@@ -284,6 +284,7 @@ Samm-sammuline plaan PoC koostamiseks: kontrollitavad AI vastused krüptograafil
 | Väli | Väärtus |
 |------|---------|
 | **Hinnang** | 2–3 t |
+| **Staatus** | ✅ Tehtud |
 | **Kirjeldus** | Leht /verify?id=... küsib GET /api/ai/verify/:id ja kuvab prompt, response, hash, signature (nt Base64 snippet), TSA token (snippet), model, kuupäev. Valikuliselt: kliendi poolel räsi kontroll (kanoniseeri uuesti ja arvuta SHA-256, võrdle salvestatud hash-iga). |
 
 **Koodi juhend (LLM-readable):**

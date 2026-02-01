@@ -297,6 +297,7 @@ Step-by-step plan for building the PoC: verifiable AI responses with cryptograph
 | Field | Value |
 |-------|--------|
 | **Est.** | 2–3 h |
+| **Status** | ✅ Done |
 | **Description** | Page /verify?id=... that fetches GET /api/ai/verify/:id and displays prompt, response, hash, signature (e.g. Base64 snippet), TSA token (snippet), model, date. Optional: client-side hash check (re-canonicalize response and compute SHA-256, compare to stored hash). |
 
 **Coding prompt (LLM-readable):**
