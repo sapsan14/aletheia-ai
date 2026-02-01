@@ -288,6 +288,22 @@ export default function VerifyPage() {
         <Suspense fallback={<div>Loading…</div>}>
           <VerifyContent />
         </Suspense>
+
+        <footer className="mt-8 border-t border-zinc-200 pt-4 text-center text-xs text-zinc-500 dark:border-zinc-600 dark:text-zinc-400">
+          <p>© 2026 Anton Sokolov &amp; Team 3</p>
+          <p>
+            <a
+              href="https://taltech.ee/vanemarendajaks"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-zinc-700 dark:hover:text-zinc-300"
+            >
+              Koolitus „Noorem-tarkvaraarendajast vanemarendajaks“
+            </a>
+            {" — "}
+            Tallinna Tehnikaülikool
+          </p>
+        </footer>
       </main>
     </div>
   );

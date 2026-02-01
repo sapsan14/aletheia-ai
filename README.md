@@ -49,6 +49,7 @@ Docs are grouped by language in `docs/<lang>/` (en, ru, et). Core documents are 
 - [Crypto demo endpoint](#crypto-demo-endpoint)
 - [Run frontend](#run-frontend)
 - [Run tests](#run-tests)
+- [Deployment](#deployment)
 - [Authorship and License](#authorship-and-license)
 
 ---
@@ -100,8 +101,8 @@ For details: [Signing](docs/en/SIGNING.md), [Timestamping](docs/en/TIMESTAMPING.
 | `OPENAI_TEMPERATURE` | LLM | `1.0` (0–2) |
 | `OPENAI_MAX_TOKENS` | LLM | `2000` |
 | `SPRING_DATASOURCE_URL` | DB | `jdbc:h2:file:./data/aletheia` |
-| `AI_ALETHEIA_TSA_MODE` | TSA | `mock` (or `real`) |
-| `AI_ALETHEIA_TSA_URL` | when mode=real | e.g. `http://timestamp.digicert.com` |
+| `AI_ALETHEIA_TSA_MODE` | TSA | `real` (default, DigiCert) or `mock` (tests/offline) |
+| `AI_ALETHEIA_TSA_URL` | when mode=real | `http://timestamp.digicert.com` (default) |
 | `NEXT_PUBLIC_API_URL` | frontend | `http://localhost:8080` |
 
 Full list: [.env.example](.env.example). Architecture: [PoC](docs/en/PoC.md), [plan](docs/en/plan.md).
@@ -218,7 +219,7 @@ openssl genpkey -algorithm RSA -out ai.key -pkeyopt rsa_keygen_bits:2048
 ```
 Then set `ai.aletheia.signing.key-path=/path/to/ai.key` (or equivalent env).
 
-**TSA mode:** `AI_ALETHEIA_TSA_MODE=mock` (default, deterministic, no network) or `real` (requires `AI_ALETHEIA_TSA_URL`). Public TSAs: DigiCert, Sectigo, GlobalSign. For a self-hosted RFC 3161 TSA, see [TIMESTAMPING](docs/en/TIMESTAMPING.md).
+**TSA mode:** `AI_ALETHEIA_TSA_MODE=real` (default, DigiCert TSA) or `mock` (deterministic, no network; use for tests or offline dev). DigiCert URL is the default; alternatives: Sectigo, GlobalSign. For a self-hosted RFC 3161 TSA, see [TIMESTAMPING](docs/en/TIMESTAMPING.md).
 
 **Command-line arguments (override .env):** Spring Boot accepts `--property=value`. Useful for one-off runs or CI:
 
@@ -306,7 +307,7 @@ curl -X POST http://localhost:8080/api/crypto/demo \
 }
 ```
 
-**With signing key:** `signature` = Base64 RSA signature, `signatureStatus` = `"SIGNED"`, `tsaToken` = RFC 3161 timestamp token (Base64), `tsaStatus` = `"MOCK_TSA"` (default) or `"REAL_TSA"` when using external TSA. See [TIMESTAMPING](docs/en/TIMESTAMPING.md) for TSA mode switching.
+**With signing key:** `signature` = Base64 RSA signature, `signatureStatus` = `"SIGNED"`, `tsaToken` = RFC 3161 timestamp token (Base64), `tsaStatus` = `"REAL_TSA"` (default, DigiCert) or `"MOCK_TSA"` when using mock. See [TIMESTAMPING](docs/en/TIMESTAMPING.md) for TSA mode switching.
 
 You can verify the hash using any SHA-256 tool (e.g. `echo -n "hello world" | shasum -a 256` — note: canonical form adds trailing newline, so hash may differ). See [SIGNING](docs/en/SIGNING.md) for canonicalization rules.
 
@@ -345,6 +346,20 @@ Runs JUnit 5 tests: `HealthControllerTest` (GET /health → 200, `{"status":"UP"
 **Frontend:** `npm test` when test script is added.
 
 Detailed test scope and acceptance criteria per step: see [plan (EN)](docs/en/plan.md#testing-by-step), [plan (RU)](docs/ru/plan.md#тестирование-по-шагам), [plan (ET)](docs/et/plan.md#testimine-sammude-kaupa).
+
+---
+
+## Deployment
+
+**Chosen approach:** Full stack (Docker + Ansible + GitHub Actions) for automated deployment to a target VM (e.g. `ssh ubuntu@193.40.157.132`).
+
+| Component | Purpose |
+|-----------|---------|
+| **Docker** | Containerize backend and frontend; docker-compose with PostgreSQL |
+| **Ansible** | VM setup (Docker install), .env template, `docker-compose up` |
+| **GitHub Actions** | On push to main: tests → build → deploy via SSH/Ansible |
+
+**Alternatives:** Ansible-only (no containers), script-only (bash over SSH), Docker Compose only. See [plan Step 8](docs/en/plan.md#step-8--deployment-cicd) for detailed tasks and LLM-readable implementation prompts.
 
 ---
 
