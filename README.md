@@ -142,7 +142,7 @@ SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect
 # Or: java -jar target/aletheia-backend.jar
 ```
 
-Set env: `SPRING_DATASOURCE_URL`, `OPENAI_API_KEY` (or GEMINI/Mistral), TSA URL, signing key path. Default API: `http://localhost:8080`.
+**Default DB:** H2 file-based at `backend/data/aletheia.mv.db` — data persists between runs. **H2 Console** at `http://localhost:8080/h2-console` (JDBC URL: `jdbc:h2:file:./data/aletheia`, user: `sa`, password: empty). Override with `SPRING_DATASOURCE_URL` for PostgreSQL. Default API: `http://localhost:8080`.
 
 **Signing key (required for backend):** PEM path in `ai.aletheia.signing.key-path` or env. Generate:
 ```bash

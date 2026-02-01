@@ -8,6 +8,8 @@ Migrations run **automatically** when the backend starts. No manual steps needed
 
 **Manual run (optional):** If you need to apply migrations without starting the app, use Flyway CLI or copy the SQL from `V1__create_ai_response.sql` and run against your PostgreSQL database.
 
+**H2 Console (dev):** With default H2 file-based DB, open `http://localhost:8080/h2-console`, JDBC URL `jdbc:h2:file:./data/aletheia`, user `sa`, password empty. Data persists in `backend/data/`.
+
 ---
 
 ## Liquibase (future)

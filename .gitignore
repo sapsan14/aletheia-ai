@@ -37,5 +37,8 @@ Thumbs.db
 .yarn/
 .pnpm-store/
 
+# H2 file-based database (local dev)
+backend/data/
+
 # Optional: Liquibase / DB
 # *.liquibase-backup
