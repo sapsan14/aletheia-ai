@@ -110,13 +110,27 @@ For details: [Signing](docs/en/SIGNING.md), [Timestamping](docs/en/TIMESTAMPING.
 
 ## Run PostgreSQL (or Docker)
 
-**Docker:**
+**Option A — Docker Compose (recommended):**
+
+```bash
+docker-compose up -d postgres
+```
+
+**Option B — Single container:**
 
 ```bash
 docker run -d --name aletheia-db -e POSTGRES_DB=aletheia -e POSTGRES_USER=aletheia -e POSTGRES_PASSWORD=local -p 5432:5432 postgres:15-alpine
 ```
 
-**Local:** install PostgreSQL 15+, create database `aletheia`, run migrations (see backend repo / Flyway/Liquibase when available).
+**Migrations:** Flyway runs automatically when the backend starts. The `ai_response` table is created on first run. No manual migration step needed. For manual SQL, see `backend/src/main/resources/db/schema-ai_response-standalone.sql`. We may switch to Liquibase later for multi-DB support or rollbacks (see `backend/src/main/resources/db/migration/README.md`).
+
+**Using PostgreSQL:** Set in `.env`:
+```
+SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/aletheia
+SPRING_DATASOURCE_USERNAME=aletheia
+SPRING_DATASOURCE_PASSWORD=local
+SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect
+```
 
 ---
 

@@ -69,6 +69,7 @@ Samm-sammuline plaan PoC koostamiseks: kontrollitavad AI vastused krüptograafil
 
 | Väli | Väärtus |
 |------|---------|
+| **Staatus** | ✅ Done |
 | **Hinnang** | 2 t |
 | **Kirjeldus** | Defineeri ja rakenda ai_response tabeli skeem. Valikuliselt: Docker Compose lokaalse Postgresi jaoks. |
 

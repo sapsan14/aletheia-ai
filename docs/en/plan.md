@@ -70,6 +70,7 @@ Step-by-step plan for building the PoC: verifiable AI responses with cryptograph
 | Field | Value |
 |-------|--------|
 | **Est.** | 2 h |
+| **Status** | ✅ Done |
 | **Description** | Define and apply schema for `ai_response` table. Optional: Docker Compose for local Postgres. |
 
 **Coding prompt (LLM-readable):**

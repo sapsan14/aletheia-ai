@@ -46,6 +46,24 @@
 			<scope>runtime</scope>
 		</dependency>
 
+		<!-- PostgreSQL for production / when SPRING_DATASOURCE_URL points to Postgres -->
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- Flyway for schema migrations -->
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-database-postgresql</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
 		<!-- BouncyCastle for crypto (signing, TSA): bcpkix, bcprov -->
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
