@@ -438,6 +438,23 @@ ansible-playbook -i deploy/ansible/inventory.yml deploy/ansible/playbook.yml \
 
 **ngrok (university/firewall):** If VM ports are blocked, use `-e ngrok_enabled=true` and CORS. Add `NGROK_AUTHTOKEN` to `.env`. See [deploy/ansible/README.md#ngrok-auto-start](deploy/ansible/README.md#ngrok-auto-start-systemd).
 
+### GitHub Actions (CI/CD)
+
+Push to `main` triggers: **test** → **build** → **deploy** via Ansible. Manual run: Actions → Deploy → Run workflow.
+
+**Required secrets** (Settings → Secrets and variables → Actions):
+
+| Secret | Description |
+|--------|-------------|
+| `DEPLOY_HOST` | Target VM IP or hostname |
+| `DEPLOY_USER` | SSH user (e.g. `ubuntu`) |
+| `SSH_PRIVATE_KEY` | SSH private key content (`cat ~/.ssh/id_ed25519`) |
+| `SIGNING_KEY` | PEM content of `ai.key` (`cat ai.key`) |
+
+**Optional** (for production): `POSTGRES_PASSWORD`, `OPENAI_API_KEY`, `NEXT_PUBLIC_API_URL` (defaults to `http://DEPLOY_HOST:8080`).
+
+Workflow: [.github/workflows/deploy.yml](.github/workflows/deploy.yml)
+
 **Alternatives:** Ansible-only (no containers), script-only (bash over SSH), Docker Compose only. See [plan Step 8](docs/en/plan.md#step-8--deployment-cicd) for detailed tasks and LLM-readable implementation prompts.
 
 ---

@@ -30,6 +30,8 @@ build/
 # OS
 .DS_Store
 Thumbs.db
+*~
+*.TMP
 
 # Logs & cache
 *.log

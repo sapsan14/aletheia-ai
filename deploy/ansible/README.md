@@ -105,17 +105,18 @@ Get your authtoken at https://dashboard.ngrok.com/get-started/your-authtoken
 | `ngrok_domain` | kaia-uncharacterized-unorbitally.ngrok-free.dev | Your ngrok free domain |
 | `ngrok_port` | 3000 | Local port to tunnel (frontend) |
 
-The service runs `ngrok http 3000 --domain=<ngrok_domain>` and restarts on failure. Ensure CORS includes your ngrok URL (see above).
+The service runs `ngrok http 3000 --domain=<ngrok_domain>` (direct CLI, not config file) and restarts on failure. Authtoken from `NGROK_AUTHTOKEN` in `.env` or `/etc/ngrok/ngrok.env`. Ensure CORS includes your ngrok URL (see above).
 
-**Full example (ngrok + CORS):**
+**Full ngrok (one command):** Exposes frontend and backend via ngrok, sets CORS, rebuilds frontend with backend URL.
 
 ```bash
-ansible-playbook -i deploy/ansible/inventory.yml deploy/ansible/playbook.yml \
-  -e ngrok_enabled=true \
-  -e "cors_allowed_origins=https://kaia-uncharacterized-unorbitally.ngrok-free.dev,http://localhost:3000"
+ansible-playbook -i deploy/ansible/inventory.yml deploy/ansible/playbook.yml -e ngrok_enabled=true
 ```
 
-Add `NGROK_AUTHTOKEN` to `.env` or pass `-e ngrok_authtoken=xxx`.
+Add `NGROK_AUTHTOKEN` to `.env` (project root). The playbook will:
+- Start ngrok with two tunnels (frontend on your free domain, backend on random URL)
+- Get backend URL from ngrok API, update .env, rebuild frontend
+- Set CORS for your frontend ngrok URL
 
 ## Idempotency
 
@@ -179,16 +180,22 @@ Or copy a key from your machine: `scp ai.key ubuntu@VM:/opt/aletheia-ai/ai.key`
 
 **Cause:** systemd cannot execute ngrok — wrong path. ngrok may be at `/usr/local/bin/ngrok` (manual install) instead of `/usr/bin/ngrok`.
 
-**Fix on the VM:**
+**Fix:** Re-run the playbook (auto-detects path), or manually `sudo sed -i 's|/usr/bin/ngrok|/usr/local/bin/ngrok|g' /etc/systemd/system/ngrok.service` then `sudo systemctl daemon-reload && sudo systemctl restart ngrok`.
+
+### ngrok: shows help and exits (inactive/dead)
+
+**Cause:** Old `ngrok start --config` syntax may fail with some ngrok versions (v2 vs v3).
+
+**Fix:** The playbook now uses `ngrok http PORT --domain=DOMAIN` (direct CLI). Re-run the playbook, or on the VM:
 
 ```bash
-which ngrok   # e.g. /usr/local/bin/ngrok
-sudo sed -i 's|/usr/bin/ngrok|/usr/local/bin/ngrok|g' /etc/systemd/system/ngrok.service
+sudo nano /etc/systemd/system/ngrok.service
+# ExecStart line should be: /usr/local/bin/ngrok http 3000 --domain=kaia-uncharacterized-unorbitally.ngrok-free.dev
+# Add: EnvironmentFile=/etc/ngrok/ngrok.env
+# Create /etc/ngrok/ngrok.env with: NGROK_AUTHTOKEN=your_token
 sudo systemctl daemon-reload
 sudo systemctl restart ngrok
 ```
-
-The playbook auto-detects the path; re-run it to fix the service file.
 
 ### University network / firewall — use ngrok
 
