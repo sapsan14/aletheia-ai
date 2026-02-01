@@ -35,11 +35,8 @@ COPY --from=builder /build/target/*.jar app.jar
 
 EXPOSE 8080
 
-# Environment variables (override at runtime)
-ENV SPRING_DATASOURCE_URL=""
-ENV AI_ALETHEIA_SIGNING_KEY_PATH=""
-ENV AI_ALETHEIA_TSA_MODE=""
-ENV AI_ALETHEIA_TSA_URL=""
-ENV OPENAI_API_KEY=""
+# Env vars (optional): pass at runtime with -e to override application.properties defaults.
+# See header comment for supported variables. Do not set ENV here to empty string,
+# or Spring would treat them as set and ignore defaults (H2, real TSA, etc.).
 
 ENTRYPOINT ["java", "-jar", "app.jar"]

@@ -35,7 +35,8 @@ services:
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-aletheia}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-local}
       SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
-      AI_ALETHEIA_SIGNING_KEY_PATH: ${AI_ALETHEIA_SIGNING_KEY_PATH:-/app/ai.key}
+      # Always /app/ai.key in container (do not inherit ../ai.key from .env)
+      AI_ALETHEIA_SIGNING_KEY_PATH: /app/ai.key
       AI_ALETHEIA_TSA_MODE: ${AI_ALETHEIA_TSA_MODE:-real}
       AI_ALETHEIA_TSA_URL: ${AI_ALETHEIA_TSA_URL:-http://timestamp.digicert.com}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
