@@ -13,6 +13,8 @@ If you're new to cryptography, start with [KINDERGARDEN](../../KINDERGARDEN.md) 
 - [tsaToken format and trust](#tsatoken-format-and-trust)
 - [Digest, serial, and TSA token structure (learners)](#digest-serial-and-tsa-token-structure-learners)
 - [RSA signature randomness and semantic determinism (learners)](#rsa-signature-randomness-and-semantic-determinism-learners)
+  - [PKCS#1 v1.5 padding structure (full diagram)](#pkcs1-v15-padding-structure-full-diagram)
+  - [SecureRandom and the padding](#securerandom-and-the-padding)
 - [Keys in the project](#keys-in-the-project)
 - [How to generate keys](#how-to-generate-keys)
 - [Where to learn more](#where-to-learn-more)
@@ -116,23 +118,80 @@ When we test MOCK_TSA, we verify that for the same input both tokens have the sa
 
 ## RSA signature randomness and semantic determinism (learners)
 
+### PKCS#1 v1.5 padding structure (full diagram)
+
+When signing with RSA, we do not encrypt the raw data. The data is first encoded (padded), then RSA is applied. PKCS#1 v1.5 for **signatures** builds a block like this:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│  RSA PKCS#1 v1.5 Signature Block (e.g. 256 bytes for 2048-bit key)                   │
+├──────┬──────┬─────────────────────────────┬──────┬───────────────────┬───────────────┤
+│ [00] │ [01] │  [FF FF FF ... FF]          │ [00] │ [hash_algorithm]  │ [hash_value]  │
+│      │      │  ← RANDOM PADDING           │      │ (OID, e.g. SHA256)│ (32 bytes)   │
+├──────┼──────┼─────────────────────────────┼──────┼───────────────────┼───────────────┤
+│  1B  │  1B  │  variable length            │  1B  │   ~15–20 bytes    │  fixed 32 B   │
+│ block│ sig  │  (filled via SecureRandom)  │ sep  │                   │ (SHA-256 out) │
+│start │ type │                             │      │                   │               │
+└──────┴──────┴─────────────────────────────┴──────┴───────────────────┴───────────────┘
+     ↑         ↑                                        ↑                    ↑
+     │         │                                        │                    └── SHA-256 of data (fixed)
+     │         │                                        └── OID of hash algorithm
+     │         └── Block type: signature
+     └── Block start
+```
+
+**Legend:**
+
+| Byte(s) | Role |
+|---------|------|
+| `[00]` | Block start |
+| `[01]` | Block type: signature |
+| `[FF FF ... FF]` | **Padding: random non-zero bytes** — generated via SecureRandom; length varies to fill the block |
+| `[00]` | Separator between padding and the digest info |
+| `[hash_algorithm_id]` | OID of the hash algorithm (e.g. SHA-256) |
+| `[hash_value]` | The actual hash (32 bytes for SHA-256) — **fixed for given data** |
+
+The block has a **fixed total length** (e.g. 256 bytes for a 2048-bit key). The padding bytes between `[01]` and the separator `[00]` are generated randomly so that the same hash, signed twice, produces **different signature bytes** each time.
+
 ### Why aren't two tokens byte-identical for the same input?
 
-RSA PKCS#1 v1.5 **signatures** use random padding. The structure is roughly:
+Because the padding bytes are random. Same digest + same key → **different padding** → different raw signature → different token bytes.
+
+### SecureRandom and the padding
 
 ```
-[00][01][FF FF ... FF][00][hash_algorithm_id][hash_value]
-        ↑
-        Random padding bytes (filled via SecureRandom)
+                    sign(hash) called
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  Java / Bouncy Castle sign()                                     │
+│                                                                  │
+│  1. Build PKCS#1 v1.5 block: [00][01][??...??][00][OID][hash]   │
+│                      padding ↑                                   │
+│  2. Fill padding bytes via SecureRandom.nextBytes(...)           │
+│  3. Apply RSA to the full block → signature bytes                │
+└─────────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+              Same digest + same key
+              but different padding each call
+                            │
+                            ▼
+              Different signature bytes every time
 ```
 
-Each call to `sign()` generates different padding bytes, so the raw signature bytes differ every time — even for identical data. This is **by design** for security (avoid certain side-channel attacks).
+**SecureRandom** is Java's cryptographically secure random number generator. When Bouncy Castle signs, it uses `SecureRandom` to fill the padding bytes. By default, the seed comes from system entropy (noise, timings, etc.), so each call produces different bytes.
 
-### SecureRandom and seed
-
-**SecureRandom** is Java's cryptographically secure random number generator. When Bouncy Castle signs, it uses `SecureRandom` to fill the padding. By default, the seed comes from system entropy (noise, timings, etc.), so each run produces different bytes.
+| | Same digest | Same key | Same padding? | Same signature bytes? |
+|---|-------------|----------|---------------|------------------------|
+| Call 1 | ✓ | ✓ | — | — |
+| Call 2 | ✓ | ✓ | ✗ (random) | ✗ |
 
 **Fixed seed** = we explicitly provide the initial value. Example: `new SecureRandom(new byte[]{0})` — same seed → same "random" sequence → same signature bytes. Useful only for tests; never in production.
+
+**Summary:** "Random padding" is implemented via SecureRandom, but it is not the same thing. Padding is the specific part of the signature block where random bytes are placed.
+
+**Diagram:** See also [diagrams/architecture.md § 8](../../diagrams/architecture.md#8-rsa-pkcs1-v15-signature-padding-why-tokens-differ).
 
 ### Semantic determinism vs byte determinism
 

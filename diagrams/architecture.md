@@ -266,6 +266,23 @@ graph TB
 
 ---
 
+## 8. RSA PKCS#1 v1.5 signature padding (why tokens differ)
+
+RSA signatures use random padding. Same hash + same key → different padding → different bytes. See [CRYPTO_REFERENCE — RSA signature randomness](../docs/en/CRYPTO_REFERENCE.md#rsa-signature-randomness-and-semantic-determinism-learners).
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│  PKCS#1 v1.5 Signature Block (256 bytes for 2048-bit key)                            │
+├──────┬──────┬─────────────────────────────┬──────┬───────────────────┬───────────────┤
+│ [00] │ [01] │  [FF FF FF ... FF]          │ [00] │ [hash_algorithm]  │ [hash_value]  │
+│      │      │  ← RANDOM (SecureRandom)    │      │ (OID)             │ (32 bytes)    │
+└──────┴──────┴─────────────────────────────┴──────┴───────────────────┴───────────────┘
+  block  sig     padding varies each call       sep    fixed              fixed
+  start  type
+```
+
+**Flow:** `sign(hash)` → SecureRandom fills padding → RSA applied → different bytes every time.
+
 ---
 
 ## Related documentation
@@ -276,6 +293,7 @@ graph TB
 - **Timestamping:** [EN](../docs/en/TIMESTAMPING.md) · [RU](../docs/ru/TIMESTAMPING.md) · [ET](../docs/et/TIMESTAMPING.md)
 - **Trust model & eIDAS:** [EN](../docs/en/TRUST_MODEL.md) · [RU](../docs/ru/TRUST_MODEL.md) · [ET](../docs/et/TRUST_MODEL.md)
 - **MOCK_TSA:** [EN](../docs/en/MOCK_TSA.md) · [RU](../docs/ru/MOCK_TSA.md)
+- **Crypto reference** (algorithms, padding, digest, serial): [EN](../docs/en/CRYPTO_REFERENCE.md)
 - **Cryptographic Oracle:** [EN](../docs/en/CRYPTO_ORACLE.md) · [RU](../docs/ru/CRYPTO_ORACLE.md) · [ET](../docs/et/CRYPTO_ORACLE.md)
 - **Agent Audit Model:** [EN](../docs/en/AGENT_AUDIT_MODEL.md) · [RU](../docs/ru/AGENT_AUDIT_MODEL.md) · [ET](../docs/et/AGENT_AUDIT_MODEL.md)
 - **Testing Strategy:** [EN](../docs/en/TESTING_STRATEGY.md) · [RU](../docs/ru/TESTING_STRATEGY.md) · [ET](../docs/et/TESTING_STRATEGY.md)
