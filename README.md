@@ -355,7 +355,7 @@ Detailed test scope and acceptance criteria per step: see [plan (EN)](docs/en/pl
 ### Quick start (docker-compose)
 
 ```bash
-# 1. Generate signing key (once)
+# 1. Generate signing key (once) — must exist before first run
 openssl genpkey -algorithm RSA -out ai.key -pkeyopt rsa_keygen_bits:2048
 
 # 2. Add OPENAI_API_KEY to .env (or cp .env.example .env and edit)
@@ -365,6 +365,8 @@ docker-compose up -d
 ```
 
 Open http://localhost:3000 (frontend) and http://localhost:8080 (backend API, Swagger).
+
+**Note:** If `ai.key` did not exist when compose first ran, Docker may create it as a directory; backend will fail. Fix: `rm -rf ai.key`, recreate the file, then `docker compose down && docker compose up -d`. See [deploy/ansible/README.md#troubleshooting](deploy/ansible/README.md#troubleshooting).
 
 ### Standalone builds
 
@@ -415,18 +417,24 @@ Both `backend/` and `frontend/` have `.dockerignore` that exclude `node_modules`
 | **Ansible** | VM setup (Docker install), .env template, `docker-compose up` |
 | **GitHub Actions** | On push to main: tests → build → deploy via SSH/Ansible |
 
-### Ansible deploy (manual)
+### Ansible deploy (manual, verified)
+
+One command deploys postgres, backend, frontend to a target VM. **Verified** on Ubuntu 22.04.
 
 ```bash
-# From project root; ensure ai.key exists
+# From project root; ensure ai.key exists (or playbook fails with instructions)
+openssl genpkey -algorithm RSA -out ai.key -pkeyopt rsa_keygen_bits:2048
+
 ansible-playbook -i deploy/ansible/inventory.yml deploy/ansible/playbook.yml
 
-# With secrets
+# With secrets (production)
 ansible-playbook -i deploy/ansible/inventory.yml deploy/ansible/playbook.yml \
-  -e postgres_password=SECURE_PASS -e openai_api_key=sk-xxx
+  -e postgres_password=SECURE_PASS \
+  -e openai_api_key=sk-xxx \
+  -e next_public_api_url=http://YOUR_VM_IP:8080
 ```
 
-See [deploy/ansible/README.md](deploy/ansible/README.md) for variables and options.
+**Result:** Frontend at `http://VM:3000`, Backend at `http://VM:8080`. See [deploy/ansible/README.md](deploy/ansible/README.md) for variables, troubleshooting (ai.key directory fix, frontend TypeScript), and verified flow.
 
 **Alternatives:** Ansible-only (no containers), script-only (bash over SSH), Docker Compose only. See [plan Step 8](docs/en/plan.md#step-8--deployment-cicd) for detailed tasks and LLM-readable implementation prompts.
 

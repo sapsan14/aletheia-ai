@@ -10,6 +10,7 @@ Tootevisioon ja järgmised sammud: krüptograafiliselt kontrollitavate AI vastus
 
 - [Praegune seis](#praegune-seis)
 - [Positsioneerimine](#positsioneerimine)
+- [Laiendatud visioon](#laiendatud-visioon)
 - [Strateegiline teekond](#strateegiline-teekond)
 - [Fookusalad (üksikasjalikult)](#fookusalad-üksikasjalikult)
 - [Production: pilv ja HSM](#production-pilv-ja-hsm)
@@ -40,6 +41,23 @@ Nii liigume «chatboti turvalisusest» **AI attestatsiooni** ja **usaldusinfrast
 
 ---
 
+## Laiendatud visioon
+
+Vastuse-taseme attestatsioonist kaugemale võib usaldusinfrastruktuur ulatuda:
+
+| Valdkond | Mida kinnitame | Miks oluline |
+|----------|----------------|--------------|
+| **Mudelid** | Mudeli kaalud, arhitektuur, checkpointi terviklikkus | Taastatavus, supply chain; EU AI Act traceability kõrge riskiga süsteemidele |
+| **Agentid** | Agendi identiteet, võimalused, tööriistade kasutus | Multi-agent süsteemid; kes mida tegi |
+| **Andmekogud ja andmed** | Koolitusandmete provenants, lineage, consent | Compliance, bias audit, autoriõigused |
+| **AI-to-AI läbi MCP** | Attestatsioon Model Context Protocoli peal | Üks agent kinnitab teist; ühilduv AI trust kiht |
+
+**Närvivõrgu kaalude allkirjastamine** — checkpointi krüptograafiline seostamine konkreetse versiooni ja provenantsiga. Kontrollija saab kinnitada täpselt mudelit, mis tulemuse andis.
+
+Need on strateegilised perspektiivid: «allkirjastatud vastustest» **full-stack AI trust** — mudelid, andmed, agentid, vastused. Lähituleviku roadmap jääb vastuse attestatsiooni juurde; see on silmapiir.
+
+---
+
 ## Strateegiline teekond
 
 Üks prioriteeditud plaan (faasid mõju ja sõltuvuse järgi):
@@ -55,7 +73,7 @@ Nii liigume «chatboti turvalisusest» **AI attestatsiooni** ja **usaldusinfrast
 
 **Tuleviku perspektiivid:**
 
-- **AI vs AI kontroll** — üks AI väidab, teine kontrollib; multi-agent trust
+- **AI vs AI kontroll** — üks AI väidab, teine kontrollib; multi-agent trust (seotus MCP ja laiendatud visiooniga)
 - **EU-stiilis teekond** — PoC → Pilot → regulatiivse joondamine
 
 ---
@@ -132,6 +150,15 @@ Allkirjastada struktureeritud **väidet** ja konteksti toorteksti asemel:
 | **Avalik key registry** | JSON või JWKS |
 | **Metaandmed** | purpose, algorithm, valid_from / valid_to |
 | **Hiljem** | Võtmete rotatsioon, key provenance, erinevad võtmed legal, medical, financial AI jaoks |
+
+**PKI / CA valikud** — allkirjastamisvõtmed saab väljastada ja hallata established PKI kaudu:
+
+| Lahendus | Kasutus |
+|----------|---------|
+| **Smallstep (step-ca)** | Kerge CA; ACME, OIDC; short-lived certs; DevOps-sõbralik |
+| **EJBCA** | Enterprise PKI; CA/RA/VA; Common Criteria; reguleeritud valdkonnad |
+
+→ Aletheia allkirjastamise sertifikaadid väljastatud Smallstep või EJBCA poolt; täielik usaldusahel, revocation, lifecycle.
 
 Vaata: [Usaldusmudel ja eIDAS](TRUST_MODEL.md).
 

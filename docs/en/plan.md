@@ -460,6 +460,17 @@ Step-by-step plan for building the PoC: verifiable AI responses with cryptograph
 - Add README section "Deployment". Subsections: (1) Quick deploy (Docker Compose): `docker-compose up -d`. (2) Full deploy (Ansible): `ansible-playbook -i deploy/ansible/inventory.yml deploy/ansible/playbook.yml`. (3) CI/CD: GitHub Actions on push to main. (4) Alternatives: Ansible-only (no Docker), script-only (bash over SSH) — briefly describe when to use. (5) Target VM: e.g. `ssh ubuntu@193.40.157.132`; list prerequisites (Ubuntu 22.04, SSH access).
 - Add link to docs/en/plan.md Step 8 for full task breakdown. Ensure LLM-readable prompts are included for future automation.
 
+### Deployment verification (implemented)
+
+| Item | Status | Notes |
+|------|--------|-------|
+| **8.1 Docker** | ✅ | Backend: multi-stage, ai.key via volume. Frontend: `next.config.mjs` (not .ts) so no TypeScript at runtime. |
+| **8.2 docker-compose** | ✅ | postgres, backend, frontend. ai.key must exist *before* first run (else Docker creates dir). |
+| **8.3 Ansible** | ✅ | Install Docker, clone repo, template .env, copy ai.key, `docker compose up -d --build`. Verified on Ubuntu 22.04. |
+| **8.5 README** | ✅ | deploy/ansible/README.md: troubleshooting (ai.key directory fix, frontend TypeScript), verified flow. |
+
+**Gotchas:** (1) ai.key as directory → `rm -rf ai.key`, recreate file, `docker compose down && up -d`. (2) next.config.ts needs TypeScript at runtime → use next.config.mjs.
+
 ---
 
 ## Summary — Estimated total

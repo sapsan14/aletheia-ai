@@ -10,6 +10,7 @@ Product vision and next steps: from cryptographically verifiable AI responses to
 
 - [Current state](#current-state)
 - [Positioning](#positioning)
+- [Extended vision](#extended-vision)
 - [Strategic roadmap](#strategic-roadmap)
 - [Focus areas (detailed)](#focus-areas-detailed)
 - [Production readiness: Cloud & HSM](#production-readiness-cloud--hsm)
@@ -40,6 +41,23 @@ This positions the project beyond “chatbot security” toward **AI attestation
 
 ---
 
+## Extended vision
+
+Beyond response-level attestation, the trust infrastructure can extend to:
+
+| Scope | What we attest | Why it matters |
+|-------|----------------|----------------|
+| **Models** | Model weights, architecture, checkpoint integrity | Reproducibility, supply chain; EU AI Act traceability for high-risk systems |
+| **Agents** | Agent identity, capabilities, tool usage | Multi-agent systems; who did what |
+| **Datasets & data** | Training data provenance, lineage, consent | Compliance, bias audit, copyright |
+| **AI-to-AI via MCP** | Attestation over Model Context Protocol | One agent certifies another; interoperable AI trust layer |
+
+**Signing neural network weights** — cryptographic binding of model checkpoint to a specific version and provenance. Verifiers can confirm the exact model that produced a given output.
+
+These are strategic perspectives: they broaden Aletheia from "signed responses" to **full-stack AI trust** — models, data, agents, and responses. Near-term roadmap stays on response attestation; this is the horizon.
+
+---
+
 ## Strategic roadmap
 
 Single prioritized plan (phases by impact and dependency):
@@ -55,7 +73,7 @@ Single prioritized plan (phases by impact and dependency):
 
 **Future perspectives:**
 
-- **AI vs AI verification** — one AI asserts, another AI verifies; multi-agent trust
+- **AI vs AI verification** — one AI asserts, another AI verifies; multi-agent trust (aligns with MCP / extended vision)
 - **EU-style roadmap** — PoC → Pilot → Regulation alignment
 
 ---
@@ -132,6 +150,15 @@ Sign a structured **claim** plus context instead of raw text:
 | **Public key registry** | JSON or JWKS |
 | **Metadata** | purpose, algorithm, valid_from / valid_to |
 | **Later** | Key rotation, key provenance, domain-specific keys (legal, medical, financial) |
+
+**PKI / CA options** — signing keys can be issued and managed by established PKI:
+
+| Solution | Use case |
+|----------|----------|
+| **Smallstep (step-ca)** | Lightweight CA; ACME, OIDC; short-lived certs; DevOps-friendly |
+| **EJBCA** | Enterprise PKI; CA/RA/VA; Common Criteria; regulated industries |
+
+→ Aletheia signing certificates issued by Smallstep or EJBCA; full chain of trust, revocation, lifecycle.
 
 See: [Trust model & eIDAS](TRUST_MODEL.md).
 

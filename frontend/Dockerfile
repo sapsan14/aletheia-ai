@@ -4,6 +4,7 @@
 # Build with: docker build --build-arg NEXT_PUBLIC_API_URL=http://localhost:8080
 # Run: next start (port 3000)
 # NEXT_PUBLIC_API_URL must be set at build time (baked into client bundle)
+# Config: next.config.mjs (not .ts) — production uses npm ci --omit=dev, no TypeScript
 # =============================================================================
 
 # --- Stage 1: Build ---
