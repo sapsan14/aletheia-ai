@@ -49,6 +49,7 @@ Docs are grouped by language in `docs/<lang>/` (en, ru, et). Core documents are 
 - [Crypto demo endpoint](#crypto-demo-endpoint)
 - [Run frontend](#run-frontend)
 - [Run tests](#run-tests)
+- [Docker build](#docker-build)
 - [Deployment](#deployment)
 - [Authorship and License](#authorship-and-license)
 
@@ -346,6 +347,61 @@ Runs JUnit 5 tests: `HealthControllerTest` (GET /health → 200, `{"status":"UP"
 **Frontend:** `npm test` when test script is added.
 
 Detailed test scope and acceptance criteria per step: see [plan (EN)](docs/en/plan.md#testing-by-step), [plan (RU)](docs/ru/plan.md#тестирование-по-шагам), [plan (ET)](docs/et/plan.md#testimine-sammude-kaupa).
+
+---
+
+## Docker build
+
+### Quick start (docker-compose)
+
+```bash
+# 1. Generate signing key (once)
+openssl genpkey -algorithm RSA -out ai.key -pkeyopt rsa_keygen_bits:2048
+
+# 2. Add OPENAI_API_KEY to .env (or cp .env.example .env and edit)
+
+# 3. Run everything
+docker-compose up -d
+```
+
+Open http://localhost:3000 (frontend) and http://localhost:8080 (backend API, Swagger).
+
+### Standalone builds
+
+Backend and frontend have multi-stage Dockerfiles. Use env vars at runtime; do **not** commit `.env` or keys to the image.
+
+### Backend
+
+```bash
+cd backend
+docker build -t aletheia-backend .
+docker run -p 8080:8080 \
+  -e SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/aletheia \
+  -e AI_ALETHEIA_SIGNING_KEY_PATH=/app/ai.key \
+  -e AI_ALETHEIA_TSA_MODE=real \
+  -e AI_ALETHEIA_TSA_URL=http://timestamp.digicert.com \
+  -e OPENAI_API_KEY=sk-your-key \
+  -v /path/to/ai.key:/app/ai.key:ro \
+  aletheia-backend
+```
+
+**Signing key:** Mount your PEM key at runtime (`-v /host/ai.key:/app/ai.key`) and set `AI_ALETHEIA_SIGNING_KEY_PATH=/app/ai.key`. Never copy keys into the image.
+
+### Frontend
+
+`NEXT_PUBLIC_API_URL` must be set at **build time** (baked into the client bundle):
+
+```bash
+cd frontend
+docker build --build-arg NEXT_PUBLIC_API_URL=http://localhost:8080 -t aletheia-frontend .
+docker run -p 3000:3000 aletheia-frontend
+```
+
+For production, use the backend URL: `--build-arg NEXT_PUBLIC_API_URL=https://api.example.com`
+
+### .dockerignore
+
+Both `backend/` and `frontend/` have `.dockerignore` that exclude `node_modules`, `.next`, `target`, `.git`, and `.env`. Secrets are passed via env or volumes at runtime.
 
 ---
 

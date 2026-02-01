@@ -1,0 +1,27 @@
+# Build output
+target/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Secrets (never copy into image)
+.env
+.env.*
+*.key
+*.pem
+
+# Docs and misc
+*.md
+!src/main/resources/**/*.md
+
+# Test artifacts (not needed in runtime image)
+*.log

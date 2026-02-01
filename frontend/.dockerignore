@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Build output
+.next/
+out/
+
+# Git
+.git/
+.gitignore
+
+# Secrets and env (use build-arg instead)
+.env
+.env.*
+.env.local
+.env.production
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# Misc
+*.log
+*.md
+.DS_Store
