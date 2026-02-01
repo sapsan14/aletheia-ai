@@ -40,7 +40,9 @@ class CryptoDemoControllerTest {
                 .andExpect(jsonPath("$.canonicalBase64").exists())
                 .andExpect(jsonPath("$.hash").value(EXPECTED_HASH_HELLO))
                 .andExpect(jsonPath("$.signature").isNotEmpty())
-                .andExpect(jsonPath("$.signatureStatus").value("SIGNED"));
+                .andExpect(jsonPath("$.signatureStatus").value("SIGNED"))
+                .andExpect(jsonPath("$.tsaToken").isNotEmpty())
+                .andExpect(jsonPath("$.tsaStatus").value("MOCK_TSA"));
     }
 
     @Test
@@ -52,7 +54,9 @@ class CryptoDemoControllerTest {
                         .content("{\"text\":\"hello world\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.hash").value(expectedHash))
-                .andExpect(jsonPath("$.signatureStatus").value("SIGNED"));
+                .andExpect(jsonPath("$.signatureStatus").value("SIGNED"))
+                .andExpect(jsonPath("$.tsaToken").isNotEmpty())
+                .andExpect(jsonPath("$.tsaStatus").value("MOCK_TSA"));
     }
 
     @Test

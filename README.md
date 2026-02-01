@@ -29,6 +29,7 @@ Docs are grouped by language in `docs/<lang>/` (en, ru, et). Core documents are 
 | **Cryptographic Oracle** | [docs/en/CRYPTO_ORACLE.md](docs/en/CRYPTO_ORACLE.md) | [docs/ru/CRYPTO_ORACLE.md](docs/ru/CRYPTO_ORACLE.md) | [docs/et/CRYPTO_ORACLE.md](docs/et/CRYPTO_ORACLE.md) |
 | **Agent Audit Model** | [docs/en/AGENT_AUDIT_MODEL.md](docs/en/AGENT_AUDIT_MODEL.md) | [docs/ru/AGENT_AUDIT_MODEL.md](docs/ru/AGENT_AUDIT_MODEL.md) | [docs/et/AGENT_AUDIT_MODEL.md](docs/et/AGENT_AUDIT_MODEL.md) |
 | **Testing Strategy** | [docs/en/TESTING_STRATEGY.md](docs/en/TESTING_STRATEGY.md) | [docs/ru/TESTING_STRATEGY.md](docs/ru/TESTING_STRATEGY.md) | [docs/et/TESTING_STRATEGY.md](docs/et/TESTING_STRATEGY.md) |
+| **Crypto reference** (algorithms, keys, why tsaToken) | [docs/en/CRYPTO_REFERENCE.md](docs/en/CRYPTO_REFERENCE.md) | — | — |
 | **Architecture diagrams** | [diagrams/architecture.md](diagrams/architecture.md) (Mermaid: pipeline, trust chain, stack) | | |
 
 ### README contents
@@ -135,13 +136,25 @@ openssl genpkey -algorithm RSA -out ai.key -pkeyopt rsa_keygen_bits:2048
 ```
 Then set `ai.aletheia.signing.key-path=/path/to/ai.key` (or equivalent env).
 
+**TSA mode:** `AI_ALETHEIA_TSA_MODE=mock` (default, deterministic) or `real` (requires `AI_ALETHEIA_TSA_URL`). See [TIMESTAMPING](docs/en/TIMESTAMPING.md).
+
+**Command-line arguments (override .env):** Spring Boot accepts `--property=value`. Useful for one-off runs or CI:
+
+```bash
+./mvnw spring-boot:run -Dspring-boot.run.arguments="--ai.aletheia.signing.key-path=../ai.key --ai.aletheia.tsa.mode=real --ai.aletheia.tsa.url=http://timestamp.digicert.com"
+```
+
+Or with JAR: `java -jar backend.jar --ai.aletheia.signing.key-path=/path/to/ai.key --ai.aletheia.tsa.mode=real --ai.aletheia.tsa.url=http://timestamp.digicert.com`
+
+CLI args override env vars and `application.properties`.
+
 **API documentation (Swagger):** When implemented (see [plan — Task 7.3](docs/en/plan.md#task-73--swagger--openapi-implement-when-needed)), available at `http://localhost:8080/swagger-ui.html`.
 
 ---
 
 ## Crypto demo endpoint
 
-Exposes the crypto pipeline (canonicalize → hash → sign) for manual verification. **Works without signing key** — returns hash; signature is `null` when key not configured.
+Exposes the crypto pipeline: canonicalize → hash → sign → timestamp. **Works without signing key** — returns hash; signature and `tsaToken` are `null` when key not configured.
 
 **Manual test:**
 
@@ -162,11 +175,13 @@ curl -X POST http://localhost:8080/api/crypto/demo \
   "canonicalBase64": "aGVsbG8gd29ybGQK",
   "hash": "a948904f2f0f479b8f8197694b30184b0d2ed1c1cd2a1ec0fb85d299a192a447",
   "signature": null,
-  "signatureStatus": "KEY_NOT_CONFIGURED"
+  "signatureStatus": "KEY_NOT_CONFIGURED",
+  "tsaToken": null,
+  "tsaStatus": "NO_SIGNATURE"
 }
 ```
 
-**With signing key:** `signature` contains Base64 RSA signature, `signatureStatus` is `"SIGNED"`.
+**With signing key:** `signature` = Base64 RSA signature, `signatureStatus` = `"SIGNED"`, `tsaToken` = RFC 3161 timestamp token (Base64), `tsaStatus` = `"MOCK_TSA"` (default) or `"REAL_TSA"` when using external TSA. See [TIMESTAMPING](docs/en/TIMESTAMPING.md) for TSA mode switching.
 
 You can verify the hash using any SHA-256 tool (e.g. `echo -n "hello world" | shasum -a 256` — note: canonical form adds trailing newline, so hash may differ). See [SIGNING](docs/en/SIGNING.md) for canonicalization rules.
 

@@ -31,6 +31,13 @@ Endpoint TSA (Time-Stamp Authority) **внешний** по отношению �
 
 Backend отправляет запросы метки времени на настроенный URL и сохраняет возвращённый токен как непрозрачные байты.
 
+### Переключение MOCK_TSA / REAL_TSA
+
+- **mode=mock** (по умолчанию) → MockTsaServiceImpl, без сети, детерминированный
+- **mode=real** → RealTsaServiceImpl, HTTP POST на `AI_ALETHEIA_TSA_URL`
+
+Конфиг: `ai.aletheia.tsa.mode`, `ai.aletheia.tsa.url`. Варианты реального TSA: публичные (DigiCert, Sectigo), локальные (OpenTSA), eIDAS. Подробности: [docs/en/TIMESTAMPING.md](../en/TIMESTAMPING.md#switching-mock_tsa--real_tsa).
+
 ---
 
 ## Обработка ошибок

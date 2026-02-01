@@ -139,6 +139,7 @@ Samm-sammuline plaan PoC koostamiseks: kontrollitavad AI vastused krüptograafil
 
 | Väli | Väärtus |
 |------|---------|
+| **Staatus** | ✅ Done |
 | **Hinnang** | 4–5 t |
 | **Kirjeldus** | Päring RFC 3161 ajatemplile TSA-st (lokaalne server või stub). Sisend: **allkirja baitid** (mitte AI teksti). Väljund: TSA token, salvestada läbipaistmatute baitidena. |
 

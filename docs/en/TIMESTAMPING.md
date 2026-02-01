@@ -20,16 +20,113 @@ This document describes how timestamping is integrated into the Aletheia backend
 
 ---
 
+## Why tsaToken, not a simple timestamp?
+
+A plain `"timestamp": "2026-02-01T12:00:00"` field can be faked — anyone can write any time. The **tsaToken** is an RFC 3161 structure signed by an external TSA (Time-Stamp Authority). A trusted third party attests *when* the data existed; you cannot forge that. See [Crypto Reference — Why tsaToken](CRYPTO_REFERENCE.md#why-tsatoken-not-a-simple-timestamp) for a noob-friendly explanation.
+
+---
+
 ## TSA Endpoint
 
 The TSA (Time-Stamp Authority) endpoint is **external** to the backend. It may be:
 
 - a **local RFC 3161 server** (e.g. OpenTSA, OpenSSL TSA)
 - a **test stub** (deterministic mock for unit tests and CI)
-- a **public TSA** (future)
+- a **public TSA** (DigiCert, Sectigo, GlobalSign, FreeTSA)
 - an **eIDAS-qualified TSA** (future)
 
 The backend sends timestamp requests to the configured URL and stores the returned token as opaque bytes.
+
+---
+
+## Switching MOCK_TSA / REAL_TSA
+
+Configuration is prepared in `.env.example`:
+
+```
+AI_ALETHEIA_TSA_MODE=mock
+AI_ALETHEIA_TSA_URL=http://timestamp.digicert.com
+```
+
+Typical implementation in `TimestampService`:
+
+```java
+@Value("${ai.aletheia.tsa.mode:mock}")  // default: mock
+private String tsaMode;
+
+@Value("${ai.aletheia.tsa.url:}")
+private String tsaUrl;
+```
+
+Selection logic:
+
+- **mode=mock** → `MockTsaServiceImpl` (no network, deterministic)
+- **mode=real** → `RealTsaServiceImpl` (HTTP POST to `tsaUrl`)
+
+Spring Boot reads `AI_ALETHEIA_TSA_MODE`, `AI_ALETHEIA_TSA_URL` via `application.properties`:
+
+```properties
+ai.aletheia.tsa.mode=${AI_ALETHEIA_TSA_MODE:mock}
+ai.aletheia.tsa.url=${AI_ALETHEIA_TSA_URL:}
+```
+
+Mode can be set via `.env`, environment variables, or **command-line arguments**:
+
+```bash
+./mvnw spring-boot:run -Dspring-boot.run.arguments="--ai.aletheia.tsa.mode=real --ai.aletheia.tsa.url=http://timestamp.digicert.com"
+```
+
+CLI args override env and `application.properties`.
+
+---
+
+## Real TSA Options
+
+| Option | Description | Complexity |
+|--------|-------------|------------|
+| **Public TSA** | DigiCert, Sectigo, GlobalSign, etc. | Low |
+| **Local TSA** | OpenTSA, OpenSSL TSA, EJBCA | Medium |
+| **eIDAS-qualified** | Commercial providers for legal validity | High |
+
+### A. Public TSA (simplest)
+
+- **DigiCert:** `http://timestamp.digicert.com`
+- **Sectigo (Comodo):** `http://timestamp.sectigo.com`
+- **GlobalSign:** `http://timestamp.globalsign.com`
+- **FreeTSA:** `http://freetsa.org/tsr`
+
+Only the URL is needed; the same client code works. No registration required.
+
+### B. Local TSA (dev / isolation)
+
+- **OpenTSA** — RFC 3161 server, can be run in Docker.
+- **OpenSSL TSA** — `tsget` + config; requires certificates and `openssl.cnf`.
+- **EJBCA** — Full PKI; typically for enterprise use.
+- **Docker Compose** — Optional TSA service:
+
+```yaml
+tsa:
+  image: ghcr.io/digicert/timestamp-authority:latest
+  profiles:
+    - with-tsa
+```
+
+Ensure the image exists and note the port (e.g. 3180). For local use, set `AI_ALETHEIA_TSA_URL=http://localhost:3180`.
+
+### Recommendation
+
+1. **Dev / tests:** `AI_ALETHEIA_TSA_MODE=mock` (default).
+2. **Integration checks:** use a public TSA:
+   ```bash
+   AI_ALETHEIA_TSA_MODE=real
+   AI_ALETHEIA_TSA_URL=http://timestamp.digicert.com
+   ```
+3. **Local TSA (optional):** run OpenTSA or similar, then:
+   ```bash
+   AI_ALETHEIA_TSA_URL=http://localhost:3180
+   ```
+
+Public TSAs require no signup and are suitable for initial RFC 3161 pipeline validation.
 
 ---
 
@@ -194,6 +291,7 @@ For deterministic testing in Aletheia, use MOCK_TSA to generate reproducible tok
 
 ## Related documents
 
+- [Crypto Reference](CRYPTO_REFERENCE.md) — algorithms, keys, key generation, why tsaToken (noob-friendly).
 - [Signing](SIGNING.md) — what we sign; signature bytes are what we timestamp.
 - [Trust model](TRUST_MODEL.md) — who attests what, eIDAS mapping.
 - [MOCK_TSA](MOCK_TSA.md) — deterministic TSA for testing, RFC 3161 test vectors.

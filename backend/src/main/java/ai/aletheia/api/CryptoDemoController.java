@@ -5,6 +5,8 @@ import ai.aletheia.api.dto.CryptoDemoResponse;
 import ai.aletheia.crypto.CanonicalizationService;
 import ai.aletheia.crypto.HashService;
 import ai.aletheia.crypto.SignatureService;
+import ai.aletheia.crypto.TimestampException;
+import ai.aletheia.crypto.TimestampService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,18 +28,25 @@ public class CryptoDemoController {
 
     private static final String STATUS_SIGNED = "SIGNED";
     private static final String STATUS_KEY_NOT_CONFIGURED = "KEY_NOT_CONFIGURED";
+    private static final String TSA_MOCK = "MOCK_TSA";
+    private static final String TSA_REAL = "REAL_TSA";
+    private static final String TSA_NO_SIGNATURE = "NO_SIGNATURE";
+    private static final String TSA_ERROR = "TSA_ERROR";
 
     private final CanonicalizationService canonicalizationService;
     private final HashService hashService;
     private final SignatureService signatureService;
+    private final TimestampService timestampService;
 
     public CryptoDemoController(
             CanonicalizationService canonicalizationService,
             HashService hashService,
-            SignatureService signatureService) {
+            SignatureService signatureService,
+            TimestampService timestampService) {
         this.canonicalizationService = canonicalizationService;
         this.hashService = hashService;
         this.signatureService = signatureService;
+        this.timestampService = timestampService;
     }
 
     @PostMapping(value = "/demo", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -62,13 +71,28 @@ public class CryptoDemoController {
             }
         }
 
+        String tsaToken = null;
+        String tsaStatus = TSA_NO_SIGNATURE;
+        if (signature != null) {
+            try {
+                byte[] signatureBytes = Base64.getDecoder().decode(signature);
+                byte[] token = timestampService.timestamp(signatureBytes);
+                tsaToken = Base64.getEncoder().encodeToString(token);
+                tsaStatus = timestampService.getClass().getSimpleName().contains("Mock") ? TSA_MOCK : TSA_REAL;
+            } catch (TimestampException e) {
+                tsaStatus = TSA_ERROR;
+            }
+        }
+
         String canonicalBase64 = Base64.getEncoder().encodeToString(canonical);
         return ResponseEntity.ok(new CryptoDemoResponse(
                 request.text(),
                 canonicalBase64,
                 hash,
                 signature,
-                signatureStatus
+                signatureStatus,
+                tsaToken,
+                tsaStatus
         ));
     }
 }

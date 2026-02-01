@@ -31,6 +31,13 @@ TSA (Time-Stamp Authority) endpoint on backendi suhtes **väline**. See võib ol
 
 Backend saadab ajatempli päringud konfigureeritud URLile ja salvestab tagastatud tokeni läbipaistmatute baitidena.
 
+### MOCK_TSA / REAL_TSA vahetamine
+
+- **mode=mock** (vaikimisi) → MockTsaServiceImpl, võrgueta, deterministlik
+- **mode=real** → RealTsaServiceImpl, HTTP POST aadressile `AI_ALETHEIA_TSA_URL`
+
+Konfig: `ai.aletheia.tsa.mode`, `ai.aletheia.tsa.url`. Reaalse TSA valikud: avalikud (DigiCert, Sectigo), lokaalsed (OpenTSA), eIDAS. Üksikasjad: [docs/en/TIMESTAMPING.md](../en/TIMESTAMPING.md#switching-mock_tsa--real_tsa).
+
 ---
 
 ## Vigade käsitlemine

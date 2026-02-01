@@ -153,6 +153,7 @@ Step-by-step plan for building the PoC: verifiable AI responses with cryptograph
 | Field | Value |
 |-------|--------|
 | **Est.** | 4–5 h |
+| **Status** | ✅ Done |
 | **Description** | Request RFC 3161 timestamp from a TSA (local server or stub). Input: **signature bytes** (not the AI text). Output: TSA response token stored as opaque bytes. |
 
 **Design (document in code and README):**
@@ -386,8 +387,8 @@ Detailed test scope and acceptance criteria for each step. Run backend tests wit
 | **2.1** | Unit | Canonicalization | Same string → same bytes; `\r\n` vs `\n` → same result. |
 | **2.2** | Unit | HashService | Known input → known SHA-256 hex (64 chars). |
 | **2.3** | Unit | SignatureService | sign(hash) then verify(hash, signature) → true; tampered signature → false. |
-| **2.3.5** | Integration / Manual | POST /api/crypto/demo | 200; body has hash, canonicalBase64, signature; hash matches pipeline. Manual: curl — see README. |
-| **2.4** | Unit | TimestampService | Mock TSA: request returns non-empty token; invalid response handled. |
+| **2.3.5** | Integration / Manual | POST /api/crypto/demo | 200; body has hash, canonicalBase64, signature, tsaToken (when signed), tsaStatus. Manual: curl — see README. |
+| **2.4** | Unit | TimestampService | Mock TSA: token non-empty, parseable; deterministic; invalid input throws. |
 | **3.1** | Unit | LLMClient | Mock: complete(prompt) returns non-empty text and modelId. |
 | **3.2** | — | Data flow | LLMResult / audit context contains model id and optional params. |
 | **4.1** | Unit | Repository | save(entity); findById(id); assert fields. Use H2 or Testcontainers. |
