@@ -157,8 +157,11 @@
 |---------|------------|
 | **Smallstep (step-ca)** | Лёгкий CA; ACME, OIDC; short-lived certs; DevOps-friendly |
 | **EJBCA** | Enterprise PKI; CA/RA/VA; Common Criteria; регулируемые отрасли |
+| **HashiCorp Vault** | Transit engine: подпись хешей через API (ключи не покидают Vault); PKI engine для выпуска cert; secrets для API keys, DB, TSA creds |
 
-→ Сертификаты подписи Aletheia, выпущенные Smallstep или EJBCA; полная цепочка доверия, revocation, lifecycle.
+**HashiCorp Vault на практике** — Backend вызывает Vault Transit для подписи хеша ответа вместо локального ключевого файла. Ключи остаются в Vault; подпись — это API-вызов. Vault может выпускать X.509 cert (PKI engine) и хранить секреты (OpenAI key, TSA config). Распространён в enterprise; дополняет или заменяет HSM для software-based защиты ключей.
+
+→ Сертификаты подписи Aletheia — Smallstep/EJBCA; или подпись через Vault Transit / HSM; полная цепочка доверия, revocation, lifecycle.
 
 См.: [Модель доверия и eIDAS](TRUST_MODEL.md).
 

@@ -157,8 +157,11 @@ Sign a structured **claim** plus context instead of raw text:
 |----------|----------|
 | **Smallstep (step-ca)** | Lightweight CA; ACME, OIDC; short-lived certs; DevOps-friendly |
 | **EJBCA** | Enterprise PKI; CA/RA/VA; Common Criteria; regulated industries |
+| **HashiCorp Vault** | Transit engine: sign hashes via API (keys never leave Vault); PKI engine for cert issuance; secrets for API keys, DB, TSA creds |
 
-→ Aletheia signing certificates issued by Smallstep or EJBCA; full chain of trust, revocation, lifecycle.
+**HashiCorp Vault in practice** — Backend calls Vault Transit to sign the response hash instead of using a local key file. Keys stay in Vault; signing is an API call. Vault can also issue X.509 certs (PKI engine) and store secrets (OpenAI key, TSA config). Common in enterprises; fits alongside or instead of HSM for software-based key protection.
+
+→ Aletheia signing certificates issued by Smallstep or EJBCA; or signing via Vault Transit / HSM; full chain of trust, revocation, lifecycle.
 
 See: [Trust model & eIDAS](TRUST_MODEL.md).
 

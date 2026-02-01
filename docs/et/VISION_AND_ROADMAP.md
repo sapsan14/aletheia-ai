@@ -157,8 +157,11 @@ Allkirjastada struktureeritud **väidet** ja konteksti toorteksti asemel:
 |----------|---------|
 | **Smallstep (step-ca)** | Kerge CA; ACME, OIDC; short-lived certs; DevOps-sõbralik |
 | **EJBCA** | Enterprise PKI; CA/RA/VA; Common Criteria; reguleeritud valdkonnad |
+| **HashiCorp Vault** | Transit engine: räside allkirjastamine API kaudu (võtmed ei lahku Vaultist); PKI engine certide väljastamiseks; secrets API keys, DB, TSA creds jaoks |
 
-→ Aletheia allkirjastamise sertifikaadid väljastatud Smallstep või EJBCA poolt; täielik usaldusahel, revocation, lifecycle.
+**HashiCorp Vault praktikas** — Backend kutsub Vault Transit vastuse räsi allkirjastamiseks, mitte kohaliku võtmefaili kasutamiseks. Võtmed jäävad Vaulti; allkirjastamine on API-päring. Vault saab väljastada X.509 cert (PKI engine) ja hoida salasid (OpenAI key, TSA config). Levinud enterprise-s; sobib HSM-i kõrval või asemel tarkvarapõhise võtmete kaitse jaoks.
+
+→ Aletheia allkirjastamise sertifikaadid — Smallstep/EJBCA; või allkirjastamine Vault Transit / HSM kaudu; täielik usaldusahel, revocation, lifecycle.
 
 Vaata: [Usaldusmudel ja eIDAS](TRUST_MODEL.md).
 
