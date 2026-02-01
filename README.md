@@ -20,18 +20,18 @@ Docs are grouped by language in `docs/<lang>/` (en, ru, et). Core documents are 
 
 | Topic | EN | RU | ET |
 |-------|----|----|-----|
-| **PoC (architecture & stack)** | [docs/en/PoC.md](docs/en/PoC.md) | [docs/ru/PoC.md](docs/ru/PoC.md) | [docs/et/PoC.md](docs/et/PoC.md) |
-| **Vision & roadmap** (next steps, AI Claim, evidence package) | [docs/en/VISION_AND_ROADMAP.md](docs/en/VISION_AND_ROADMAP.md) | [docs/ru/VISION_AND_ROADMAP.md](docs/ru/VISION_AND_ROADMAP.md) | [docs/et/VISION_AND_ROADMAP.md](docs/et/VISION_AND_ROADMAP.md) |
-| **Implementation plan** | [docs/en/plan.md](docs/en/plan.md) | [docs/ru/plan.md](docs/ru/plan.md) | [docs/et/plan.md](docs/et/plan.md) |
-| **Signing** | [docs/en/SIGNING.md](docs/en/SIGNING.md) | [docs/ru/SIGNING.md](docs/ru/SIGNING.md) | [docs/et/SIGNING.md](docs/et/SIGNING.md) |
-| **Timestamping** | [docs/en/TIMESTAMPING.md](docs/en/TIMESTAMPING.md) | [docs/ru/TIMESTAMPING.md](docs/ru/TIMESTAMPING.md) | [docs/et/TIMESTAMPING.md](docs/et/TIMESTAMPING.md) |
-| **Trust model & eIDAS** | [docs/en/TRUST_MODEL.md](docs/en/TRUST_MODEL.md) | [docs/ru/TRUST_MODEL.md](docs/ru/TRUST_MODEL.md) | [docs/et/TRUST_MODEL.md](docs/et/TRUST_MODEL.md) |
-| **MOCK_TSA (testing)** | [docs/en/MOCK_TSA.md](docs/en/MOCK_TSA.md) | [docs/ru/MOCK_TSA.md](docs/ru/MOCK_TSA.md) | — |
-| **Cryptographic Oracle** | [docs/en/CRYPTO_ORACLE.md](docs/en/CRYPTO_ORACLE.md) | [docs/ru/CRYPTO_ORACLE.md](docs/ru/CRYPTO_ORACLE.md) | [docs/et/CRYPTO_ORACLE.md](docs/et/CRYPTO_ORACLE.md) |
-| **Agent Audit Model** | [docs/en/AGENT_AUDIT_MODEL.md](docs/en/AGENT_AUDIT_MODEL.md) | [docs/ru/AGENT_AUDIT_MODEL.md](docs/ru/AGENT_AUDIT_MODEL.md) | [docs/et/AGENT_AUDIT_MODEL.md](docs/et/AGENT_AUDIT_MODEL.md) |
-| **Testing Strategy** | [docs/en/TESTING_STRATEGY.md](docs/en/TESTING_STRATEGY.md) | [docs/ru/TESTING_STRATEGY.md](docs/ru/TESTING_STRATEGY.md) | [docs/et/TESTING_STRATEGY.md](docs/et/TESTING_STRATEGY.md) |
-| **Crypto reference** (algorithms, keys, why tsaToken) | [docs/en/CRYPTO_REFERENCE.md](docs/en/CRYPTO_REFERENCE.md) | — | — |
-| **Architecture diagrams** | [diagrams/architecture.md](diagrams/architecture.md) (Mermaid: pipeline, trust chain, stack) | | |
+| **PoC (architecture & stack)** | [PoC](docs/en/PoC.md) | [PoC (архитектура)](docs/ru/PoC.md) | [PoC (arhitektuur)](docs/et/PoC.md) |
+| **Vision & roadmap** (next steps, AI Claim, evidence package) | [Vision & roadmap](docs/en/VISION_AND_ROADMAP.md) | [Видение и дорожная карта](docs/ru/VISION_AND_ROADMAP.md) | [Visioon ja teekond](docs/et/VISION_AND_ROADMAP.md) |
+| **Implementation plan** | [Implementation plan](docs/en/plan.md) | [План реализации](docs/ru/plan.md) | [Rakendusplaan](docs/et/plan.md) |
+| **Signing** | [Signing](docs/en/SIGNING.md) | [Подпись](docs/ru/SIGNING.md) | [Allkirjastamine](docs/et/SIGNING.md) |
+| **Timestamping** | [Timestamping](docs/en/TIMESTAMPING.md) | [Временные метки](docs/ru/TIMESTAMPING.md) | [Ajatemplid](docs/et/TIMESTAMPING.md) |
+| **Trust model & eIDAS** | [Trust model](docs/en/TRUST_MODEL.md) | [Модель доверия](docs/ru/TRUST_MODEL.md) | [Usaldusmudel](docs/et/TRUST_MODEL.md) |
+| **MOCK_TSA (testing)** | [MOCK_TSA](docs/en/MOCK_TSA.md) | [MOCK_TSA (тестирование)](docs/ru/MOCK_TSA.md) | — |
+| **Cryptographic Oracle** | [Crypto Oracle](docs/en/CRYPTO_ORACLE.md) | [Криптографический оракул](docs/ru/CRYPTO_ORACLE.md) | [Krüptograafiline oraakel](docs/et/CRYPTO_ORACLE.md) |
+| **Agent Audit Model** | [Agent Audit](docs/en/AGENT_AUDIT_MODEL.md) | [Модель аудита агентов](docs/ru/AGENT_AUDIT_MODEL.md) | [Agentide auditi mudel](docs/et/AGENT_AUDIT_MODEL.md) |
+| **Testing Strategy** | [Testing Strategy](docs/en/TESTING_STRATEGY.md) | [Стратегия тестирования](docs/ru/TESTING_STRATEGY.md) | [Testimise strateegia](docs/et/TESTING_STRATEGY.md) |
+| **Crypto reference** (algorithms, keys, why tsaToken) | [Crypto reference](docs/en/CRYPTO_REFERENCE.md) | — | — |
+| **Architecture diagrams** | [Architecture diagrams](diagrams/architecture.md) (Mermaid: pipeline, trust chain, stack) | | |
 
 ### README contents
 
