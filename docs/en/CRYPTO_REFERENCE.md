@@ -11,6 +11,8 @@ If you're new to cryptography, start with [KINDERGARDEN](../../KINDERGARDEN.md) 
 - [Algorithms we use](#algorithms-we-use)
 - [Why tsaToken, not a simple timestamp?](#why-tsatoken-not-a-simple-timestamp)
 - [tsaToken format and trust](#tsatoken-format-and-trust)
+- [Digest, serial, and TSA token structure (learners)](#digest-serial-and-tsa-token-structure-learners)
+- [RSA signature randomness and semantic determinism (learners)](#rsa-signature-randomness-and-semantic-determinism-learners)
 - [Keys in the project](#keys-in-the-project)
 - [How to generate keys](#how-to-generate-keys)
 - [Where to learn more](#where-to-learn-more)
@@ -80,6 +82,68 @@ A **Time-Stamp Token** (RFC 3161) is a signed bundle containing:
 | Trust | Tests only | Legal validity (eIDAS, etc.) |
 | Time | Fixed (2026-01-01) | Real clock |
 | Certificate | Test/mock | Issued by trusted CA |
+
+---
+
+## Digest, serial, and TSA token structure (learners)
+
+### What is a digest?
+
+A **digest** (or **hash**, or **message imprint**) is a fixed-size "fingerprint" of data. Same input → same digest. We use SHA-256, which produces 32 bytes (64 hex chars).
+
+```
+dataToTimestamp  →  SHA-256  →  digest (32 bytes)
+```
+
+In an RFC 3161 token, the **messageImprint digest** is the hash of the data being timestamped. It proves *what* was attested. In our pipeline, we timestamp the **signature bytes**, so the digest is SHA-256(signature).
+
+### What is a serial?
+
+The **serial number** is a unique identifier for a specific timestamp. Each TSA response has one. Real TSAs usually use an incrementing counter or UUID. Our MOCK_TSA derives it from the digest: `serial = BigInteger(digest)` — so same input → same serial. It helps distinguish different timestamps and link them to the original request.
+
+### Structure of a TimeStampToken
+
+| Field | Meaning |
+|-------|---------|
+| **genTime** | The time the TSA attested (GeneralizedTime, UTC) |
+| **messageImprint digest** | Hash of the data being timestamped |
+| **serialNumber** | Unique ID for this token |
+| **TSA signature** | RSA signature over the token body (proves authenticity) |
+
+When we test MOCK_TSA, we verify that for the same input both tokens have the same genTime, serial, and digest — i.e. they are **semantically equivalent**.
+
+---
+
+## RSA signature randomness and semantic determinism (learners)
+
+### Why aren't two tokens byte-identical for the same input?
+
+RSA PKCS#1 v1.5 **signatures** use random padding. The structure is roughly:
+
+```
+[00][01][FF FF ... FF][00][hash_algorithm_id][hash_value]
+        ↑
+        Random padding bytes (filled via SecureRandom)
+```
+
+Each call to `sign()` generates different padding bytes, so the raw signature bytes differ every time — even for identical data. This is **by design** for security (avoid certain side-channel attacks).
+
+### SecureRandom and seed
+
+**SecureRandom** is Java's cryptographically secure random number generator. When Bouncy Castle signs, it uses `SecureRandom` to fill the padding. By default, the seed comes from system entropy (noise, timings, etc.), so each run produces different bytes.
+
+**Fixed seed** = we explicitly provide the initial value. Example: `new SecureRandom(new byte[]{0})` — same seed → same "random" sequence → same signature bytes. Useful only for tests; never in production.
+
+### Semantic determinism vs byte determinism
+
+| | Byte determinism | Semantic determinism |
+|---|------------------|----------------------|
+| **Meaning** | Same bytes every time | Same logical content (genTime, serial, digest) |
+| **RSA signature** | Would require fixed-seed RNG | Padding varies; signature bytes differ |
+| **What we test** | — | ✅ Token parses; genTime, serial, digest match |
+| **Why** | Hard to achieve with real RSA; not required | Sufficient for audit/verification; reflects reality |
+
+Our `TimestampServiceTest.timestamp_sameInput_returnsSemanticallyIdenticalToken` asserts semantic equivalence: both tokens are valid, parseable, and attest the same time, serial, and content. The raw bytes may differ; that's expected and acceptable. See `backend/src/test/java/ai/aletheia/crypto/TimestampServiceTest.java`.
 
 ---
 
