@@ -35,6 +35,15 @@ For production, set the frontend API URL (browser will call this):
 -e next_public_api_url=http://YOUR_VM_IP:8080
 ```
 
+## CI/CD (GitHub Actions)
+
+Push to `main` triggers automated deploy. Configure GitHub Secrets (Settings → Secrets and variables → Actions):
+
+- **Required:** `DEPLOY_HOST`, `DEPLOY_USER`, `SSH_PRIVATE_KEY`, `SIGNING_KEY` (PEM content of `ai.key`)
+- **Optional:** `POSTGRES_PASSWORD`, `OPENAI_API_KEY`, `NEXT_PUBLIC_API_URL`
+
+See [.github/workflows/deploy.yml](../../.github/workflows/deploy.yml) and main [README Deployment section](../../README.md#github-actions-cicd).
+
 ## Override target host
 
 Edit `inventory.yml` or create a custom inventory. To override via CLI:
@@ -51,10 +60,62 @@ ansible-playbook -i 'aletheia ansible_host=YOUR_VM_IP,' deploy/ansible/playbook.
 | `deploy_repo_version` | main | Branch or tag |
 | `postgres_password` | local | DB password |
 | `openai_api_key` | (empty) | OpenAI API key |
-| `next_public_api_url` | http://localhost:8080 | **Production:** set to `http://YOUR_VM_IP:8080` so frontend calls correct backend |
+| `cors_allowed_origins` | http://localhost:3000 | CORS allowed origins (comma-separated). **ngrok:** add `https://your-subdomain.ngrok-free.dev` |
+| `next_public_api_url` | http://localhost:8080 | **Production:** set to `http://YOUR_VM_IP:8080` or backend ngrok URL so frontend calls correct backend |
+| `ngrok_enabled` | false | Set `true` to install ngrok and run as systemd service (auto-start on boot) |
+| `ngrok_authtoken` | — | **Required** when ngrok_enabled. From https://dashboard.ngrok.com/get-started/your-authtoken |
+| `ngrok_domain` | kaia-uncharacterized-unorbitally.ngrok-free.dev | ngrok free domain for tunnel |
 | `signing_key_src` | `{{ playbook_dir }}/../../ai.key` | Override path to PEM key (`-e signing_key_src=/path/to/ai.key`) |
 
 All `.env.j2` template variables can be overridden via `-e`.
+
+### Example: ngrok + CORS
+
+```bash
+ansible-playbook -i deploy/ansible/inventory.yml deploy/ansible/playbook.yml \
+  -e "cors_allowed_origins=https://kaia-uncharacterized-unorbitally.ngrok-free.dev,http://localhost:3000"
+```
+
+### ngrok auto-start (systemd)
+
+Expose the frontend via ngrok and start it on boot.
+
+**Option 1 — use .env:** Add to your project root `.env`:
+```
+NGROK_AUTHTOKEN=your_token_here
+```
+
+Then run:
+```bash
+ansible-playbook -i deploy/ansible/inventory.yml deploy/ansible/playbook.yml -e ngrok_enabled=true
+```
+
+**Option 2 — pass via -e:**
+```bash
+ansible-playbook -i deploy/ansible/inventory.yml deploy/ansible/playbook.yml \
+  -e ngrok_enabled=true -e ngrok_authtoken=YOUR_NGROK_AUTHTOKEN
+```
+
+Get your authtoken at https://dashboard.ngrok.com/get-started/your-authtoken
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `ngrok_enabled` | false | Set to `true` to install and run ngrok as systemd service |
+| `ngrok_authtoken` | — | **Required** when ngrok_enabled. From ngrok dashboard |
+| `ngrok_domain` | kaia-uncharacterized-unorbitally.ngrok-free.dev | Your ngrok free domain |
+| `ngrok_port` | 3000 | Local port to tunnel (frontend) |
+
+The service runs `ngrok http 3000 --domain=<ngrok_domain>` and restarts on failure. Ensure CORS includes your ngrok URL (see above).
+
+**Full example (ngrok + CORS):**
+
+```bash
+ansible-playbook -i deploy/ansible/inventory.yml deploy/ansible/playbook.yml \
+  -e ngrok_enabled=true \
+  -e "cors_allowed_origins=https://kaia-uncharacterized-unorbitally.ngrok-free.dev,http://localhost:3000"
+```
+
+Add `NGROK_AUTHTOKEN` to `.env` or pass `-e ngrok_authtoken=xxx`.
 
 ## Idempotency
 
@@ -113,6 +174,32 @@ Or copy a key from your machine: `scp ai.key ubuntu@VM:/opt/aletheia-ai/ai.key`
 **Cause:** `next.config.ts` required TypeScript at runtime; production image uses `npm ci --omit=dev` (no devDependencies).
 
 **Fix:** Resolved by using `next.config.mjs` (plain JS). Ensure you have the latest commit. Rebuild: `docker compose build frontend --no-cache && docker compose up -d`.
+
+### ngrok: status=203/EXEC or "ngrok unavailable"
+
+**Cause:** systemd cannot execute ngrok — wrong path. ngrok may be at `/usr/local/bin/ngrok` (manual install) instead of `/usr/bin/ngrok`.
+
+**Fix on the VM:**
+
+```bash
+which ngrok   # e.g. /usr/local/bin/ngrok
+sudo sed -i 's|/usr/bin/ngrok|/usr/local/bin/ngrok|g' /etc/systemd/system/ngrok.service
+sudo systemctl daemon-reload
+sudo systemctl restart ngrok
+```
+
+The playbook auto-detects the path; re-run it to fix the service file.
+
+### University network / firewall — use ngrok
+
+If VM ports (3000, 8080) are blocked from outside (e.g. university network), expose via ngrok:
+
+```bash
+# On VM: ngrok tunnels localhost:3000 to a public URL
+ansible-playbook ... -e ngrok_enabled=true -e "cors_allowed_origins=https://YOUR-NGROK-URL.ngrok-free.dev,http://localhost:3000"
+```
+
+Frontend: https://YOUR-NGROK-URL.ngrok-free.dev. Backend needs a second ngrok tunnel and frontend rebuild with that URL (see CORS section above).
 
 ### Other causes
 

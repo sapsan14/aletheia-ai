@@ -21,6 +21,10 @@
     repo_version: "{{ deploy_repo_version | default('main') }}"
     # Path to signing key on control node; override with -e signing_key_src=/path/to/ai.key
     signing_key_path: "{{ signing_key_src | default(playbook_dir ~ '/../../ai.key') }}"
+    # ngrok: set ngrok_enabled=true (via -e) and ngrok_authtoken to run ngrok as systemd service
+    ngrok_enabled: false
+    ngrok_domain: kaia-uncharacterized-unorbitally.ngrok-free.dev
+    ngrok_port: 3000
 
   tasks:
     - name: Install aptitude (recommended for apt)
@@ -155,3 +159,107 @@
       ansible.builtin.debug:
         var: backend_logs.stdout_lines
       when: backend_logs.stdout_lines | default([]) | length > 0
+
+    # --- ngrok (optional): expose frontend via ngrok, start on boot ---
+    - name: Add ngrok GPG key
+      ansible.builtin.apt_key:
+        url: https://ngrok-agent.s3.amazonaws.com/ngrok.asc
+        state: present
+      when: ngrok_enabled
+
+    - name: Add ngrok apt repository
+      ansible.builtin.apt_repository:
+        repo: "deb https://ngrok-agent.s3.amazonaws.com bookworm main"
+        state: present
+        filename: ngrok
+      when: ngrok_enabled
+
+    - name: Install ngrok
+      ansible.builtin.apt:
+        name: ngrok
+        state: present
+        update_cache: true
+      when: ngrok_enabled
+
+    - name: Load NGROK_AUTHTOKEN from local .env (when not passed via -e)
+      ansible.builtin.shell: |
+        env_file="{{ playbook_dir }}/../../.env"
+        [ -f "$env_file" ] && grep -E '^NGROK_AUTHTOKEN=' "$env_file" 2>/dev/null | cut -d= -f2- | tr -d '"' | tr -d "'" || true
+      register: ngrok_token_from_env
+      changed_when: false
+      run_once: true
+      delegate_to: localhost
+      become: false
+      when: ngrok_enabled and not (ngrok_authtoken | default('') | trim | length > 0)
+
+    - name: Set ngrok_authtoken from .env
+      ansible.builtin.set_fact:
+        ngrok_authtoken: "{{ ngrok_token_from_env.stdout | default('') | trim }}"
+      when:
+        - ngrok_enabled
+        - ngrok_token_from_env is defined
+        - (ngrok_token_from_env.stdout | default('') | trim | length > 0)
+
+    - name: Fail if ngrok enabled but authtoken missing
+      ansible.builtin.fail:
+        msg: "ngrok_enabled=true requires ngrok_authtoken. Add NGROK_AUTHTOKEN=xxx to .env, or pass -e ngrok_authtoken=xxx"
+      when: ngrok_enabled and not (ngrok_authtoken | default('') | trim | length > 0)
+
+    - name: Find ngrok binary path
+      ansible.builtin.shell: |
+        command -v ngrok || test -x /usr/bin/ngrok && echo /usr/bin/ngrok || test -x /usr/local/bin/ngrok && echo /usr/local/bin/ngrok
+      register: ngrok_path_result
+      changed_when: false
+      when: ngrok_enabled
+
+    - name: Set ngrok_executable path
+      ansible.builtin.set_fact:
+        ngrok_executable: "{{ (ngrok_path_result.stdout | trim) or '/usr/local/bin/ngrok' }}"
+      when: ngrok_enabled
+
+    - name: Create ngrok config directory
+      ansible.builtin.file:
+        path: /etc/ngrok
+        state: directory
+        mode: "0755"
+      when: ngrok_enabled
+
+    - name: Create ngrok config
+      ansible.builtin.copy:
+        content: |
+          version: "2"
+          authtoken: {{ ngrok_authtoken }}
+          tunnels:
+            frontend:
+              addr: {{ ngrok_port }}
+              domain: {{ ngrok_domain }}
+        dest: /etc/ngrok/ngrok.yml
+        mode: "0600"
+      when: ngrok_enabled
+
+    - name: Create ngrok systemd service
+      ansible.builtin.copy:
+        content: |
+          [Unit]
+          Description=ngrok tunnel for Aletheia frontend
+          After=network-online.target docker.service
+          Wants=network-online.target
+
+          [Service]
+          Type=simple
+          ExecStart={{ ngrok_executable | default('/usr/local/bin/ngrok') }} start --config /etc/ngrok/ngrok.yml frontend
+          Restart=on-failure
+          RestartSec=5
+
+          [Install]
+          WantedBy=multi-user.target
+        dest: /etc/systemd/system/ngrok.service
+      when: ngrok_enabled
+
+    - name: Enable and start ngrok service
+      ansible.builtin.systemd:
+        name: ngrok
+        state: started
+        enabled: true
+        daemon_reload: true
+      when: ngrok_enabled

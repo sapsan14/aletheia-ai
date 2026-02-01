@@ -466,10 +466,11 @@ Step-by-step plan for building the PoC: verifiable AI responses with cryptograph
 |------|--------|-------|
 | **8.1 Docker** | ✅ | Backend: multi-stage, ai.key via volume. Frontend: `next.config.mjs` (not .ts) so no TypeScript at runtime. |
 | **8.2 docker-compose** | ✅ | postgres, backend, frontend. ai.key must exist *before* first run (else Docker creates dir). |
-| **8.3 Ansible** | ✅ | Install Docker, clone repo, template .env, copy ai.key, `docker compose up -d --build`. Verified on Ubuntu 22.04. |
-| **8.5 README** | ✅ | deploy/ansible/README.md: troubleshooting (ai.key directory fix, frontend TypeScript), verified flow. |
+| **8.3 Ansible** | ✅ | Install Docker, clone repo, template .env, copy ai.key, `docker compose up -d --build`. Optional ngrok systemd service. Verified on Ubuntu 22.04. |
+| **8.4 GitHub Actions** | ✅ | .github/workflows/deploy.yml: test → build → deploy via Ansible. Secrets: DEPLOY_HOST, DEPLOY_USER, SSH_PRIVATE_KEY, SIGNING_KEY. |
+| **8.5 README** | ✅ | deploy/ansible/README.md: troubleshooting (ai.key, frontend TypeScript, ngrok 203/EXEC), ngrok for university/firewall, verified flow. |
 
-**Gotchas:** (1) ai.key as directory → `rm -rf ai.key`, recreate file, `docker compose down && up -d`. (2) next.config.ts needs TypeScript at runtime → use next.config.mjs.
+**Gotchas:** (1) ai.key as directory → `rm -rf ai.key`, recreate file, `docker compose down && up -d`. (2) next.config.ts needs TypeScript at runtime → use next.config.mjs. (3) ngrok systemd 203/EXEC → ngrok may be at `/usr/local/bin/ngrok`; playbook auto-detects path.
 
 ---
 

@@ -414,8 +414,8 @@ Both `backend/` and `frontend/` have `.dockerignore` that exclude `node_modules`
 | Component | Purpose |
 |-----------|---------|
 | **Docker** | Containerize backend and frontend; docker-compose with PostgreSQL |
-| **Ansible** | VM setup (Docker install), .env template, `docker-compose up` |
-| **GitHub Actions** | On push to main: tests → build → deploy via SSH/Ansible |
+| **Ansible** | VM setup (Docker install), .env template, `docker compose up`, optional ngrok systemd service |
+| **GitHub Actions** | On push to main: tests → build → deploy via Ansible; see [.github/workflows/deploy.yml](.github/workflows/deploy.yml) |
 
 ### Ansible deploy (manual, verified)
 
@@ -434,7 +434,9 @@ ansible-playbook -i deploy/ansible/inventory.yml deploy/ansible/playbook.yml \
   -e next_public_api_url=http://YOUR_VM_IP:8080
 ```
 
-**Result:** Frontend at `http://VM:3000`, Backend at `http://VM:8080`. See [deploy/ansible/README.md](deploy/ansible/README.md) for variables, troubleshooting (ai.key directory fix, frontend TypeScript), and verified flow.
+**Result:** Frontend at `http://VM:3000`, Backend at `http://VM:8080`. See [deploy/ansible/README.md](deploy/ansible/README.md) for variables, troubleshooting, ngrok (university/firewall), and verified flow.
+
+**ngrok (university/firewall):** If VM ports are blocked, use `-e ngrok_enabled=true` and CORS. Add `NGROK_AUTHTOKEN` to `.env`. See [deploy/ansible/README.md#ngrok-auto-start](deploy/ansible/README.md#ngrok-auto-start-systemd).
 
 **Alternatives:** Ansible-only (no containers), script-only (bash over SSH), Docker Compose only. See [plan Step 8](docs/en/plan.md#step-8--deployment-cicd) for detailed tasks and LLM-readable implementation prompts.
 
@@ -451,6 +453,21 @@ You are free to use, copy, modify, and distribute the code with attribution.
 
 The author retains the right to continue development of the project independently 
 of the course or project group.
+
+For full details, see [LICENSE](LICENSE).
+
+## Private Development / Future Work
+
+This project is open for exploration, experimentation, and contributions.  
+**Please note:** the original author intends to continue developing certain features independently in future branches (`future/` or `dev/`).  
+
+When forking or contributing:  
+- Always retain proper attribution to the original author.  
+- Do **not modify, merge, or claim ownership** of ongoing private work in `future/` or `dev/`.  
+- Contributions to main or feature branches outside these reserved areas are welcome and appreciated.  
+
+This approach helps the community experiment, while preserving the author's right to continue personal development.
+ group.
 
 For full details, see [LICENSE](LICENSE).
 
