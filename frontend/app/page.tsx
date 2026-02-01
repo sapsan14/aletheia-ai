@@ -8,6 +8,7 @@
 
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -91,12 +92,26 @@ export default function Home() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-50 p-8 dark:bg-zinc-900">
       <main className="w-full max-w-2xl space-y-6 rounded-lg border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-700 dark:bg-zinc-800">
-        <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
-          Aletheia AI
-        </h1>
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">
-          Verifiable AI responses with signing and timestamps
-        </p>
+        <div className="flex items-center gap-4">
+          <div className="flex shrink-0 rounded-xl bg-white dark:bg-zinc-800 p-1">
+            <Image
+              src="/logo.png"
+              alt="Aletheia AI"
+              width={144}
+              height={144}
+              className="rounded-lg bg-white dark:bg-zinc-800"
+              unoptimized
+            />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
+              Aletheia AI
+            </h1>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">
+              Verifiable AI responses with signing and timestamps
+            </p>
+          </div>
+        </div>
 
         <div>
           <label
