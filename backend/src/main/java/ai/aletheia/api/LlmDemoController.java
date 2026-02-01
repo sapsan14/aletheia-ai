@@ -1,0 +1,51 @@
+package ai.aletheia.api;
+
+import ai.aletheia.llm.LLMClient;
+import ai.aletheia.llm.LLMException;
+import ai.aletheia.llm.LLMResult;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
+
+/**
+ * Demo endpoint to test LLM completion. Only available when LLMClient bean exists (OPENAI_API_KEY set).
+ *
+ * <p>POST /api/llm/demo with {"prompt": "..."} → {"responseText", "modelId"}.
+ */
+@RestController
+@RequestMapping("/api/llm")
+@ConditionalOnBean(LLMClient.class)
+public class LlmDemoController {
+
+    private final LLMClient llmClient;
+
+    public LlmDemoController(LLMClient llmClient) {
+        this.llmClient = llmClient;
+    }
+
+    @PostMapping(value = "/demo", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> demo(@RequestBody Map<String, String> body) {
+        String prompt = body != null ? body.get("prompt") : null;
+        if (prompt == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Missing 'prompt' field"));
+        }
+        try {
+            LLMResult result = llmClient.complete(prompt);
+            return ResponseEntity.ok(Map.of(
+                    "responseText", result.responseText(),
+                    "modelId", result.modelId()
+            ));
+        } catch (LLMException e) {
+            return ResponseEntity.status(502).body(Map.of(
+                    "error", "LLM failed",
+                    "message", e.getMessage()
+            ));
+        }
+    }
+}

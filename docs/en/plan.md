@@ -179,6 +179,7 @@ Step-by-step plan for building the PoC: verifiable AI responses with cryptograph
 | Field | Value |
 |-------|--------|
 | **Est.** | 3 h |
+| **Status** | ✅ Done |
 | **Description** | Integrate one LLM API: OpenAI, or Gemini, or Mistral. Accept prompt string; return response text and model identifier. |
 
 **Coding prompt (LLM-readable):**

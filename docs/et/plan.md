@@ -166,6 +166,7 @@ Samm-sammuline plaan PoC koostamiseks: kontrollitavad AI vastused krüptograafil
 | Väli | Väärtus |
 |------|---------|
 | **Hinnang** | 3 t |
+| **Staatus** | ✅ Tehtud |
 | **Kirjeldus** | Integreeri üks LLM API: OpenAI, Gemini või Mistral. Võta vastu prompt string; tagasta vastuse tekst ja mudeli identifikaator. |
 
 **Koodi juhend (LLM-readable):**

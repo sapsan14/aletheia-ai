@@ -39,6 +39,7 @@ Docs are grouped by language in `docs/<lang>/` (en, ru, et). Core documents are 
 - [Run backend](#run-backend)
 - [H2 (default) — file-based DB](#h2-default--file-based-db)
 - [Run PostgreSQL](#run-postgresql-or-docker)
+- [LLM (OpenAI)](#llm-openai)
 - [Audit demo (tangible test)](#audit-demo-tangible-test)
 - [Crypto demo endpoint](#crypto-demo-endpoint)
 - [Run frontend](#run-frontend)
@@ -183,6 +184,19 @@ Or with JAR: `java -jar backend.jar --ai.aletheia.signing.key-path=/path/to/ai.k
 CLI args override env vars and `application.properties`.
 
 **API documentation (Swagger):** When implemented (see [plan — Task 7.3](docs/en/plan.md#task-73--swagger--openapi-implement-when-needed)), available at `http://localhost:8080/swagger-ui.html`.
+
+---
+
+## LLM (OpenAI)
+
+**POST /api/llm/demo** — test LLM completion. Requires `OPENAI_API_KEY` in `.env`. Returns `{"responseText", "modelId"}`.
+
+```bash
+curl -X POST http://localhost:8080/api/llm/demo -H "Content-Type: application/json" -d '{"prompt":"What is 2+2?"}'
+# → { "responseText": "2+2 equals 4.", "modelId": "gpt-4" }
+```
+
+**Env vars:** `OPENAI_API_KEY` (required for real calls), `OPENAI_MODEL` (default: gpt-4). See `.env.example`.
 
 ---
 
