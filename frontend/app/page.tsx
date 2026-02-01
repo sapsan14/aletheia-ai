@@ -70,14 +70,28 @@ export default function Home() {
         body: JSON.stringify({ prompt: trimmed }),
       });
 
-      const data = await res.json();
+      const contentType = res.headers.get("content-type") ?? "";
+      let data: unknown;
+      try {
+        data = contentType.includes("application/json")
+          ? await res.json()
+          : { error: await res.text() || `Request failed (${res.status})` };
+      } catch {
+        data = { error: await res.text().catch(() => `Request failed (${res.status})`) };
+      }
 
       if (!res.ok) {
-        setError(data?.message || data?.error || `Request failed (${res.status})`);
+        const msg =
+          typeof data === "object" && data !== null && "message" in data
+            ? String((data as { message?: unknown }).message)
+            : typeof data === "object" && data !== null && "error" in data
+              ? String((data as { error?: unknown }).error)
+              : `Request failed (${res.status})`;
+        setError(msg || `Request failed (${res.status})`);
         return;
       }
 
-      setResponseData(data);
+      setResponseData(data as AiAskResponse);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Network error");
     } finally {

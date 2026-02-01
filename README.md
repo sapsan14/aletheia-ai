@@ -69,7 +69,7 @@ For details: [Signing](docs/en/SIGNING.md), [Timestamping](docs/en/TIMESTAMPING.
 | Java | 21+ | ✓ backend |
 | Node.js | 18+ | ✓ frontend |
 | OpenSSL | any | ✓ key generation |
-| Maven | 3.6+ (or use `./mvnw`) | ✓ backend |
+| Maven | 3.6+ | ✓ backend |
 | PostgreSQL | 15+ | optional (default: H2) |
 | Docker | any | optional (for PostgreSQL) |
 
@@ -109,7 +109,7 @@ openssl genpkey -algorithm RSA -out ai.key -pkeyopt rsa_keygen_bits:2048
 **Run backend** (from project root or `backend/`):
 
 ```bash
-cd backend && ./mvnw spring-boot:run
+cd backend && mvn spring-boot:run
 ```
 
 - H2 DB is created at `backend/data/` (no PostgreSQL required). API: http://localhost:8080, Swagger: http://localhost:8080/swagger-ui.html, H2 console: http://localhost:8080/h2-console.
@@ -128,13 +128,13 @@ Open http://localhost:3000. For POST /api/ai/ask set `OPENAI_API_KEY` in `.env`.
 
 Spring Boot loads `.env` from the project root automatically. Default: **H2** file-based at `backend/data/aletheia.mv.db` (data persists). Override with [Environment variables](#environment-variables) for PostgreSQL.
 
-**Run backend:** `cd backend && ./mvnw spring-boot:run` (or `java -jar target/aletheia-backend.jar`). API: http://localhost:8080.
+**Run backend:** `cd backend && mvn spring-boot:run` (or `java -jar target/aletheia-backend.jar`). API: http://localhost:8080.
 
 **H2 console** (while backend is running): http://localhost:8080/h2-console. Use the **same** JDBC URL as in `SPRING_DATASOURCE_URL` (e.g. `jdbc:h2:file:./data/aletheia` for file-based). User: `sa`, password: empty. Run backend from `backend/` so `./data/aletheia` resolves.
 
 **PostgreSQL (optional):** `docker-compose up -d postgres` or single container: `docker run -d --name aletheia-db -e POSTGRES_DB=aletheia -e POSTGRES_USER=aletheia -e POSTGRES_PASSWORD=local -p 5432:5432 postgres:15-alpine`. Then in `.env`: `SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/aletheia`, `SPRING_DATASOURCE_USERNAME=aletheia`, `SPRING_DATASOURCE_PASSWORD=local`, `SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect`. Flyway runs on startup; see `backend/src/main/resources/db/migration/README.md` and `schema-ai_response-standalone.sql` for manual SQL.
 
-**Signing key:** required for signing/TSA. Generate once (see [Quick start](#quick-start)); set `AI_ALETHEIA_SIGNING_KEY_PATH` in `.env`. Override via CLI: `./mvnw spring-boot:run -Dspring-boot.run.arguments="--ai.aletheia.signing.key-path=../ai.key"`.
+**Signing key:** required for signing/TSA. Generate once (see [Quick start](#quick-start)); set `AI_ALETHEIA_SIGNING_KEY_PATH` in `.env`. Override via CLI: `mvn spring-boot:run -Dspring-boot.run.arguments="--ai.aletheia.signing.key-path=../ai.key"`.
 
 **TSA:** `AI_ALETHEIA_TSA_MODE=real` (default, DigiCert) or `mock` (tests/offline). See [TIMESTAMPING](docs/en/TIMESTAMPING.md).
 
@@ -191,7 +191,7 @@ Exposes the crypto pipeline: canonicalize → hash → sign → timestamp. **Wor
 
 ```bash
 # Start backend first (see [Backend & database](#backend--database))
-cd backend && ./mvnw spring-boot:run
+cd backend && mvn spring-boot:run
 
 # In another terminal — hash only (no key needed):
 curl -X POST http://localhost:8080/api/crypto/demo \
@@ -241,8 +241,7 @@ Open http://localhost:3000. You should see:
 
 **Backend (from `backend/`):**
 ```bash
-./mvnw test
-# or: mvn test
+mvn test
 ```
 Runs JUnit 5 tests: `HealthControllerTest` (GET /health → 200, `{"status":"UP"}`), `AletheiaBackendApplicationTests` (context load), `CanonicalizationServiceTest`, `HashServiceTest`, and `SignatureServiceTest` (sign/verify, tampered signature). Uses H2 in-memory for tests; signing tests use in-memory RSA keys (no PEM file required).
 
@@ -338,7 +337,9 @@ ansible-playbook -i deploy/ansible/inventory.yml deploy/ansible/playbook.yml \
   -e next_public_api_url=http://YOUR_VM_IP:8080
 ```
 
-**Result:** Frontend at `http://VM:3000`, Backend at `http://VM:8080`. Variables, troubleshooting, ngrok (firewall/university): [deploy/ansible/README.md](deploy/ansible/README.md).
+**Result:** Frontend at `http://VM:3000`, Backend at `http://VM:8080`. Variables, troubleshooting: [deploy/ansible/README.md](deploy/ansible/README.md).
+
+**ngrok (firewall / university):** One command exposes the app via ngrok (free plan = 1 endpoint). Add `NGROK_AUTHTOKEN` to `.env`, then: `ansible-playbook ... -e ngrok_enabled=true`. Next.js rewrites `/api/*` to the backend — no second tunnel or CORS.
 
 ### GitHub Actions (CI/CD)
 

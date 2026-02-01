@@ -21,7 +21,8 @@
     repo_version: "{{ deploy_repo_version | default('main') }}"
     # Path to signing key on control node; override with -e signing_key_src=/path/to/ai.key
     signing_key_path: "{{ signing_key_src | default(playbook_dir ~ '/../../ai.key') }}"
-    # ngrok: set ngrok_enabled=true (via -e) and ngrok_authtoken to run ngrok as systemd service
+    # ngrok: set ngrok_enabled=true (via -e) and ngrok_authtoken to run ngrok as systemd service.
+    # Free tier only: ngrok http PORT --domain=DOMAIN (no --oauth; OAuth is paid-only).
     ngrok_enabled: false
     ngrok_domain: kaia-uncharacterized-unorbitally.ngrok-free.dev
     ngrok_port: 3000
@@ -217,9 +218,9 @@
       changed_when: false
       when: ngrok_enabled
 
-    - name: Set ngrok_executable path
+    - name: Set ngrok_executable path (single path only)
       ansible.builtin.set_fact:
-        ngrok_executable: "{{ (ngrok_path_result.stdout | trim) or '/usr/local/bin/ngrok' }}"
+        ngrok_executable: "{{ (ngrok_path_result.stdout | trim | split('\n') | first | trim) or '/usr/local/bin/ngrok' }}"
       when: ngrok_enabled
 
     - name: Create ngrok config directory
@@ -227,6 +228,14 @@
         path: /etc/ngrok
         state: directory
         mode: "0755"
+      when: ngrok_enabled
+
+    - name: Create ngrok env file (authtoken)
+      ansible.builtin.copy:
+        content: |
+          NGROK_AUTHTOKEN={{ ngrok_authtoken }}
+        dest: /etc/ngrok/ngrok.env
+        mode: "0600"
       when: ngrok_enabled
 
     - name: Create ngrok systemd service (single tunnel; free plan allows 1 endpoint)
@@ -240,7 +249,7 @@
           [Service]
           Type=simple
           EnvironmentFile=/etc/ngrok/ngrok.env
-          ExecStart={{ ngrok_executable | default('/usr/local/bin/ngrok') }} http {{ ngrok_port }} --domain={{ ngrok_domain }}
+          ExecStart={{ (ngrok_executable | default('/usr/local/bin/ngrok')) | trim }} http {{ ngrok_port }} --domain={{ ngrok_domain }}
           Restart=on-failure
           RestartSec=5
 
@@ -263,7 +272,7 @@
         cd {{ app_dir }}
         sed -i 's|^NEXT_PUBLIC_API_URL=.*|NEXT_PUBLIC_API_URL=|' .env
         sed -i 's|^CORS_ALLOWED_ORIGINS=.*|CORS_ALLOWED_ORIGINS=https://{{ ngrok_domain }},http://localhost:3000|' .env
-        docker compose build frontend --no-cache
+        docker compose build frontend --no-cache --build-arg NEXT_PUBLIC_API_URL=
         docker compose up -d
       args:
         executable: /bin/bash

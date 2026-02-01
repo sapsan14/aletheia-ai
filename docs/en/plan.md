@@ -464,11 +464,13 @@ Step-by-step plan for building the PoC: verifiable AI responses with cryptograph
 
 | Item | Status | Notes |
 |------|--------|-------|
-| **8.1 Docker** | ✅ | Backend: multi-stage, ai.key via volume. Frontend: `next.config.mjs` (not .ts) so no TypeScript at runtime. |
-| **8.2 docker-compose** | ✅ | postgres, backend, frontend. ai.key must exist *before* first run (else Docker creates dir). |
-| **8.3 Ansible** | ✅ | Install Docker, clone repo, template .env, copy ai.key, `docker compose up -d --build`. Optional ngrok systemd service. Verified on Ubuntu 22.04. |
+| **8.1 Docker** | ✅ | Backend: multi-stage, ai.key via volume. Frontend: `next.config.mjs` (not .ts) so no TypeScript at runtime; rewrites `/api/*` to backend. |
+| **8.2 docker-compose** | ✅ | postgres, backend, frontend. ai.key must exist *before* first run (else Docker creates dir). Frontend uses `BACKEND_INTERNAL_URL` for rewrite. |
+| **8.3 Ansible** | ✅ | Install Docker, clone repo, template .env, copy ai.key, `docker compose up -d --build`. Optional ngrok: `-e ngrok_enabled=true`. Verified on Ubuntu 22.04. |
 | **8.4 GitHub Actions** | ✅ | .github/workflows/deploy.yml: test → build → deploy via Ansible. Secrets: DEPLOY_HOST, DEPLOY_USER, SSH_PRIVATE_KEY, SIGNING_KEY. |
-| **8.5 README** | ✅ | deploy/ansible/README.md: troubleshooting (ai.key, frontend TypeScript, ngrok 203/EXEC), ngrok for university/firewall, verified flow. |
+| **8.5 README** | ✅ | deploy/ansible/README.md: troubleshooting (ai.key, frontend TypeScript, ngrok 203/EXEC), ngrok single-tunnel, verified flow. |
+
+**ngrok (free plan = 1 endpoint):** Single tunnel for port 3000. Next.js rewrites `/api/*` → backend; frontend uses `NEXT_PUBLIC_API_URL=` (relative URLs). No CORS issues. One command: `ansible-playbook ... -e ngrok_enabled=true`.
 
 **Gotchas:** (1) ai.key as directory → `rm -rf ai.key`, recreate file, `docker compose down && up -d`. (2) next.config.ts needs TypeScript at runtime → use next.config.mjs. (3) ngrok systemd 203/EXEC → ngrok may be at `/usr/local/bin/ngrok`; playbook auto-detects path.
 

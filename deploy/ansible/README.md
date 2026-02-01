@@ -61,7 +61,7 @@ ansible-playbook -i 'aletheia ansible_host=YOUR_VM_IP,' deploy/ansible/playbook.
 | `postgres_password` | local | DB password |
 | `openai_api_key` | (empty) | OpenAI API key |
 | `cors_allowed_origins` | http://localhost:3000 | CORS allowed origins (comma-separated). **ngrok:** add `https://your-subdomain.ngrok-free.dev` |
-| `next_public_api_url` | http://localhost:8080 | **Production:** set to `http://YOUR_VM_IP:8080` or backend ngrok URL so frontend calls correct backend |
+| `next_public_api_url` | http://localhost:8080 | **ngrok:** leave empty (playbook sets it); frontend uses relative `/api`, proxied by Next.js. **Production (no ngrok):** `http://YOUR_VM_IP:8080` |
 | `ngrok_enabled` | false | Set `true` to install ngrok and run as systemd service (auto-start on boot) |
 | `ngrok_authtoken` | — | **Required** when ngrok_enabled. From https://dashboard.ngrok.com/get-started/your-authtoken |
 | `ngrok_domain` | kaia-uncharacterized-unorbitally.ngrok-free.dev | ngrok free domain for tunnel |
@@ -107,16 +107,16 @@ Get your authtoken at https://dashboard.ngrok.com/get-started/your-authtoken
 
 The service runs `ngrok http 3000 --domain=<ngrok_domain>` (direct CLI, not config file) and restarts on failure. Authtoken from `NGROK_AUTHTOKEN` in `.env` or `/etc/ngrok/ngrok.env`. Ensure CORS includes your ngrok URL (see above).
 
-**Full ngrok (one command):** Exposes frontend and backend via ngrok, sets CORS, rebuilds frontend with backend URL.
+**Full ngrok (one command):** Exposes app via single tunnel (free plan = 1 endpoint). API calls go through Next.js rewrite, no CORS issues.
 
 ```bash
 ansible-playbook -i deploy/ansible/inventory.yml deploy/ansible/playbook.yml -e ngrok_enabled=true
 ```
 
 Add `NGROK_AUTHTOKEN` to `.env` (project root). The playbook will:
-- Start ngrok with two tunnels (frontend on your free domain, backend on random URL)
-- Get backend URL from ngrok API, update .env, rebuild frontend
-- Set CORS for your frontend ngrok URL
+- Start ngrok tunnel for frontend (port 3000, your free domain)
+- Set `NEXT_PUBLIC_API_URL=` so frontend uses relative `/api` (proxied to backend by Next.js)
+- Rebuild frontend, set CORS
 
 ## Idempotency
 
@@ -186,27 +186,77 @@ Or copy a key from your machine: `scp ai.key ubuntu@VM:/opt/aletheia-ai/ai.key`
 
 **Cause:** Old `ngrok start --config` syntax may fail with some ngrok versions (v2 vs v3).
 
-**Fix:** The playbook now uses `ngrok http PORT --domain=DOMAIN` (direct CLI). Re-run the playbook, or on the VM:
+**Fix:** The playbook now uses `ngrok http PORT --domain=DOMAIN` (direct CLI). Re-run the playbook, or on the VM replace the unit file with the correct content (see [Broken ExecStart](#ngrok-broken-execstart-multiple-lines) below).
+
+### ngrok: broken ExecStart (multiple lines)
+
+**Cause:** The unit file has a split or malformed `ExecStart` (e.g. path on one line, full command on another, or extra lines like `/usr/bin/ngrok`). systemd then runs only the first token and ngrok exits.
+
+**Fix:** On the VM, replace the unit file with exactly this (one line for `ExecStart`; adjust domain if you use another):
+
+```bash
+sudo tee /etc/systemd/system/ngrok.service << 'EOF'
+[Unit]
+Description=ngrok tunnel for Aletheia frontend
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+EnvironmentFile=/etc/ngrok/ngrok.env
+ExecStart=/usr/local/bin/ngrok http 3000 --domain=kaia-uncharacterized-unorbitally.ngrok-free.dev
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+sudo systemctl daemon-reload
+sudo systemctl restart ngrok
+sudo systemctl status ngrok
+```
+
+If ngrok is at `/usr/bin/ngrok`, change the `ExecStart` line to use that path. Ensure `/etc/ngrok/ngrok.env` exists and contains `NGROK_AUTHTOKEN=your_token`.
+
+### ngrok: inactive (dead) — OAuth / paid features
+
+**Cause:** The service was edited to use `--oauth=google` or `--oauth-allow-email=...`. Those are **paid-only** features; on the free plan ngrok prints "Upgrade your account" and exits, so the unit becomes inactive (dead).
+
+**Fix:** Use the free-tier command only (no OAuth). Either re-run the playbook so it overwrites the unit:
+
+```bash
+ansible-playbook -i deploy/ansible/inventory.yml deploy/ansible/playbook.yml -e ngrok_enabled=true -e ngrok_authtoken=YOUR_TOKEN
+```
+
+Or on the VM, edit the service and remove OAuth flags:
 
 ```bash
 sudo nano /etc/systemd/system/ngrok.service
-# ExecStart line should be: /usr/local/bin/ngrok http 3000 --domain=kaia-uncharacterized-unorbitally.ngrok-free.dev
-# Add: EnvironmentFile=/etc/ngrok/ngrok.env
-# Create /etc/ngrok/ngrok.env with: NGROK_AUTHTOKEN=your_token
+# ExecStart must be (replace with your domain and port):
+#   ExecStart=/usr/local/bin/ngrok http 3000 --domain=YOUR-DOMAIN.ngrok-free.dev
+# Remove any --oauth=... or --oauth-allow-email=...
 sudo systemctl daemon-reload
 sudo systemctl restart ngrok
+sudo systemctl status ngrok
 ```
+
+### CORS when opening app via ngrok (fetch to localhost:8080 blocked)
+
+**Symptom:** Browser console shows: `Access to fetch at 'http://localhost:8080/api/ai/ask' from origin 'https://...ngrok-free.dev' has been blocked by CORS policy`.
+
+**Cause:** The frontend was built with `NEXT_PUBLIC_API_URL=http://localhost:8080`. The client then calls that URL from the browser; when you open the app via the ngrok URL, the browser sends the request to *your* machine’s localhost, not the server, and the backend (or lack of it) doesn’t allow the ngrok origin.
+
+**Fix:** Use `-e ngrok_enabled=true` so the playbook sets `NEXT_PUBLIC_API_URL=` and rebuilds. The frontend uses relative `/api` URLs; Next.js rewrites `/api/*` to the backend internally. Same origin → no CORS. Or manually on the VM: `sed -i 's|^NEXT_PUBLIC_API_URL=.*|NEXT_PUBLIC_API_URL=|' .env` then `docker compose build frontend --no-cache && docker compose up -d`.
 
 ### University network / firewall — use ngrok
 
-If VM ports (3000, 8080) are blocked from outside (e.g. university network), expose via ngrok:
+If VM ports (3000, 8080) are blocked from outside (e.g. university network), expose via ngrok. **Single command** (free plan = 1 endpoint):
 
 ```bash
-# On VM: ngrok tunnels localhost:3000 to a public URL
-ansible-playbook ... -e ngrok_enabled=true -e "cors_allowed_origins=https://YOUR-NGROK-URL.ngrok-free.dev,http://localhost:3000"
+ansible-playbook -i deploy/ansible/inventory.yml deploy/ansible/playbook.yml -e ngrok_enabled=true
 ```
 
-Frontend: https://YOUR-NGROK-URL.ngrok-free.dev. Backend needs a second ngrok tunnel and frontend rebuild with that URL (see CORS section above).
+Add `NGROK_AUTHTOKEN` to `.env`. The playbook starts one tunnel (frontend on port 3000), sets `NEXT_PUBLIC_API_URL=` so the frontend uses relative `/api` URLs. Next.js rewrites `/api/*` to the backend internally — no second tunnel or CORS needed.
 
 ### Other causes
 
