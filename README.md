@@ -36,6 +36,9 @@ Docs are grouped by language in `docs/<lang>/` (en, ru, et). Core documents are 
 
 - [Design: PKI chain and RFC 3161](#design-pki-chain-and-rfc-3161)
 - [Prerequisites](#prerequisites)
+- [Environment variables](#environment-variables)
+- [Setup from scratch](#setup-from-scratch)
+- [Quick Start (minimal)](#quick-start-minimal)
 - [Run backend](#run-backend)
 - [H2 (default) — file-based DB](#h2-default--file-based-db)
 - [Run PostgreSQL](#run-postgresql-or-docker)
@@ -71,42 +74,81 @@ For details: [Signing](docs/en/SIGNING.md), [Timestamping](docs/en/TIMESTAMPING.
 
 ---
 
-## Quick Start
+## Prerequisites
 
-1. **Copy environment template:**
-   ```bash
-   cp .env.example .env
-   # Edit .env: at minimum, set AI_ALETHEIA_SIGNING_KEY_PATH=../ai.key
-   ```
-
-2. **Generate signing key:**
-   ```bash
-   openssl genpkey -algorithm RSA -out ai.key -pkeyopt rsa_keygen_bits:2048
-   ```
-
-3. **Run backend:**
-   ```bash
-   cd backend && ./mvnw spring-boot:run
-   ```
-   Uses H2 file-based DB by default — no PostgreSQL needed for local dev.
-
-4. **Run frontend:**
-   ```bash
-   cd frontend && npm install && npm run dev
-   ```
-   Open http://localhost:3000
-
-**Optional:** For PostgreSQL, start `docker-compose up -d postgres` and set `SPRING_DATASOURCE_URL` in `.env` (see [Run PostgreSQL](#run-postgresql-or-docker)).
+| Requirement | Version | Required |
+|-------------|---------|----------|
+| Java | 21+ | ✓ backend |
+| Node.js | 18+ | ✓ frontend |
+| OpenSSL | any | ✓ key generation |
+| Maven | 3.6+ (or use `./mvnw`) | ✓ backend |
+| PostgreSQL | 15+ | optional (default: H2) |
+| Docker | any | optional (for PostgreSQL) |
 
 ---
 
-## Prerequisites
+## Environment variables
 
-- **Java 21+** (backend)
-- **Node.js 18+** (frontend)
-- **OpenSSL** (key generation)
-- **PostgreSQL 15+** (optional — only when using PostgreSQL; default is H2)
-- Env: LLM API key (OpenAI/Gemini/Mistral), signing key path — see [PoC](docs/en/PoC.md) and [plan](docs/en/plan.md) for details.
+Copy `.env.example` to `.env` and configure. Key variables:
+
+| Variable | When needed | Default / note |
+|----------|-------------|----------------|
+| `AI_ALETHEIA_SIGNING_KEY_PATH` | signing, POST /api/ai/ask | path to PEM (e.g. `../ai.key`) |
+| `OPENAI_API_KEY` | LLM, POST /api/ai/ask | — |
+| `OPENAI_MODEL` | LLM | `gpt-4` |
+| `SPRING_DATASOURCE_URL` | DB | `jdbc:h2:file:./data/aletheia` |
+| `AI_ALETHEIA_TSA_MODE` | TSA | `mock` (or `real`) |
+| `AI_ALETHEIA_TSA_URL` | when mode=real | e.g. `http://timestamp.digicert.com` |
+| `NEXT_PUBLIC_API_URL` | frontend | `http://localhost:8080` |
+
+Full list: [.env.example](.env.example). Architecture: [PoC](docs/en/PoC.md), [plan](docs/en/plan.md).
+
+---
+
+## Setup from scratch
+
+**1. Clone and env:**
+```bash
+git clone <repo> && cd aletheia-ai
+cp .env.example .env
+```
+
+**2. Generate signing key:**
+```bash
+openssl genpkey -algorithm RSA -out ai.key -pkeyopt rsa_keygen_bits:2048
+```
+Set in `.env`: `AI_ALETHEIA_SIGNING_KEY_PATH=../ai.key` (or absolute path).
+
+**3. Run backend:**
+```bash
+cd backend && ./mvnw spring-boot:run
+```
+- H2 DB created at `backend/data/` (no PostgreSQL)
+- API: http://localhost:8080
+- H2 console: http://localhost:8080/h2-console
+
+**4. Run frontend:**
+```bash
+cd frontend && npm install && npm run dev
+```
+- Create `frontend/.env.local` with `NEXT_PUBLIC_API_URL=http://localhost:8080` (or copy from `frontend/.env.example`)
+- Open http://localhost:3000
+
+**5. Test:** On the main page, enter a prompt and click Send. Requires `OPENAI_API_KEY` in `.env`. For LLM-free test: `curl -X POST http://localhost:8080/api/audit/demo -H "Content-Type: application/json" -d '{"text":"hello"}'`.
+
+---
+
+## Quick Start (minimal)
+
+```bash
+cp .env.example .env
+openssl genpkey -algorithm RSA -out ai.key -pkeyopt rsa_keygen_bits:2048
+# Edit .env: AI_ALETHEIA_SIGNING_KEY_PATH=../ai.key
+cd backend && ./mvnw spring-boot:run
+# In another terminal:
+cd frontend && cp .env.example .env.local && npm install && npm run dev
+```
+Open http://localhost:3000. For POST /api/ai/ask, add `OPENAI_API_KEY` to `.env`.
 
 ---
 
@@ -172,7 +214,7 @@ openssl genpkey -algorithm RSA -out ai.key -pkeyopt rsa_keygen_bits:2048
 ```
 Then set `ai.aletheia.signing.key-path=/path/to/ai.key` (or equivalent env).
 
-**TSA mode:** `AI_ALETHEIA_TSA_MODE=mock` (default, deterministic) or `real` (requires `AI_ALETHEIA_TSA_URL`). See [TIMESTAMPING](docs/en/TIMESTAMPING.md).
+**TSA mode:** `AI_ALETHEIA_TSA_MODE=mock` (default, deterministic, no network) or `real` (requires `AI_ALETHEIA_TSA_URL`). Public TSAs: DigiCert, Sectigo, GlobalSign. For a self-hosted RFC 3161 TSA, see [TIMESTAMPING](docs/en/TIMESTAMPING.md).
 
 **Command-line arguments (override .env):** Spring Boot accepts `--property=value`. Useful for one-off runs or CI:
 

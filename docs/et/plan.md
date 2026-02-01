@@ -315,6 +315,7 @@ Samm-sammuline plaan PoC koostamiseks: kontrollitavad AI vastused krüptograafil
 | Väli | Väärtus |
 |------|---------|
 | **Hinnang** | 1–2 t |
+| **Staatus** | ✅ Tehtud |
 | **Kirjeldus** | README: kuidas genereerida võti, seada env, käivitada PostgreSQL, backend, frontend, lokaalne TSA (kui on). Loetle env: API võtmed, DB URL, TSA URL, võtme tee. |
 
 **Koodi juhend (LLM-readable):**

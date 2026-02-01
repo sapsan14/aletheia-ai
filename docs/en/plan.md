@@ -328,6 +328,7 @@ Step-by-step plan for building the PoC: verifiable AI responses with cryptograph
 | Field | Value |
 |-------|--------|
 | **Est.** | 1–2 h |
+| **Status** | ✅ Done |
 | **Description** | README: how to generate key, set env vars, run PostgreSQL, run backend, run frontend, run local TSA (if any). List required env: API keys, DB URL, TSA URL, key path. |
 
 **Coding prompt (LLM-readable):**
