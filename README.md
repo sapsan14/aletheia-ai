@@ -415,6 +415,19 @@ Both `backend/` and `frontend/` have `.dockerignore` that exclude `node_modules`
 | **Ansible** | VM setup (Docker install), .env template, `docker-compose up` |
 | **GitHub Actions** | On push to main: tests → build → deploy via SSH/Ansible |
 
+### Ansible deploy (manual)
+
+```bash
+# From project root; ensure ai.key exists
+ansible-playbook -i deploy/ansible/inventory.yml deploy/ansible/playbook.yml
+
+# With secrets
+ansible-playbook -i deploy/ansible/inventory.yml deploy/ansible/playbook.yml \
+  -e postgres_password=SECURE_PASS -e openai_api_key=sk-xxx
+```
+
+See [deploy/ansible/README.md](deploy/ansible/README.md) for variables and options.
+
 **Alternatives:** Ansible-only (no containers), script-only (bash over SSH), Docker Compose only. See [plan Step 8](docs/en/plan.md#step-8--deployment-cicd) for detailed tasks and LLM-readable implementation prompts.
 
 ---

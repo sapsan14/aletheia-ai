@@ -18,6 +18,9 @@ Tootevisioon ja järgmised suured sammud: krüptograafiliselt kontrollitavate AI
 - [Suur samm 6: AI vs AI kontroll](#suur-samm-6-ai-vs-ai-kontroll)
 - [Suur samm 7: Vali üks killer-valdkond](#suur-samm-7-vali-üks-killer-valdkond)
 - [Kokkuvõte ja järgmised toimingud](#kokkuvõte-ja-järgmised-toimingud)
+- [Pilv ja HSM](#pilv-ja-hsm)
+- [Strateegilised prioriteedid](#strateegilised-prioriteedid)
+- [Investori pitch](#investori-pitch)
 
 ---
 
@@ -30,6 +33,7 @@ Tootevisioon ja järgmised suured sammud: krüptograafiliselt kontrollitavate AI
 | **Krüpto-pipeline** | ✅ Canonicalize → hash → sign → timestamp (RFC 3161) |
 | **RFC 3161 TSA** | ✅ Rakendatud (haruldane AI-projektides) |
 | **Usaldusahel** | ✅ Allkirjastatud vastus + TSA-token; kontroll meie backendis |
+| **Deploy** | ✅ Docker, docker-compose, Ansible |
 
 Kõige raskem osa on tehtud: **krüptograafiliselt range usaldusahel AI jaoks**. Paljud stardiettevõtted kukuvad just siin. Järgmine tase on muuta «allkirjastatud AI vastus» **dokumenteeritavaks, audit-tasemel AI attestatsiooniks** ja **kontrolliks ilma meie serverita**.
 
@@ -205,21 +209,88 @@ Oluline: mitte «chat», vaid **väited tagajärgedega**.
 - ✅ Demo
 - ✅ Täielik krüpto-pipeline (canonicalize, hash, sign, timestamp)
 - ✅ RFC 3161 (haruldane AI-projektides)
+- ✅ Docker, docker-compose, Ansible deploy
 
 ### Järgmised suured sammud (mõju järjekorras)
 
-1. **AI Claim** — struktureeritud väide + kontekst lihtsa teksti asemel
-2. **Võrguühenduseta / kolmanda osapoole kontroll** — CLI + JS kontrollija, ekspordipakett
-3. **Usaldus- ja võtmemudel** — key_id, registry, rotatsioon, provenance
-4. **Tugev ajatempli ankur** — multi-TSA, avalikud ankrud
-5. **Evidence package** — .aep vorming kohtutele ja auditile
-6. **Killer-valdkond** — vali üks (nt legal, medical, contracts)
+1. **Evidence Package + võrguühenduseta kontroll** — .aep eksport, CLI kontrollija; *usaldusinfrastruktuuri hetk*
+2. **Killer demo (legal/compliance)** — GDPR klausli kontrolli stsenaarium; vali üks valdkond
+3. **AI Claim** — struktureeritud väide + kontekst lihtsa teksti asemel
+4. **Usaldus- ja võtmemudel** — key_id, registry, rotatsioon, provenance
+5. **Tugev ajatempli ankur** — multi-TSA, avalikud ankrud
+6. **Killer-valdkond** — soovitus: **legal / compliance AI** (EU AI Act, lepingud, audit)
 
 ### Valikuline
 
 - Üheleheküljeline **product vision**
 - **Killer demo** investori jaoks
 - **EU-stiilis teekond** (PoC → Pilot → Regulation)
+
+---
+
+## Pilv ja HSM
+
+### Pilvepõhine deploy
+
+Stakk (Docker, Spring Boot, Next.js) on pilvevalmis. Soovituslik tee:
+
+| Pilv | Teenused |
+|------|----------|
+| **AWS** | ECS/EKS, RDS PostgreSQL, valikuliselt CloudHSM |
+| **GCP** | Cloud Run, Cloud SQL |
+| **Azure** | Container Apps, PostgreSQL |
+
+→ Üks production-deploy pilves skaleeritavuse, SLA ja investorite usalduse jaoks.
+
+### HSM (Hardware Security Module)
+
+**Praegu:** Failipõhine allkirjastamisvõti (`ai.key`).
+
+**Production / enterprise:** Allkirjastamine HSMi kaudu juriidilise kaalu ja compliance'i jaoks.
+
+| Valik | Kasutus |
+|-------|---------|
+| **AWS KMS** | Managed; allkirjastamine API kaudu |
+| **AWS CloudHSM** | Eritatud HSM; täielik kontroll |
+| **Azure Key Vault HSM** | Managed HSM backing |
+| **Google Cloud HSM** | Cloud HSM module |
+
+**Tee:** Abstraheerida `SignatureService` — üks impl failipõhiseks, teine HSM/KMS jaoks. Dokumenteerida: «Enterprise: vaheta failist HSM-ile ühe konfig muudatusega.»
+
+→ Arhitektuur toetab HSM-i; enterprise-klientidel on võimalik oma HSM sisse lülitada.
+
+---
+
+## Strateegilised prioriteedid
+
+Soovituslik järjekord maksimaalse mõju saavutamiseks:
+
+| # | Samm | Eesmärk |
+|---|------|---------|
+| 1 | **Evidence Package + võrguühenduseta kontroll** | Usaldusinfrastruktuur; kontroll ilma meie serverita |
+| 2 | **Killer demo (legal/compliance)** | Product-market fit; investori lugu |
+| 3 | **Pilvepõhine deploy** | Production-grade; SLA |
+| 4 | **HSM integratsiooni tee** | Enterprise valmidus |
+| 5 | **AI Claim** | Struktureeritud attestatsioon |
+| 6 | **Key registry + rotatsioon** | PKI AI jaoks |
+
+---
+
+## Investori pitch
+
+> **Aletheia AI — Trust Infrastructure for AI**
+>
+> Muudame AI väljundid krüptograafiliselt kontrollitavateks tõenditeks: allkirjastatud, RFC 3161 ajatempliga, kontrollitavad võrguühenduseta.
+>
+> **Probleem:** Võimatu tõestada, mida AI ütles, millal ja millises kontekstis.
+>
+> **Lahendus:** Allkirjastatud AI väited usaldusväärsete ajatemplitega; kontroll ilma meie serverita.
+>
+> **Turg:** Legal tech, compliance, fintech, regulaatorid (EU AI Act).
+>
+> **Staatus:** PoC valmis; RFC 3161; eIDAS-ühilduv arhitektuur; tee HSM-i ja qualified TSA juurde.
+>
+> **Edasi:** Evidence Package, võrguühenduseta kontroll, piloot legal/compliance-s.
 
 ---
 

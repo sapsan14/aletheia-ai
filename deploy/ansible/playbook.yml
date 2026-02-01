@@ -1,0 +1,124 @@
+---
+# Aletheia AI — Deploy playbook
+# Target: Ubuntu VM with SSH access (e.g. ssh ubuntu@193.40.157.132)
+#
+# Run from project root:
+#   ansible-playbook -i deploy/ansible/inventory.yml deploy/ansible/playbook.yml
+#
+# With secrets (never commit these):
+#   ansible-playbook -i deploy/ansible/inventory.yml deploy/ansible/playbook.yml \
+#     -e postgres_password=SECURE_PASS \
+#     -e openai_api_key=sk-xxx
+#
+# Or use ansible-vault for group_vars/deploy/vault.yml
+
+- name: Deploy Aletheia AI to target VM
+  hosts: deploy
+  become: true
+  vars:
+    app_dir: /opt/aletheia-ai
+    repo_url: "{{ deploy_repo_url | default('https://github.com/sapsan14/aletheia-ai.git') }}"
+    repo_version: "{{ deploy_repo_version | default('main') }}"
+    # Path to signing key on control node; override with -e signing_key_src=/path/to/ai.key
+    signing_key_path: "{{ signing_key_src | default(playbook_dir ~ '/../../ai.key') }}"
+
+  tasks:
+    - name: Install aptitude (recommended for apt)
+      apt:
+        name: aptitude
+        state: present
+        update_cache: true
+      when: ansible_os_family == "Debian"
+
+    - name: Install Docker dependencies
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+        state: present
+        update_cache: true
+
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Add Docker apt repository
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        state: present
+        filename: docker
+      when: ansible_os_family == "Debian"
+
+    - name: Install Docker
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-compose-plugin
+        state: present
+        update_cache: true
+      when: ansible_os_family == "Debian"
+
+    - name: Ensure docker group exists
+      group:
+        name: docker
+        state: present
+
+    - name: Add ubuntu user to docker group
+      user:
+        name: ubuntu
+        groups: docker
+        append: true
+
+    - name: Create app directory
+      file:
+        path: "{{ app_dir }}"
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+        mode: "0755"
+
+    - name: Clone or update repository
+      ansible.builtin.git:
+        repo: "{{ repo_url }}"
+        dest: "{{ app_dir }}"
+        version: "{{ repo_version }}"
+        force: true
+        update: true
+      become_user: ubuntu
+
+    - name: Create .env from template
+      ansible.builtin.template:
+        src: templates/.env.j2
+        dest: "{{ app_dir }}/.env"
+        owner: ubuntu
+        group: ubuntu
+        mode: "0600"
+
+    - name: Check if signing key exists locally
+      ansible.builtin.stat:
+        path: "{{ signing_key_path }}"
+      register: signing_key_stat
+
+    - name: Copy signing key to server
+      ansible.builtin.copy:
+        src: "{{ signing_key_path }}"
+        dest: "{{ app_dir }}/ai.key"
+        owner: ubuntu
+        group: ubuntu
+        mode: "0600"
+      when: signing_key_stat.stat.exists | default(false)
+
+    - name: Build and start containers with docker compose
+      ansible.builtin.shell: |
+        cd {{ app_dir }} && (docker compose up -d --build 2>/dev/null || docker-compose up -d --build)
+      args:
+        executable: /bin/bash
+      register: docker_up
+      changed_when: true  # always report change; idempotent due to docker compose

@@ -1,0 +1,12 @@
+# Ansible inventory for Aletheia AI deploy
+# Override: ansible-playbook -i deploy/ansible/inventory.yml ... -e ansible_host=YOUR_IP
+---
+all:
+  children:
+    deploy:
+      hosts:
+        aletheia:
+          ansible_host: 193.40.157.132
+      vars:
+        ansible_user: ubuntu
+        ansible_ssh_private_key_file: "~/.ssh/id_ed25519"

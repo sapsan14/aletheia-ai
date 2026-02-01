@@ -12,6 +12,7 @@ build/
 .env
 .env.*
 !.env.example
+!deploy/**/templates/.env.j2
 *.key
 *.pem
 !**/docs/**/*.pem
