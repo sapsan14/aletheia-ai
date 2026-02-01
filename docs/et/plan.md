@@ -195,6 +195,7 @@ Samm-sammuline plaan PoC koostamiseks: kontrollitavad AI vastused krüptograafil
 | Väli | Väärtus |
 |------|---------|
 | **Hinnang** | 2 t |
+| **Staatus** | ✅ Tehtud |
 | **Kirjeldus** | JPA üksus (või ekvivalent) ja repository tabelile ai_response. |
 
 **Koodi juhend (LLM-readable):**

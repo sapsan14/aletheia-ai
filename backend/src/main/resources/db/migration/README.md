@@ -10,6 +10,8 @@ Migrations run **automatically** when the backend starts. No manual steps needed
 
 **H2 Console (dev):** With default H2 file-based DB, open `http://localhost:8080/h2-console`, JDBC URL `jdbc:h2:file:./data/aletheia`, user `sa`, password empty. Data persists in `backend/data/`.
 
+**JPA mapping:** The `ai_response` table is mapped by `AiResponse` entity in `ai.aletheia.db.entity`. `AiResponseRepository` (Spring Data JPA) provides `save` and `findById`. See Task 4.1 in the plan.
+
 ---
 
 ## Liquibase (future)

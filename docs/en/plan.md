@@ -208,6 +208,7 @@ Step-by-step plan for building the PoC: verifiable AI responses with cryptograph
 | Field | Value |
 |-------|--------|
 | **Est.** | 2 h |
+| **Status** | ✅ Done |
 | **Description** | JPA entity (or equivalent) and repository for table ai_response. |
 
 **Coding prompt (LLM-readable):**
