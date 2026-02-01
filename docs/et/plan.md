@@ -179,6 +179,7 @@ Samm-sammuline plaan PoC koostamiseks: kontrollitavad AI vastused krüptograafil
 | Väli | Väärtus |
 |------|---------|
 | **Hinnang** | 1 t |
+| **Staatus** | ✅ Tehtud |
 | **Kirjeldus** | Iga LLM päring peab salvestama mudeli identifikaatori ja võimalusel parameetrid auditi jaoks. |
 
 **Koodi juhend (LLM-readable):**

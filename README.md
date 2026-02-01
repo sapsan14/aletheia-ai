@@ -89,13 +89,15 @@ For details: [Signing](docs/en/SIGNING.md), [Timestamping](docs/en/TIMESTAMPING.
 
 ## Environment variables
 
-Copy `.env.example` to `.env` and configure. Key variables:
+**All backend config comes from `.env`** — no hardcoded values in `application.properties`. Copy `.env.example` to `.env` and configure. Key variables:
 
 | Variable | When needed | Default / note |
 |----------|-------------|----------------|
 | `AI_ALETHEIA_SIGNING_KEY_PATH` | signing, POST /api/ai/ask | path to PEM (e.g. `../ai.key`) |
 | `OPENAI_API_KEY` | LLM, POST /api/ai/ask | — |
 | `OPENAI_MODEL` | LLM | `gpt-4` |
+| `OPENAI_TEMPERATURE` | LLM | `1.0` (0–2) |
+| `OPENAI_MAX_TOKENS` | LLM | `2000` |
 | `SPRING_DATASOURCE_URL` | DB | `jdbc:h2:file:./data/aletheia` |
 | `AI_ALETHEIA_TSA_MODE` | TSA | `mock` (or `real`) |
 | `AI_ALETHEIA_TSA_URL` | when mode=real | e.g. `http://timestamp.digicert.com` |

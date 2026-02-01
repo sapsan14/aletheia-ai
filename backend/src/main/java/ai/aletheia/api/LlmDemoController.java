@@ -43,10 +43,13 @@ public class LlmDemoController {
         }
         try {
             LLMResult result = llmClient.complete(prompt);
-            return ResponseEntity.ok(Map.of(
-                    "responseText", result.responseText(),
-                    "modelId", result.modelId()
-            ));
+            var response = new java.util.HashMap<String, Object>();
+            response.put("responseText", result.responseText());
+            response.put("modelId", result.modelId());
+            if (result.temperature() != null) {
+                response.put("temperature", result.temperature());
+            }
+            return ResponseEntity.ok(response);
         } catch (LLMException e) {
             return ResponseEntity.status(502).body(Map.of(
                     "error", "LLM failed",

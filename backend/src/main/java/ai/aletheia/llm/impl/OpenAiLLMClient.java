@@ -32,23 +32,37 @@ public class OpenAiLLMClient implements LLMClient {
     private static final Logger log = LoggerFactory.getLogger(OpenAiLLMClient.class);
     private static final String API_URL = "https://api.openai.com/v1/chat/completions";
     private static final Duration TIMEOUT = Duration.ofSeconds(60);
+    private static final int DEFAULT_MAX_TOKENS = 2000;
 
     private final String apiKey;
     private final String model;
+    private final Double temperature;
+    private final int maxTokens;
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
 
     public OpenAiLLMClient(
             @Value("${ai.aletheia.llm.openai.api-key:}") String apiKey,
-            @Value("${ai.aletheia.llm.openai.model:gpt-4}") String model) {
+            @Value("${ai.aletheia.llm.openai.model:}") String model,
+            @Value("${ai.aletheia.llm.openai.temperature:}") Double temperature,
+            @Value("${ai.aletheia.llm.openai.max-tokens:}") String maxTokensStr) {
         if (apiKey == null || apiKey.isBlank()) {
             throw new IllegalStateException("OPENAI_API_KEY must be set for OpenAiLLMClient");
         }
         this.apiKey = apiKey;
-        this.model = model.isBlank() ? "gpt-4" : model;
+        this.model = model == null || model.isBlank() ? "gpt-4" : model;
+        this.temperature = (temperature != null && temperature >= 0 && temperature <= 2) ? temperature : 1.0;
+        int parsed = DEFAULT_MAX_TOKENS;
+        if (maxTokensStr != null && !maxTokensStr.isBlank()) {
+            try {
+                int v = Integer.parseInt(maxTokensStr.trim());
+                if (v > 0 && v <= 128000) parsed = v;
+            } catch (NumberFormatException ignored) { }
+        }
+        this.maxTokens = parsed;
         this.httpClient = HttpClient.newBuilder().connectTimeout(TIMEOUT).build();
         this.objectMapper = new ObjectMapper();
-        log.info("OpenAI LLM client initialized, model={}", this.model);
+        log.info("OpenAI LLM client initialized, model={}, temperature={}, maxTokens={}", this.model, this.temperature, this.maxTokens);
     }
 
     @Override
@@ -78,7 +92,8 @@ public class OpenAiLLMClient implements LLMClient {
     private String buildRequestBody(String prompt) throws Exception {
         ObjectNode root = objectMapper.createObjectNode();
         root.put("model", model);
-        root.put("max_tokens", 2000);
+        root.put("max_tokens", maxTokens);
+        root.put("temperature", temperature);
         ArrayNode messages = root.putArray("messages");
         ObjectNode msg = messages.addObject();
         msg.put("role", "user");
@@ -117,7 +132,8 @@ public class OpenAiLLMClient implements LLMClient {
                 ? root.get("model").asText()
                 : model;
 
-        log.debug("LLM complete: promptLen={}, responseLen={}, model={}", prompt.length(), responseText.length(), modelId);
-        return new LLMResult(responseText, modelId);
+        log.info("LLM complete: model={}, promptLen={}, responseLen={}, temperature={}",
+                modelId, prompt.length(), responseText.length(), temperature);
+        return new LLMResult(responseText, modelId, temperature);
     }
 }

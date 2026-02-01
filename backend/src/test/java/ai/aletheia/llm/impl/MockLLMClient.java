@@ -7,7 +7,10 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 /**
- * Mock LLM client for tests. Returns deterministic responses, no network.
+ * Mock LLM client for tests: implements {@link LLMClient} without calling any real API.
+ *
+ * <p>Used when {@code @ActiveProfiles("test")}: returns deterministic responses so tests
+ * don't need OPENAI_API_KEY or network. Replaces OpenAiLLMClient in test context.
  */
 @Service
 @Profile("test")
@@ -23,6 +26,6 @@ public class MockLLMClient implements LLMClient {
         if (prompt.toLowerCase().contains("hello")) {
             response = "Hello! How can I help you?";
         }
-        return new LLMResult(response, "mock-model");
+        return new LLMResult(response, "mock-model", 0.7);
     }
 }

@@ -111,13 +111,14 @@ public class AiAskController {
                     tsaToken,
                     modelId,
                     null,
-                    null,
+                    llmResult.temperature(),
                     null,
                     1
             );
             Long id = auditRecordService.save(auditRequest);
 
-            log.info("AI ask: id={}, model={}, promptLen={}, responseLen={}", id, modelId, request.prompt().length(), responseText.length());
+            log.info("AI ask: id={}, model={}, promptLen={}, responseLen={}, temperature={}",
+                    id, modelId, request.prompt().length(), responseText.length(), llmResult.temperature());
 
             return ResponseEntity.ok(new AiAskResponse(
                     canonicalResponse,

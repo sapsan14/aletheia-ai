@@ -192,6 +192,7 @@ Step-by-step plan for building the PoC: verifiable AI responses with cryptograph
 | Field | Value |
 |-------|--------|
 | **Est.** | 1 h |
+| **Status** | ✅ Done |
 | **Description** | Ensure every LLM call stores model identifier and optional parameters for audit. |
 
 **Coding prompt (LLM-readable):**

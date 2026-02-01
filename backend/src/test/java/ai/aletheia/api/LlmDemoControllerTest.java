@@ -20,13 +20,14 @@ class LlmDemoControllerTest {
     private MockMvc mockMvc;
 
     @Test
-    void demo_returnsResponseAndModelId() throws Exception {
+    void demo_returnsResponseModelIdAndTemperature() throws Exception {
         mockMvc.perform(post("/api/llm/demo")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"prompt\":\"hello\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.responseText").isNotEmpty())
-                .andExpect(jsonPath("$.modelId").value("mock-model"));
+                .andExpect(jsonPath("$.modelId").value("mock-model"))
+                .andExpect(jsonPath("$.temperature").value(0.7));
     }
 
     @Test
