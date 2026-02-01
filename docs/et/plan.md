@@ -258,6 +258,7 @@ Samm-sammuline plaan PoC koostamiseks: kontrollitavad AI vastused krüptograafil
 | Väli | Väärtus |
 |------|---------|
 | **Hinnang** | 2 t |
+| **Staatus** | ✅ Tehtud |
 | **Kirjeldus** | Ühenda prompti väli ja Send nupp POST /api/ai/ask-ga; näita laadimise olekut ja vigu. |
 
 **Koodi juhend (LLM-readable):**

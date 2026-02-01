@@ -271,6 +271,7 @@ Step-by-step plan for building the PoC: verifiable AI responses with cryptograph
 | Field | Value |
 |-------|--------|
 | **Est.** | 2 h |
+| **Status** | ✅ Done |
 | **Description** | Connect prompt field and Send button to POST /api/ai/ask; show loading state and errors. |
 
 **Coding prompt (LLM-readable):**

@@ -276,11 +276,11 @@ npm run dev
 ```
 
 Open http://localhost:3000. You should see:
-- **Prompt** — text area for entering questions (Task 1.3)
-- **Send — Coming soon** — button (disabled; will connect to backend in Step 6)
-- **Response** — area where AI answer will appear
+- **Prompt** — text area for entering questions
+- **Send** — button (connects to POST /api/ai/ask)
+- **Response** — area for AI answer and status
 
-Set `NEXT_PUBLIC_API_URL=http://localhost:8080` when connecting to backend (Step 6).
+**Required:** Set `NEXT_PUBLIC_API_URL=http://localhost:8080` in `frontend/.env.local` (or copy from `frontend/.env.example`). Start the backend first. CORS allows `http://localhost:3000` by default; override with `CORS_ALLOWED_ORIGINS` if needed.
 
 ---
 
