@@ -194,6 +194,8 @@ Verification uses: `canonical.bin` → recompute hash and compare with `hash.sha
 | Doc | DEMO_SCRIPT or section | Steps 1–5 clear; example prompt included; time ≤5 min achievable. |
 | Manual | Run through once | Follow script; obtain .aep; run verifier; get VALID. |
 
+**→ Implemented:** [Killer demo script (legal/compliance)](../DEMO_SCRIPT.md) — steps 1–5, example prompt, prerequisites, ≤5 min target.
+
 ---
 
 #### Task DP2.3.2 — Optional: “Download evidence” in frontend
