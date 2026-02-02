@@ -4,7 +4,7 @@ Samm-sammuline plaan PoC koostamiseks: kontrollitavad AI vastused krüptograafil
 
 **Stekk (PoC põhjal):** Next.js, Java Spring Boot, PostgreSQL, OpenSSL/BouncyCastle, üks LLM (OpenAI/Gemini/Mistral), lokaalne RFC 3161 TSA.
 
-**Seotud:** [Visioon ja teekond](VISION_AND_ROADMAP.md) (järgmised sammud) · [PoC](PoC.md) · [Usaldusmudel](TRUST_MODEL.md)
+**Seotud:** [Visioon ja teekond](VISION_AND_ROADMAP.md) (järgmised sammud) · [PoC](PoC.md) · [Usaldusmudel](TRUST_MODEL.md) · [Tuleviku ideed](ideas/README.md)
 
 ---
 

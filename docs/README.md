@@ -33,6 +33,7 @@ Same topics exist in **Russian** ([docs/ru/](ru/)) and **Estonian** ([docs/et/](
 | **Crypto reference** | Algorithms, keys, tsaToken (beginner-friendly) | [CRYPTO_REFERENCE](en/CRYPTO_REFERENCE.md) | — | — |
 | **Agent Audit** | Audit model for LLM agents | [AGENT_AUDIT](en/AGENT_AUDIT_MODEL.md) | [Аудит агентов](ru/AGENT_AUDIT_MODEL.md) | [Agentide audit](et/AGENT_AUDIT_MODEL.md) |
 | **Testing strategy** | Unit, integration, fixtures, CI | [TESTING_STRATEGY](en/TESTING_STRATEGY.md) | [Стратегия тестирования](ru/TESTING_STRATEGY.md) | [Testimise strateegia](et/TESTING_STRATEGY.md) |
+| **Future ideas** (PKI for AI agents, OpenClaw, MCP) | — | [Идеи](ru/ideas/README.md) | [Ideed](et/ideas/README.md) |
 | **Diagrams** | Mermaid: pipeline, trust chain, stack | [diagrams/architecture.md](../diagrams/architecture.md) | | |
 
 ---

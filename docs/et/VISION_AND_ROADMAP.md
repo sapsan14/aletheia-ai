@@ -2,7 +2,7 @@
 
 Tootevisioon ja järgmised sammud: krüptograafiliselt kontrollitavate AI vastuste juurest **AI attestatsioonini** ja **usaldusinfrastruktuurini**. Strateegiline suund praeguse PoC ja demo taga.
 
-**Seotud:** [PoC (arhitektuur)](PoC.md) · [Rakendusplaan](plan.md) · [Usaldusmudel](TRUST_MODEL.md)
+**Seotud:** [PoC (arhitektuur)](PoC.md) · [Rakendusplaan](plan.md) · [Usaldusmudel](TRUST_MODEL.md) · [Tuleviku ideed](ideas/README.md)
 
 ---
 
@@ -194,6 +194,8 @@ Vaata: [Ajatemplid](TIMESTAMPING.md).
 | **AI-2** | «Kinnitan: väide on õige.» |
 
 → **Multi-agent usaldus** — lähemal teaduslikule kontrollile.
+
+**Laiendus:** PKI idee autonoomsete AI-agentide jaoks (OpenClaw, agentid MCP ökosüsteemis, kontroll ja sertifitseerimine meie PKI-ga) on kirjeldatud eraldi dokumendis: [Idee: PKI AI-agentide jaoks — kasutamine ja testimine](ideas/PKI_FOR_AI_AGENTS.md).
 
 ---
 

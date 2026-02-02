@@ -4,7 +4,7 @@
 
 **Стек (из PoC):** Next.js, Java Spring Boot, PostgreSQL, OpenSSL/BouncyCastle, один LLM (OpenAI/Gemini/Mistral), локальный RFC 3161 TSA.
 
-**Связанные документы:** [Видение и дорожная карта](VISION_AND_ROADMAP.md) (следующие шаги) · [PoC](PoC.md) · [Модель доверия](TRUST_MODEL.md)
+**Связанные документы:** [Видение и дорожная карта](VISION_AND_ROADMAP.md) (следующие шаги) · [PoC](PoC.md) · [Модель доверия](TRUST_MODEL.md) · [Будущие идеи](ideas/README.md)
 
 ---
 

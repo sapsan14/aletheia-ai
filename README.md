@@ -30,6 +30,7 @@ Docs are grouped by language in `docs/<lang>/` (en, ru, et). **Overview and wher
 | **Cryptographic Oracle** | [Crypto Oracle](docs/en/CRYPTO_ORACLE.md) | [Криптографический оракул](docs/ru/CRYPTO_ORACLE.md) | [Krüptograafiline oraakel](docs/et/CRYPTO_ORACLE.md) |
 | **Agent Audit Model** | [Agent Audit](docs/en/AGENT_AUDIT_MODEL.md) | [Модель аудита агентов](docs/ru/AGENT_AUDIT_MODEL.md) | [Agentide auditi mudel](docs/et/AGENT_AUDIT_MODEL.md) |
 | **Testing Strategy** | [Testing Strategy](docs/en/TESTING_STRATEGY.md) | [Стратегия тестирования](docs/ru/TESTING_STRATEGY.md) | [Testimise strateegia](docs/et/TESTING_STRATEGY.md) |
+| **Future ideas** (PKI for AI agents, OpenClaw, MCP) | — | [Будущие идеи](docs/ru/ideas/README.md) | [Tuleviku ideed](docs/et/ideas/README.md) |
 | **Crypto reference** (algorithms, keys, why tsaToken) | [Crypto reference](docs/en/CRYPTO_REFERENCE.md) | — | — |
 | **Architecture diagrams** | [Architecture diagrams](diagrams/architecture.md) (Mermaid: pipeline, trust chain, stack) | | |
 
