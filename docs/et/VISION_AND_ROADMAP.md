@@ -56,6 +56,10 @@ Vastuse-taseme attestatsioonist kaugemale võib usaldusinfrastruktuur ulatuda:
 
 Need on strateegilised perspektiivid: «allkirjastatud vastustest» **full-stack AI trust** — mudelid, andmed, agentid, vastused. Lähituleviku roadmap jääb vastuse attestatsiooni juurde; see on silmapiir.
 
+### Täiendavad usalduskihid
+
+Usaldus **tehtu** suhtes (kes mida tegi, millal) täieneb teiste kihtidega. **Proof of Human** (nt [World ID](https://worldcoin.org) / Orb ja sarnased) vastab küsimusele «kes on inimene» ilma isikuandmeid avaldamata. Aletheia vastab «mida täpselt tehti, kes ja millal». Need on ortogonaalsed teljed: üks kiht on inimese identiteet, teine on tulemuse krüptograafiline tõend. Proof of Human võib olla valikuline sisend agentide sertifikaatide väljastamisel (nt «agent kontrollitava inimese all»). Täpsemalt: [idee: World ID ja Aletheia](../ru/ideas/WORLD_ID_AND_ALETHEIA.md) (RU).
+
 ---
 
 ## Strateegiline teekond
@@ -195,7 +199,7 @@ Vaata: [Ajatemplid](TIMESTAMPING.md).
 
 → **Multi-agent usaldus** — lähemal teaduslikule kontrollile.
 
-**Laiendus:** PKI idee autonoomsete AI-agentide jaoks (OpenClaw, agentid MCP ökosüsteemis, kontroll ja sertifitseerimine meie PKI-ga) on kirjeldatud eraldi dokumendis: [Idee: PKI AI-agentide jaoks — kasutamine ja testimine](ideas/PKI_FOR_AI_AGENTS.md).
+**Laiendus:** PKI idee autonoomsete AI-agentide jaoks (OpenClaw, agentid MCP ökosüsteemis, kontroll ja sertifitseerimine meie PKI-ga) on kirjeldatud eraldi dokumendis: [Idee: PKI AI-agentide jaoks — kasutamine ja testimine](ideas/PKI_FOR_AI_AGENTS.md). MCP Identity positsioneerimine: [Idee: Aletheia ja MCP Identity](ideas/ALETHEIA_AND_MCP_IDENTITY.md).
 
 ---
 

@@ -56,6 +56,10 @@ Beyond response-level attestation, the trust infrastructure can extend to:
 
 These are strategic perspectives: they broaden Aletheia from "signed responses" to **full-stack AI trust** — models, data, agents, and responses. Near-term roadmap stays on response attestation; this is the horizon.
 
+### Complementary trust layers
+
+Trust in **what was done** (who did what, when) is complemented by other layers. **Proof of Human** (e.g. [World ID](https://worldcoin.org) / Orb and similar systems) answers “who is human” without revealing personal data. Aletheia answers “what was done, by whom, and when.” These are orthogonal axes: one layer is human identity; the other is cryptographic proof of the result. Proof of Human can be used as an optional input when issuing agent certificates (e.g. “agent under control of a verified human”). More: [idea: World ID and Aletheia](../ru/ideas/WORLD_ID_AND_ALETHEIA.md) (RU).
+
 ---
 
 ## Strategic roadmap

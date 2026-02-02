@@ -161,4 +161,4 @@ Aletheia:
 
 ---
 
-*Часть раздела [Будущие идеи](README.md). Документация Aletheia AI: [индекс](../../README.md), [Видение и дорожная карта](../VISION_AND_ROADMAP.md).*
+*Часть раздела [Будущие идеи](README.md). Документация Aletheia AI: [индекс](../../README.md), [Видение и дорожная карта](../VISION_AND_ROADMAP.md). Другие языки: [ET](../et/ideas/ALETHEIA_AND_MCP_IDENTITY.md).*
