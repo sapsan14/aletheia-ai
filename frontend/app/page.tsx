@@ -52,6 +52,8 @@ export default function Home() {
   const [responseData, setResponseData] = useState<AiAskResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [downloading, setDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
 
@@ -61,6 +63,7 @@ export default function Home() {
 
     setIsLoading(true);
     setError(null);
+    setDownloadError(null);
     setResponseData(null);
 
     try {
@@ -103,6 +106,49 @@ export default function Home() {
   const signed = !!(responseData?.signature?.trim());
   const timestamped = !!(responseData?.tsaToken?.trim());
   const verifiable = signed && timestamped;
+
+  async function handleDownloadEvidence() {
+    if (!responseData) return;
+    setDownloading(true);
+    setDownloadError(null);
+    try {
+      const res = await fetch(
+        `${apiUrl}/api/ai/evidence/${responseData.id}`
+      );
+      if (!res.ok) {
+        const text = await res.text();
+        const msg =
+          res.status === 404
+            ? "Response not found"
+            : res.status === 503
+              ? "Signing key not configured"
+              : text || `Download failed (${res.status})`;
+        setDownloadError(msg);
+        return;
+      }
+      const blob = await res.blob();
+      const disposition = res.headers.get("Content-Disposition");
+      let filename = `aletheia-evidence-${responseData.id}.aep`;
+      if (disposition) {
+        const match = /filename[*]?=(?:UTF-8'')?"?([^";\n]+)"?/i.exec(
+          disposition
+        );
+        if (match) filename = match[1].trim();
+      }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setDownloadError(
+        err instanceof Error ? err.message : "Download failed"
+      );
+    } finally {
+      setDownloading(false);
+    }
+  }
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-50 p-8 dark:bg-zinc-900">
@@ -189,12 +235,28 @@ export default function Home() {
                 <p className="text-xs text-zinc-500 dark:text-zinc-400">
                   Model: {responseData.model} · ID: {responseData.id}
                 </p>
-                <Link
-                  href={`/verify?id=${responseData.id}`}
-                  className="inline-flex items-center text-sm font-medium text-blue-600 hover:underline dark:text-blue-400"
-                >
-                  Verify this response →
-                </Link>
+                <div className="flex flex-wrap items-center gap-3">
+                  <Link
+                    href={`/verify?id=${responseData.id}`}
+                    className="inline-flex items-center text-sm font-medium text-blue-600 hover:underline dark:text-blue-400"
+                  >
+                    Verify this response →
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={handleDownloadEvidence}
+                    disabled={downloading}
+                    className="inline-flex items-center text-sm font-medium text-blue-600 hover:underline disabled:opacity-60 dark:text-blue-400"
+                    aria-label="Download Evidence Package (.aep)"
+                  >
+                    {downloading ? "Downloading…" : "Download evidence"}
+                  </button>
+                </div>
+                {downloadError && (
+                  <p className="text-xs text-red-600 dark:text-red-400">
+                    {downloadError}
+                  </p>
+                )}
               </div>
             )}
             {!responseData && !error && !isLoading && (

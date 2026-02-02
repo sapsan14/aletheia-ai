@@ -82,7 +82,7 @@ curl -o evidence-ID.aep "http://localhost:8080/api/ai/evidence/ID"
 curl -o evidence-1.aep "http://localhost:8080/api/ai/evidence/1"
 ```
 
-**Frontend:** If a “Download evidence” (or “Export .aep”) button exists, click it after the response; the file will download (e.g. `aletheia-evidence-1.aep`).
+**Frontend:** Click **Download evidence** after the response; the file will download (e.g. `aletheia-evidence-1.aep`).
 
 The file is a ZIP containing the seven components: `response.txt`, `canonical.bin`, `hash.sha256`, `signature.sig`, `timestamp.tsr`, `metadata.json`, `public_key.pem`.
 

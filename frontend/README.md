@@ -1,6 +1,6 @@
 # Aletheia AI — Frontend
 
-Next.js frontend for verifiable AI responses. Task 1.3 skeleton: Prompt input, Send button (Coming soon), Response area.
+Next.js frontend for verifiable AI responses. Prompt input, Send button, Response area with status (Signed, Timestamped, Verifiable), link to the verify page, and **Download evidence** to export the Evidence Package (`.aep`) for offline verification. After asking a question, click **Download evidence** to get the Evidence Package for the last response; the file is saved as `aletheia-evidence-<id>.aep`.
 
 ## Getting Started
 
