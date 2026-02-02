@@ -1,12 +1,25 @@
 # CodeQL analysis - runs on push to main and on pull requests targeting main
 # Required by branch protection for merge
+#
+# If you see "CodeQL analyses from advanced configurations cannot be processed
+# when the default setup is enabled": in repo Settings → Code security and
+# analysis → Code scanning, disable the default CodeQL setup so this workflow
+# is the only one; or (org) set code scanning to "Enabled with advanced setup allowed".
 name: "CodeQL"
 
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - "docs/**"
+      - "diagrams/**"
+      - "*.md"
   pull_request:
     branches: [main]
+    paths-ignore:
+      - "docs/**"
+      - "diagrams/**"
+      - "*.md"
 
 jobs:
   analyze:
@@ -58,3 +71,5 @@ jobs:
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
+        with:
+          category: /language:${{ matrix.language }}

@@ -17,6 +17,10 @@ name: "Deploy"
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - "docs/**"
+      - "diagrams/**"
+      - "*.md"
   workflow_dispatch:
 
 jobs:
