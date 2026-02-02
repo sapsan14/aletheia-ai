@@ -290,7 +290,7 @@ RSA signatures use random padding. Same hash + same key → different padding �
 **Doc index:** [docs/README.md](../docs/README.md) — overview and where to start.
 
 - **PoC:** [EN](../docs/en/PoC.md) · [RU](../docs/ru/PoC.md) · [ET](../docs/et/PoC.md)
-- **Plan:** [EN](../docs/en/plan.md) · [RU](../docs/ru/plan.md) · [ET](../docs/et/plan.md)
+- **Plan:** [EN](../docs/en/PLAN.md) · [RU](../docs/ru/PLAN.md) · [ET](../docs/et/PLAN.md)
 - **Signing:** [EN](../docs/en/SIGNING.md) · [RU](../docs/ru/SIGNING.md) · [ET](../docs/et/SIGNING.md)
 - **Timestamping:** [EN](../docs/en/TIMESTAMPING.md) · [RU](../docs/ru/TIMESTAMPING.md) · [ET](../docs/et/TIMESTAMPING.md)
 - **Trust model & eIDAS:** [EN](../docs/en/TRUST_MODEL.md) · [RU](../docs/ru/TRUST_MODEL.md) · [ET](../docs/et/TRUST_MODEL.md)

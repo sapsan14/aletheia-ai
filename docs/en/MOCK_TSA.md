@@ -531,7 +531,7 @@ src/test/resources/fixtures/timestamps/
 - [TIMESTAMPING](TIMESTAMPING.md) — RFC 3161 overview and test vectors
 - [CRYPTO_ORACLE](CRYPTO_ORACLE.md) — Testing philosophy and golden fixtures
 - [TESTING_STRATEGY](TESTING_STRATEGY.md) — Full testing approach with MOCK_TSA integration
-- [plan](plan.md) — Task 2.4: TimestampService implementation
+- [PLAN](PLAN.md) — Task 2.4: TimestampService implementation
 - [README](../../README.md) — Project overview
 
 ---

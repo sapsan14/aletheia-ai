@@ -4,7 +4,7 @@ Samm-sammuline plaan PoC koostamiseks: kontrollitavad AI vastused krüptograafil
 
 **Stekk (PoC põhjal):** Next.js, Java Spring Boot, PostgreSQL, OpenSSL/BouncyCastle, üks LLM (OpenAI/Gemini/Mistral), lokaalne RFC 3161 TSA.
 
-**Seotud:** [Visioon ja teekond](VISION_AND_ROADMAP.md) (järgmised sammud) · [PoC](PoC.md) · [Usaldusmudel](TRUST_MODEL.md) · [Tuleviku ideed](ideas/README.md)
+**Seotud:** [Visioon ja teekond](VISION_AND_ROADMAP.md) (järgmised sammud) · [Plaan Phase 2](PLAN_PHASE2.md) (killer demo, Evidence Package, võrguühenduseta kontrollija) · [PoC](PoC.md) · [Usaldusmudel](TRUST_MODEL.md) · [Tuleviku ideed](ideas/README.md)
 
 ---
 
@@ -133,7 +133,7 @@ Samm-sammuline plaan PoC koostamiseks: kontrollitavad AI vastused krüptograafil
 
 **Eesmärk:** Võimaldab arendajatel "katsuda" krüpto pipeline'i curliga enne täieliku /api/ai/ask ehitamist. Töötab ilma allkirjavõtmeta (tagastab hash; signature = null kui võtit pole).
 
-**Koodi juhend (LLM-readable):** vt [docs/en/plan.md](../en/plan.md#task-235--crypto-demo-endpoint-bridge-to-api).
+**Koodi juhend (LLM-readable):** vt [docs/en/PLAN.md](../en/PLAN.md#task-235--crypto-demo-endpoint-bridge-to-api).
 
 **Vastuvõtt:** POST /api/crypto/demo → 200; body hash, canonicalBase64, signature-ga; käsitsi test — curl, vt README.
 
@@ -335,7 +335,7 @@ Samm-sammuline plaan PoC koostamiseks: kontrollitavad AI vastused krüptograafil
 | **Staatus** | ✅ Tehtud |
 | **Kirjeldus** | Lisa SpringDoc OpenAPI + Swagger UI API dokumentatsiooniks ja interaktiivseks testimiseks. |
 
-**Millal rakendada:** Kui on 3+ REST endpoint'i või pärast Sammu 5. Üksikasjad ja LLM-readable prompt: vt [docs/en/plan.md](../en/plan.md#task-73--swagger--openapi-implement-when-needed).
+**Millal rakendada:** Kui on 3+ REST endpoint'i või pärast Sammu 5. Üksikasjad ja LLM-readable prompt: vt [docs/en/PLAN.md](../en/PLAN.md#task-73--swagger--openapi-implement-when-needed).
 
 ---
 

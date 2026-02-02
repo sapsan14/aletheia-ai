@@ -4,7 +4,7 @@ Step-by-step plan for building the PoC: verifiable AI responses with cryptograph
 
 **Stack (from PoC):** Next.js, Java Spring Boot, PostgreSQL, OpenSSL/BouncyCastle, one LLM (OpenAI/Gemini/Mistral), local RFC 3161 TSA.
 
-**Related:** [Vision & roadmap](VISION_AND_ROADMAP.md) (next steps) · [PoC](PoC.md) · [Trust model](TRUST_MODEL.md)
+**Related:** [Vision & roadmap](VISION_AND_ROADMAP.md) (next steps) · [Plan Phase 2](PLAN_PHASE2.md) (killer demo, Evidence Package, offline verifier) · [PoC](PoC.md) · [Trust model](TRUST_MODEL.md)
 
 ---
 
@@ -458,7 +458,7 @@ Step-by-step plan for building the PoC: verifiable AI responses with cryptograph
 
 **Coding prompt (LLM-readable):**
 - Add README section "Deployment". Subsections: (1) Quick deploy (Docker Compose): `docker-compose up -d`. (2) Full deploy (Ansible): `ansible-playbook -i deploy/ansible/inventory.yml deploy/ansible/playbook.yml`. (3) CI/CD: GitHub Actions on push to main. (4) Alternatives: Ansible-only (no Docker), script-only (bash over SSH) — briefly describe when to use. (5) Target VM: e.g. `ssh ubuntu@193.40.157.132`; list prerequisites (Ubuntu 22.04, SSH access).
-- Add link to docs/en/plan.md Step 8 for full task breakdown. Ensure LLM-readable prompts are included for future automation.
+- Add link to docs/en/PLAN.md Step 8 for full task breakdown. Ensure LLM-readable prompts are included for future automation.
 
 ### Deployment verification (implemented)
 

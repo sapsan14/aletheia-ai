@@ -22,7 +22,8 @@ Docs are grouped by language in `docs/<lang>/` (en, ru, et). **Overview and wher
 |-------|----|----|-----|
 | **PoC (architecture & stack)** | [PoC](docs/en/PoC.md) | [PoC (архитектура)](docs/ru/PoC.md) | [PoC (arhitektuur)](docs/et/PoC.md) |
 | **Vision & roadmap** (next steps, AI Claim, evidence package) | [Vision & roadmap](docs/en/VISION_AND_ROADMAP.md) | [Видение и дорожная карта](docs/ru/VISION_AND_ROADMAP.md) | [Visioon ja teekond](docs/et/VISION_AND_ROADMAP.md) |
-| **Implementation plan** | [Implementation plan](docs/en/plan.md) | [План реализации](docs/ru/plan.md) | [Rakendusplaan](docs/et/plan.md) |
+| **Implementation plan** | [PLAN](docs/en/PLAN.md) | [План реализации](docs/ru/PLAN.md) | [Rakendusplaan](docs/et/PLAN.md) |
+| **Plan Phase 2** (killer demo, Evidence Package, offline verifier) | [EN](docs/en/PLAN_PHASE2.md) | [RU](docs/ru/PLAN_PHASE2.md) | [ET](docs/et/PLAN_PHASE2.md) |
 | **Signing** | [Signing](docs/en/SIGNING.md) | [Подпись](docs/ru/SIGNING.md) | [Allkirjastamine](docs/et/SIGNING.md) |
 | **Timestamping** | [Timestamping](docs/en/TIMESTAMPING.md) | [Временные метки](docs/ru/TIMESTAMPING.md) | [Ajatemplid](docs/et/TIMESTAMPING.md) |
 | **Trust model & eIDAS** | [Trust model](docs/en/TRUST_MODEL.md) | [Модель доверия](docs/ru/TRUST_MODEL.md) | [Usaldusmudel](docs/et/TRUST_MODEL.md) |
@@ -92,7 +93,7 @@ For details: [Signing](docs/en/SIGNING.md), [Timestamping](docs/en/TIMESTAMPING.
 | `AI_ALETHEIA_TSA_URL` | when mode=real | `http://timestamp.digicert.com` (default) |
 | `NEXT_PUBLIC_API_URL` | frontend | `http://localhost:8080` |
 
-Full list: [.env.example](.env.example). Architecture: [PoC](docs/en/PoC.md), [plan](docs/en/plan.md).
+Full list: [.env.example](.env.example). Architecture: [PoC](docs/en/PoC.md), [PLAN](docs/en/PLAN.md).
 
 ---
 
@@ -250,7 +251,7 @@ Runs JUnit 5 tests: `HealthControllerTest` (GET /health → 200, `{"status":"UP"
 
 **Frontend:** `npm test` when test script is added.
 
-Detailed test scope and acceptance criteria per step: see [plan (EN)](docs/en/plan.md#testing-by-step), [plan (RU)](docs/ru/plan.md#тестирование-по-шагам), [plan (ET)](docs/et/plan.md#testimine-sammude-kaupa).
+Detailed test scope and acceptance criteria per step: see [plan (EN)](docs/en/PLAN.md#testing-by-step), [plan (RU)](docs/ru/PLAN.md#тестирование-по-шагам), [plan (ET)](docs/et/PLAN.md#testimine-sammude-kaupa).
 
 ---
 
@@ -359,7 +360,7 @@ Push to `main` triggers: **test** → **build** → **deploy** via Ansible. Manu
 
 Workflow: [.github/workflows/deploy.yml](.github/workflows/deploy.yml)
 
-**Alternatives:** Ansible-only (no containers), script-only (bash over SSH), Docker Compose only. See [plan Step 8](docs/en/plan.md#step-8--deployment-cicd) for detailed tasks and LLM-readable implementation prompts.
+**Alternatives:** Ansible-only (no containers), script-only (bash over SSH), Docker Compose only. See [plan Step 8](docs/en/PLAN.md#step-8--deployment-cicd) for detailed tasks and LLM-readable implementation prompts.
 
 ---
 

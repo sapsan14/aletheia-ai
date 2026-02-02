@@ -533,7 +533,7 @@ void testSignatureService_invalidKey_throwsException()
 - [Ajatemplid](TIMESTAMPING.md) — RFC 3161 protokoll, TSA endpoint
 - [Usaldusmudel](TRUST_MODEL.md) — Kes mida kinnitab, usaldusahel
 - [Agentide auditi mudel](AGENT_AUDIT_MODEL.md) — LLM väljundi auditeerimine, audit kirjed
-- [Implementeerimise plaan](plan.md) — Task 2.4: TimestampService implementatsioon
+- [Implementeerimise plaan](PLAN.md) — Task 2.4: TimestampService implementatsioon
 - [Arhitektuuri diagrammid](../../diagrams/architecture.md) — Pipeline ülevaade
 - [README](../../README.md) — Projekti ülevaade, käivitamise juhised
 

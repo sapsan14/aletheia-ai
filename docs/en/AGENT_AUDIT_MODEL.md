@@ -418,7 +418,7 @@ It is about:
 - [Cryptographic Oracle (CRYPTO_ORACLE)](CRYPTO_ORACLE.md) — Testing agent outputs for reproducibility
 - [MOCK_TSA (MOCK_TSA)](MOCK_TSA.md) — Deterministic TSA for testing agent audit records
 - [Architecture Diagrams](../../diagrams/architecture.md) — Pipeline: canonicalize → hash → sign → timestamp
-- [Implementation Plan (plan)](plan.md) — Task roadmap for implementing audit trail
+- [Implementation Plan (PLAN)](PLAN.md) — Task roadmap for implementing audit trail
 - [README](../../README.md) — Project overview, design philosophy
 
 ---

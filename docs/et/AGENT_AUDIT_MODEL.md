@@ -418,7 +418,7 @@ See käsitleb:
 - [Krüptograafiline oraakel (CRYPTO_ORACLE)](CRYPTO_ORACLE.md) — Agentide väljundite testimine reprodutseeritavuse jaoks
 - [MOCK_TSA (MOCK_TSA)](MOCK_TSA.md) — Deterministlik TSA agentide auditi kirjete testimiseks
 - [Arhitektuuri diagrammid](../../diagrams/architecture.md) — Pipeline: kanoniseerimine → räsi → allkiri → ajatempel
-- [Implementeerimise plaan (plan)](plan.md) — Ülesannete tegevuskava audit trail'i implementeerimiseks
+- [Implementeerimise plaan (PLAN)](PLAN.md) — Ülesannete tegevuskava audit trail'i implementeerimiseks
 - [README](../../README.md) — Projekti ülevaade, disaini filosoofia
 
 ---

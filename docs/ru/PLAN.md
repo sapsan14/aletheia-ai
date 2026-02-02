@@ -4,7 +4,7 @@
 
 **Стек (из PoC):** Next.js, Java Spring Boot, PostgreSQL, OpenSSL/BouncyCastle, один LLM (OpenAI/Gemini/Mistral), локальный RFC 3161 TSA.
 
-**Связанные документы:** [Видение и дорожная карта](VISION_AND_ROADMAP.md) (следующие шаги) · [PoC](PoC.md) · [Модель доверия](TRUST_MODEL.md) · [Будущие идеи](ideas/README.md)
+**Связанные документы:** [Видение и дорожная карта](VISION_AND_ROADMAP.md) (следующие шаги) · [План Phase 2](PLAN_PHASE2.md) (killer demo, Evidence Package, офлайн-верификатор) · [PoC](PoC.md) · [Модель доверия](TRUST_MODEL.md) · [Будущие идеи](ideas/README.md)
 
 ---
 
@@ -133,7 +133,7 @@
 
 **Цель:** Позволяет разработчикам «потрогать руками» crypto pipeline через curl до реализации полного /api/ai/ask. Работает без ключа подписи (возвращает hash; signature = null при отсутствии ключа).
 
-**Инструкция для кодинга (LLM-readable):** см. [docs/en/plan.md](../en/plan.md#task-235--crypto-demo-endpoint-bridge-to-api).
+**Инструкция для кодинга (LLM-readable):** см. [docs/en/PLAN.md](../en/PLAN.md#task-235--crypto-demo-endpoint-bridge-to-api).
 
 **Приёмка:** POST /api/crypto/demo → 200; body с hash, canonicalBase64, signature; ручной тест — curl, см. README.
 
@@ -335,7 +335,7 @@
 | **Статус** | ✅ Готово |
 | **Описание** | Добавить SpringDoc OpenAPI + Swagger UI для документирования API и интерактивного тестирования. |
 
-**Когда реализовывать:** При наличии 3+ REST endpoints или после Этапа 5 (POST /api/ai/ask, GET /api/ai/verify/:id). Подробности и LLM-readable prompt: см. [docs/en/plan.md](../en/plan.md#task-73--swagger--openapi-implement-when-needed).
+**Когда реализовывать:** При наличии 3+ REST endpoints или после Этапа 5 (POST /api/ai/ask, GET /api/ai/verify/:id). Подробности и LLM-readable prompt: см. [docs/en/PLAN.md](../en/PLAN.md#task-73--swagger--openapi-implement-when-needed).
 
 ---
 
@@ -366,7 +366,7 @@
 | **Оценка** | 3–4 ч |
 | **Описание** | Создать Dockerfile для backend (multi-stage: Maven → JRE) и frontend (multi-stage: npm build → nginx/Node). |
 
-**Инструкция для кодинга (LLM-readable):** см. [docs/en/plan.md](../en/plan.md#task-81--dockerfiles-for-backend-and-frontend).
+**Инструкция для кодинга (LLM-readable):** см. [docs/en/PLAN.md](../en/PLAN.md#task-81--dockerfiles-for-backend-and-frontend).
 
 ---
 
@@ -377,7 +377,7 @@
 | **Оценка** | 2 ч |
 | **Описание** | Добавить backend и frontend в docker-compose.yml; настроить сеть и env. |
 
-**Инструкция для кодинга (LLM-readable):** см. [docs/en/plan.md](../en/plan.md#task-82--extend-docker-compose-for-app-services).
+**Инструкция для кодинга (LLM-readable):** см. [docs/en/PLAN.md](../en/PLAN.md#task-82--extend-docker-compose-for-app-services).
 
 ---
 
@@ -388,7 +388,7 @@
 | **Оценка** | 4–5 ч |
 | **Описание** | Playbook: установка Docker, клонирование репо, шаблон .env, docker-compose up. TSA по умолчанию: DigiCert. |
 
-**Инструкция для кодинга (LLM-readable):** см. [docs/en/plan.md](../en/plan.md#task-83--ansible-playbook-for-vm-setup-and-deploy).
+**Инструкция для кодинга (LLM-readable):** см. [docs/en/PLAN.md](../en/PLAN.md#task-83--ansible-playbook-for-vm-setup-and-deploy).
 
 ---
 
@@ -399,7 +399,7 @@
 | **Оценка** | 3–4 ч |
 | **Описание** | При push в main: тесты, сборка образов, деплой по SSH + Ansible. |
 
-**Инструкция для кодинга (LLM-readable):** см. [docs/en/plan.md](../en/plan.md#task-84--github-actions-workflow-for-deploy).
+**Инструкция для кодинга (LLM-readable):** см. [docs/en/PLAN.md](../en/PLAN.md#task-84--github-actions-workflow-for-deploy).
 
 ---
 
@@ -410,7 +410,7 @@
 | **Оценка** | 1–2 ч |
 | **Описание** | Раздел Deployment в README; альтернативные варианты. |
 
-**Инструкция для кодинга (LLM-readable):** см. [docs/en/plan.md](../en/plan.md#task-85--readme-and-deployment-docs).
+**Инструкция для кодинга (LLM-readable):** см. [docs/en/PLAN.md](../en/PLAN.md#task-85--readme-and-deployment-docs).
 
 ---
 

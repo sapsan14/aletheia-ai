@@ -853,7 +853,7 @@ void timestampMatchesGoldenFixture() throws Exception {
 - [Временные метки (TIMESTAMPING)](TIMESTAMPING.md) — RFC 3161, TSA endpoint, что метим по времени
 - [Подпись (SIGNING)](SIGNING.md) — алгоритмы подписи, детерминизм RSA PKCS#1 v1.5
 - [Модель доверия (TRUST_MODEL)](TRUST_MODEL.md) — кто что удостоверяет, почему TSA важен
-- [План имплементации (plan)](plan.md) — Задача 2.4: TimestampService (где будет использоваться MOCK_TSA)
+- [План имплементации (PLAN)](PLAN.md) — Задача 2.4: TimestampService (где будет использоваться MOCK_TSA)
 - [Архитектурные диаграммы](../../diagrams/architecture.md) — pipeline с timestamp шагом
 - [README](../../README.md) — обзор проекта Aletheia AI
 

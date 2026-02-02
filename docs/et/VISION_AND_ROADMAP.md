@@ -2,7 +2,7 @@
 
 Tootevisioon ja järgmised sammud: krüptograafiliselt kontrollitavate AI vastuste juurest **AI attestatsioonini** ja **usaldusinfrastruktuurini**. Strateegiline suund praeguse PoC ja demo taga.
 
-**Seotud:** [PoC (arhitektuur)](PoC.md) · [Rakendusplaan](plan.md) · [Usaldusmudel](TRUST_MODEL.md) · [Tuleviku ideed](ideas/README.md)
+**Seotud:** [PoC (arhitektuur)](PoC.md) · [Rakendusplaan](PLAN.md) · [Usaldusmudel](TRUST_MODEL.md) · [Tuleviku ideed](ideas/README.md)
 
 ---
 
@@ -113,6 +113,8 @@ Tuleb valida **üks** põhivaldkond. Soovitus: **legal / compliance AI** (EU AI 
 | **AI žurnalistika / faktiväited** | Kontrollitavad allikad ja väited |
 
 Oluline: mitte «chat», vaid **väited tagajärgedega**.
+
+**Konkreetne plaan:** Samm-sammulised ülesanded (Evidence Package, võrguühenduseta kontrollija, üks killer demo stsenaarium, LLM-readable koodi juhendid) on dokumendis [Plaan Phase 2](PLAN_PHASE2.md). Seal on ka [võimaluste kirjeldus](PLAN_PHASE2.md#võimalused-miks-see-suund) (turg, nišš, eristaja) lihtsas keeles.
 
 ---
 
@@ -229,4 +231,4 @@ Vaata: [Ajatemplid](TIMESTAMPING.md).
 
 ---
 
-*Dokument kuulub Aletheia AI dokumentatsiooni. Rakendamise üksikasjad ja navigeerimine: [README](../../README.md), [plaan](plan.md), [dokumendite indeks](../README.md).*
+*Dokument kuulub Aletheia AI dokumentatsiooni. Rakendamise üksikasjad ja navigeerimine: [README](../../README.md), [plaan](PLAN.md), [dokumendite indeks](../README.md).*

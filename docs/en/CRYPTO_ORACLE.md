@@ -402,7 +402,7 @@ Cryptographic test oracles provide:
 - [Timestamping (TIMESTAMPING)](TIMESTAMPING.md) — RFC 3161, TSA endpoint, what we timestamp
 - [Signing (SIGNING)](SIGNING.md) — RSA PKCS#1 v1.5, deterministic signatures
 - [Trust Model (TRUST_MODEL)](TRUST_MODEL.md) — Who attests what, eIDAS mapping
-- [Implementation Plan (plan)](plan.md) — Task 2.4: TimestampService (where oracles are used)
+- [Implementation Plan (PLAN)](PLAN.md) — Task 2.4: TimestampService (where oracles are used)
 - [Architecture Diagrams](../../diagrams/architecture.md) — Pipeline with crypto layer and trust chain
 - [README](../../README.md) — Project overview, design, run instructions
 

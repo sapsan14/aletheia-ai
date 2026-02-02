@@ -2,7 +2,7 @@
 
 This document describes the proposed PoC architecture for a system of verifiable AI responses with cryptographic signing and timestamps.
 
-**Related:** [Vision & roadmap](VISION_AND_ROADMAP.md) · [Implementation plan](plan.md) · [Trust model](TRUST_MODEL.md) · [Architecture diagrams](../../diagrams/architecture.md)
+**Related:** [Vision & roadmap](VISION_AND_ROADMAP.md) · [Implementation plan](PLAN.md) · [Trust model](TRUST_MODEL.md) · [Architecture diagrams](../../diagrams/architecture.md)
 
 ---
 
@@ -291,7 +291,7 @@ Minimal but powerful:
 - **Ansible:** VM setup (Docker install), .env template, `docker-compose up`.
 - **GitHub Actions:** On push to main: tests → build → deploy via SSH/Ansible.
 
-**Alternatives:** Ansible-only (no containers), script-only (bash over SSH), Docker Compose only. See [plan.md](plan.md) Step 8 for detailed tasks and LLM-readable prompts.
+**Alternatives:** Ansible-only (no containers), script-only (bash over SSH), Docker Compose only. See [PLAN](PLAN.md) Step 8 for detailed tasks and LLM-readable prompts.
 
 ---
 

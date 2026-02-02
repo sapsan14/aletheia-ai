@@ -400,7 +400,7 @@ Krüptograafilised testoraaklit pakuvad:
 - [Ajatemplid (TIMESTAMPING)](TIMESTAMPING.md) — RFC 3161, TSA endpoint, mida me ajatempliga märgime
 - [Allkirjastamine (SIGNING)](SIGNING.md) — RSA PKCS#1 v1.5, deterministlikud allkirjad
 - [Usaldusmudel (TRUST_MODEL)](TRUST_MODEL.md) — Kes mida kinnitab, eIDAS vastendus
-- [Implementeerimise plaan (plan)](plan.md) — Ülesanne 2.4: TimestampService (kus oraaklit kasutatakse)
+- [Implementeerimise plaan (PLAN)](PLAN.md) — Ülesanne 2.4: TimestampService (kus oraaklit kasutatakse)
 - [Arhitektuuri diagrammid](../../diagrams/architecture.md) — Pipeline krüptokihi ja usaldusahelaga
 - [README](../../README.md) — Projekti ülevaade, disain, käivitamise juhised
 

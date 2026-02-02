@@ -2,7 +2,7 @@
 
 Product vision and next steps: from cryptographically verifiable AI responses to **AI attestation** and **trust infrastructure**. Strategic direction beyond the current PoC and demo.
 
-**Related:** [PoC (architecture)](PoC.md) · [Implementation plan](plan.md) · [Trust model](TRUST_MODEL.md)
+**Related:** [PoC (architecture)](PoC.md) · [Implementation plan](PLAN.md) · [Trust model](TRUST_MODEL.md)
 
 ---
 
@@ -113,6 +113,8 @@ Focus on **one** primary domain first. Recommended: **legal / compliance AI** (E
 | **AI journalism / fact claims** | Verifiable sources and claims |
 
 Important: not “chat,” but **assertions with consequences**.
+
+**Concrete plan:** Step-by-step tasks (Evidence Package, offline verifier, one killer demo scenario, LLM-readable coding prompts) are in [Plan Phase 2](PLAN_PHASE2.md). It also describes [opportunities](PLAN_PHASE2.md#opportunities-why-this-direction) (market, niche, differentiator) in plain language.
 
 ---
 
@@ -227,4 +229,4 @@ One AI answers; another AI **verifies** the assertion. Both answers are signed a
 
 ---
 
-*Part of Aletheia AI docs. See [README](../../README.md), [plan](plan.md), and [doc index](../README.md) for implementation details and where to start.*
+*Part of Aletheia AI docs. See [README](../../README.md), [PLAN](PLAN.md), and [doc index](../README.md) for implementation details and where to start.*

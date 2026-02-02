@@ -2,7 +2,7 @@
 
 Dokument kirjeldab ettepanekul olevat PoC-arhitektuuri süsteemile, mis tagab tehisintellekti vastuste kinnitamise krüptograafilise allkirja ja ajatemplite abil.
 
-**Seotud:** [Visioon ja teekond](VISION_AND_ROADMAP.md) · [Rakendusplaan](plan.md) · [Usaldusmudel](TRUST_MODEL.md) · [Arhitektuuri diagrammid](../../diagrams/architecture.md)
+**Seotud:** [Visioon ja teekond](VISION_AND_ROADMAP.md) · [Rakendusplaan](PLAN.md) · [Usaldusmudel](TRUST_MODEL.md) · [Arhitektuuri diagrammid](../../diagrams/architecture.md)
 
 ---
 
@@ -291,7 +291,7 @@ Minimaalne, kuid võimas:
 - **Ansible:** VM seadistus (Docker install), .env mall, `docker-compose up`.
 - **GitHub Actions:** Push main'ile: testid → build → deploy üle SSH/Ansible.
 
-**Alternatiivid:** Ainult Ansible, ainult skript (bash üle SSH), ainult Docker Compose. Üksikasjad [plan.md](plan.md) Samm 8.
+**Alternatiivid:** Ainult Ansible, ainult skript (bash üle SSH), ainult Docker Compose. Üksikasjad [PLAN](PLAN.md) Samm 8.
 
 ---
 

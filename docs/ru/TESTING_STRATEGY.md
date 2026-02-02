@@ -537,7 +537,7 @@ void testSignatureService_invalidKey_throwsException()
 - [Временные метки](TIMESTAMPING.md) — Протокол RFC 3161, TSA endpoint
 - [Модель доверия](TRUST_MODEL.md) — Кто что удостоверяет, цепочка доверия
 - [Модель аудита агентов](AGENT_AUDIT_MODEL.md) — Аудит выходов LLM, audit records
-- [План имплементации](plan.md) — Task 2.4: имплементация TimestampService
+- [План имплементации](PLAN.md) — Task 2.4: имплементация TimestampService
 - [Архитектурные диаграммы](../../diagrams/architecture.md) — Обзор pipeline
 - [README](../../README.md) — Обзор проекта, инструкции по запуску
 

@@ -400,7 +400,7 @@ void matchesOracle() {
 - [Временные метки (TIMESTAMPING)](TIMESTAMPING.md) — RFC 3161, TSA endpoint, что метим по времени
 - [Подпись (SIGNING)](SIGNING.md) — RSA PKCS#1 v1.5, детерминированные подписи
 - [Модель доверия (TRUST_MODEL)](TRUST_MODEL.md) — Кто что удостоверяет, соответствие eIDAS
-- [План имплементации (plan)](plan.md) — Задача 2.4: TimestampService (где используются оракулы)
+- [План имплементации (PLAN)](PLAN.md) — Задача 2.4: TimestampService (где используются оракулы)
 - [Архитектурные диаграммы](../../diagrams/architecture.md) — Pipeline с крипто-слоем и цепочкой доверия
 - [README](../../README.md) — Обзор проекта, дизайн, инструкции по запуску
 
