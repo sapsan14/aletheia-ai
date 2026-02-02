@@ -36,6 +36,7 @@ Same topics exist in **Russian** ([docs/ru/](ru/)) and **Estonian** ([docs/et/](
 | **Agent Audit** | Audit model for LLM agents | [AGENT_AUDIT](en/AGENT_AUDIT_MODEL.md) | [Аудит агентов](ru/AGENT_AUDIT_MODEL.md) | [Agentide audit](et/AGENT_AUDIT_MODEL.md) |
 | **Testing strategy** | Unit, integration, fixtures, CI | [TESTING_STRATEGY](en/TESTING_STRATEGY.md) | [Стратегия тестирования](ru/TESTING_STRATEGY.md) | [Testimise strateegia](et/TESTING_STRATEGY.md) |
 | **Future ideas** (PKI for AI agents, OpenClaw, MCP) | — | [Идеи](ru/ideas/README.md) | [Ideed](et/ideas/README.md) |
+| **Legal & regulatory** | EU law: eIDAS, AI Act, GDPR, ETSI timestamps | [legal/README.md](legal/README.md) | | |
 | **Diagrams** | Mermaid: pipeline, trust chain, stack | [diagrams/architecture.md](../diagrams/architecture.md) | | |
 
 ---

@@ -46,5 +46,8 @@ Thumbs.db
 # H2 file-based database (local dev)
 backend/data/
 
+# Legal PDFs (download via docs/legal/download.sh or manually)
+docs/legal/downloads/
+
 # Optional: Liquibase / DB
 # *.liquibase-backup

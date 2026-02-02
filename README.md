@@ -33,6 +33,7 @@ Docs are grouped by language in `docs/<lang>/` (en, ru, et). **Overview and wher
 | **Testing Strategy** | [Testing Strategy](docs/en/TESTING_STRATEGY.md) | [Стратегия тестирования](docs/ru/TESTING_STRATEGY.md) | [Testimise strateegia](docs/et/TESTING_STRATEGY.md) |
 | **Future ideas** (PKI for AI agents, OpenClaw, MCP) | — | [Будущие идеи](docs/ru/ideas/README.md) | [Tuleviku ideed](docs/et/ideas/README.md) |
 | **Crypto reference** (algorithms, keys, why tsaToken) | [Crypto reference](docs/en/CRYPTO_REFERENCE.md) | — | — |
+| **Legal & regulatory** (eIDAS, EU AI Act, GDPR, ETSI) | [Legal docs](docs/legal/README.md) | | |
 | **Architecture diagrams** | [Architecture diagrams](diagrams/architecture.md) (Mermaid: pipeline, trust chain, stack) | | |
 
 ### README contents
@@ -44,6 +45,7 @@ Docs are grouped by language in `docs/<lang>/` (en, ru, et). **Overview and wher
 - [Backend & database](#backend--database)
 - [Main AI endpoint](#main-ai-endpoint)
 - [Evidence Package](#evidence-package)
+- [Offline verification](#offline-verification-dp22)
 - [LLM (OpenAI)](#llm-openai)
 - [Audit demo (tangible test)](#audit-demo-tangible-test)
 - [Crypto demo endpoint](#crypto-demo-endpoint)
@@ -171,6 +173,31 @@ curl "http://localhost:8080/api/ai/evidence/1?format=json"
 ```
 
 See [Plan Phase 2](docs/en/PLAN_PHASE2.md) for the Evidence Package format (DP2.1.1) and offline verifier.
+
+### Offline verification (DP2.2)
+
+You can verify an Evidence Package **without calling the Aletheia backend**: use the Java verifier (backend) or the OpenSSL script.
+
+**Verification order:** (1) **Hash** — recompute SHA-256 of `canonical.bin` and compare with `hash.sha256`. (2) **Signature** — load `public_key.pem`, verify `signature.sig` over the hash (RSA PKCS#1 v1.5 over DigestInfo(SHA-256, hash)). (3) **TSA token** — parse `timestamp.tsr` (RFC 3161), read `genTime`, optionally verify TSA signature.
+
+**Shell script (OpenSSL only):**
+```bash
+./scripts/verify-evidence.sh /path/to/package-dir
+# or
+./scripts/verify-evidence.sh /path/to/evidence.aep
+```
+Exit 0 = VALID, 1 = INVALID. Requires `openssl`, `xxd`, `base64`, `unzip`. Optional: set `TSA_CA_FILE` to a TSA CA PEM to verify the timestamp signature.
+
+**Java verifier (CLI):**
+```bash
+# From repo root (runs VerifierMain via Maven)
+./scripts/verify-evidence-java.sh /path/to/package-dir
+./scripts/verify-evidence-java.sh /path/to/evidence.aep
+
+# Or from backend/ directly
+cd backend && mvn exec:java -Dexec.mainClass="ai.aletheia.verifier.VerifierMain" -Dexec.args="/path/to/package"
+```
+Exit 0 = VALID, 1 = INVALID. No backend server or network call. Programmatic use: `new EvidenceVerifierImpl().verify(path)` returns `VerificationResult(valid, report, failureReason)`. Unit tests: `EvidenceVerifierTest`.
 
 ---
 
