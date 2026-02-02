@@ -82,6 +82,11 @@
 			<artifactId>bcprov-jdk18on</artifactId>
 			<version>1.78.1</version>
 		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcutil-jdk18on</artifactId>
+			<version>1.78.1</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -98,5 +103,80 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<profiles>
+		<profile>
+			<id>verifier</id>
+			<build>
+				<plugins>
+					<!-- Skip Spring Boot repackage so the main artifact stays the plain JAR for shade -->
+					<plugin>
+						<groupId>org.springframework.boot</groupId>
+						<artifactId>spring-boot-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>repackage</id>
+								<phase>none</phase>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-shade-plugin</artifactId>
+						<version>3.6.0</version>
+						<executions>
+							<execution>
+								<id>verifier-shade</id>
+								<phase>package</phase>
+								<goals>
+									<goal>shade</goal>
+								</goals>
+								<configuration>
+									<finalName>aletheia-verifier</finalName>
+									<transformers>
+										<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+											<mainClass>ai.aletheia.verifier.VerifierMain</mainClass>
+										</transformer>
+									</transformers>
+									<filters>
+										<filter>
+											<artifact>${project.groupId}:${project.artifactId}</artifact>
+											<includes>
+												<include>ai/aletheia/verifier/**</include>
+												<include>ai/aletheia/evidence/**</include>
+											</includes>
+										</filter>
+										<filter>
+											<artifact>org.bouncycastle:*</artifact>
+											<includes>
+												<include>**</include>
+											</includes>
+										</filter>
+										<filter>
+											<artifact>*:*</artifact>
+											<excludes>
+												<exclude>META-INF/*.SF</exclude>
+												<exclude>META-INF/*.DSA</exclude>
+												<exclude>META-INF/*.RSA</exclude>
+											</excludes>
+										</filter>
+									</filters>
+									<artifactSet>
+										<includes>
+											<include>${project.groupId}:${project.artifactId}</include>
+											<include>org.bouncycastle:bcpkix-jdk18on</include>
+											<include>org.bouncycastle:bcprov-jdk18on</include>
+											<include>org.bouncycastle:bcutil-jdk18on</include>
+										</includes>
+									</artifactSet>
+									<createDependencyReducedPom>false</createDependencyReducedPom>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 
 </project>

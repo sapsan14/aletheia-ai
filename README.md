@@ -190,14 +190,16 @@ Exit 0 = VALID, 1 = INVALID. Requires `openssl`, `xxd`, `base64`, `unzip`. Optio
 
 **Java verifier (CLI):**
 ```bash
-# From repo root (runs VerifierMain via Maven)
-./scripts/verify-evidence-java.sh /path/to/package-dir
-./scripts/verify-evidence-java.sh /path/to/evidence.aep
+# Standalone JAR (no Maven at runtime)
+cd backend && mvn package -Pverifier -DskipTests
+java -jar backend/target/aletheia-verifier.jar /path/to/package-dir
+java -jar backend/target/aletheia-verifier.jar /path/to/evidence.aep
 
-# Or from backend/ directly
-cd backend && mvn exec:java -Dexec.mainClass="ai.aletheia.verifier.VerifierMain" -Dexec.args="/path/to/package"
+# Or via Maven (from repo root)
+./scripts/verify-evidence-java.sh /path/to/package-dir
+# Or from backend/: mvn exec:java -Dexec.mainClass="ai.aletheia.verifier.VerifierMain" -Dexec.args="/path/to/package"
 ```
-Exit 0 = VALID, 1 = INVALID. No backend server or network call. Programmatic use: `new EvidenceVerifierImpl().verify(path)` returns `VerificationResult(valid, report, failureReason)`. Unit tests: `EvidenceVerifierTest`.
+Exit 0 = VALID, 1 = INVALID. No backend server or network call. The `-Pverifier` profile builds a fat JAR (verifier + BouncyCastle only) at `backend/target/aletheia-verifier.jar`. Programmatic use: `new EvidenceVerifierImpl().verify(path)`. Unit tests: `EvidenceVerifierTest`.
 
 ---
 

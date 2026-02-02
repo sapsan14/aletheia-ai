@@ -1,5 +1,6 @@
 # Build & runtime
 backend/target/
+backend/dependency-reduced-pom.xml
 backend/.mvn/wrapper/maven-wrapper.jar
 node_modules/
 .next/
