@@ -7,6 +7,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
+import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -17,6 +18,7 @@ import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -210,6 +212,18 @@ public class SignatureServiceImpl implements SignatureService {
         if (privateKey == null) {
             throw new IllegalStateException(
                     "Signing key not configured: set ai.aletheia.signing.key-path to PEM file path");
+        }
+    }
+
+    @Override
+    public String getPublicKeyPem() {
+        ensureKeysLoaded();
+        try (StringWriter sw = new StringWriter(); JcaPEMWriter w = new JcaPEMWriter(sw)) {
+            w.writeObject(publicKey);
+            w.flush();
+            return sw.toString();
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to export public key as PEM", e);
         }
     }
 }

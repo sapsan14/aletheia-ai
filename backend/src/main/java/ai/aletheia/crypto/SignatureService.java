@@ -41,4 +41,12 @@ public interface SignatureService {
      * @return true if the signature is valid
      */
     boolean verify(byte[] hashBytes, byte[] signatureBytes);
+
+    /**
+     * Export the public key used for signing as PEM (e.g. for Evidence Package).
+     *
+     * @return PEM string (-----BEGIN PUBLIC KEY----- ... -----END PUBLIC KEY-----)
+     * @throws IllegalStateException if signing key is not configured
+     */
+    String getPublicKeyPem();
 }

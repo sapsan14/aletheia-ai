@@ -82,6 +82,22 @@ We focus Phase 2 on **legal / compliance AI** (contracts, clauses, EU AI Act, au
 |-----------|--------------|---------------------|
 | Doc | Format spec | All seven components listed; naming and content type (text/binary/JSON) defined. |
 
+**Evidence Package format (.aep) — minimal set**
+
+An Evidence Package is a directory or a `.aep` archive (e.g. ZIP) containing exactly the following seven components. All filenames are fixed.
+
+| # | Filename        | Description                                      | Content type / format                    |
+|---|-----------------|--------------------------------------------------|------------------------------------------|
+| 1 | `response.txt`  | Raw AI response text as returned to the client  | UTF-8 text                               |
+| 2 | `canonical.bin` | Canonical form of the content used for hashing  | Binary (exact bytes fed to SHA-256)      |
+| 3 | `hash.sha256`   | SHA-256 of the canonical bytes                  | 64 ASCII hex chars (lowercase or mixed)  |
+| 4 | `signature.sig` | Signature over the hash (or canonical bytes)    | Base64-encoded binary                    |
+| 5 | `timestamp.tsr` | RFC 3161 TSA token                              | Base64-encoded binary                    |
+| 6 | `metadata.json`| Model, timestamp, optional ids                  | JSON (e.g. model, created_at ISO 8601)   |
+| 7 | `public_key.pem`| Public key used for signing                     | PEM (so verifier needs no backend)      |
+
+Verification uses: `canonical.bin` → recompute hash and compare with `hash.sha256`; load `public_key.pem` and verify `signature.sig` over the hash; parse `timestamp.tsr` and validate TSA token. `response.txt` and `metadata.json` are for display and audit.
+
 ---
 
 #### Task DP2.1.2 — Backend: generate Evidence Package for a response

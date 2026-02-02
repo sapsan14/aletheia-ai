@@ -43,6 +43,7 @@ Docs are grouped by language in `docs/<lang>/` (en, ru, et). **Overview and wher
 - [Quick start](#quick-start)
 - [Backend & database](#backend--database)
 - [Main AI endpoint](#main-ai-endpoint)
+- [Evidence Package](#evidence-package)
 - [LLM (OpenAI)](#llm-openai)
 - [Audit demo (tangible test)](#audit-demo-tangible-test)
 - [Crypto demo endpoint](#crypto-demo-endpoint)
@@ -155,6 +156,21 @@ curl -X POST http://localhost:8080/api/ai/ask -H "Content-Type: application/json
 curl http://localhost:8080/api/ai/verify/1
 # → full record for verification page
 ```
+
+### Evidence Package
+
+**GET /api/ai/evidence/:id** — build and download the Evidence Package (.aep) for a stored response. Returns a ZIP archive containing the seven components required for offline verification (response.txt, canonical.bin, hash.sha256, signature.sig, timestamp.tsr, metadata.json, public_key.pem). Requires a configured signing key. Use `?format=json` to get JSON with base64-encoded file contents instead of ZIP.
+
+```bash
+# After POST /api/ai/ask or /api/audit/demo, get the response id (e.g. 1)
+curl -o evidence-1.aep "http://localhost:8080/api/ai/evidence/1"
+# → saves aletheia-evidence-1.aep (ZIP)
+
+curl "http://localhost:8080/api/ai/evidence/1?format=json"
+# → JSON with keys: response.txt, canonical.bin, hash.sha256, signature.sig, timestamp.tsr, metadata.json, public_key.pem (values are base64)
+```
+
+See [Plan Phase 2](docs/en/PLAN_PHASE2.md) for the Evidence Package format (DP2.1.1) and offline verifier.
 
 ---
 
