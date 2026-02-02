@@ -44,8 +44,9 @@ Docs are grouped by language in `docs/<lang>/` (en, ru, et). **Overview and wher
 - [Quick start](#quick-start)
 - [Backend & database](#backend--database)
 - [Main AI endpoint](#main-ai-endpoint)
-- [Evidence Package](#evidence-package)
-- [Offline verification](#offline-verification-dp22)
+- [Evidence Package & offline verification](#evidence-package--offline-verification)
+- [Killer demo (Phase 2)](#killer-demo-phase-2)
+- [Works with MCP / any agent](#works-with-mcp--any-agent)
 - [LLM (OpenAI)](#llm-openai)
 - [Audit demo (tangible test)](#audit-demo-tangible-test)
 - [Crypto demo endpoint](#crypto-demo-endpoint)
@@ -159,7 +160,9 @@ curl http://localhost:8080/api/ai/verify/1
 # → full record for verification page
 ```
 
-### Evidence Package
+### Evidence Package & offline verification
+
+Each signed response can be exported as an **Evidence Package** (`.aep`) and verified **offline** with the verifier CLI — no Aletheia backend call. See [Plan Phase 2](docs/en/PLAN_PHASE2.md) for the format and [scripts/README.md](scripts/README.md) for verifier usage (JAR, Java+Maven, OpenSSL-only).
 
 **GET /api/ai/evidence/:id** — build and download the Evidence Package (.aep) for a stored response. Returns a ZIP archive containing the seven components required for offline verification (response.txt, canonical.bin, hash.sha256, signature.sig, timestamp.tsr, metadata.json, public_key.pem). Requires a configured signing key. Use `?format=json` to get JSON with base64-encoded file contents instead of ZIP.
 
@@ -200,6 +203,14 @@ java -jar backend/target/aletheia-verifier.jar /path/to/evidence.aep
 # Or from backend/: mvn exec:java -Dexec.mainClass="ai.aletheia.verifier.VerifierMain" -Dexec.args="/path/to/package"
 ```
 Exit 0 = VALID, 1 = INVALID. No backend server or network call. The `-Pverifier` profile builds a fat JAR (verifier + BouncyCastle only) at `backend/target/aletheia-verifier.jar`. Programmatic use: `new EvidenceVerifierImpl().verify(path)`. Unit tests: `EvidenceVerifierTest`. See [scripts/README.md](scripts/README.md) for all verifier options (JAR, Java+Maven, OpenSSL-only).
+
+### Killer demo (Phase 2)
+
+One reproducible scenario: **legal/compliance** — user asks AI a compliance question (e.g. “Is this clause GDPR-compliant?”), backend returns signed + timestamped response, user exports Evidence Package, auditor runs the offline verifier and sees VALID. Reproducible in ≤5 minutes. See [Demo script](docs/DEMO_SCRIPT.md) for step-by-step instructions and [Plan Phase 2](docs/en/PLAN_PHASE2.md) for scope and implementation status.
+
+### Works with MCP / any agent
+
+**Aletheia can sign and timestamp outputs from any agent** (e.g. MCP, OpenClaw); verification remains offline. The Evidence Package and verifier do not depend on a specific LLM or UI. See [Vision Phase 2](docs/en/VISION_AND_ROADMAP.md#2-killer-demo--domain-choice) and [ideas: PKI for AI agents](docs/ru/ideas/PKI_FOR_AI_AGENTS.md) (RU).
 
 ---
 

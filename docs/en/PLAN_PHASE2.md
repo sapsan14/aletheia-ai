@@ -279,6 +279,8 @@ So today **confidence** and **policy_version** do not depend on the model respon
 | Doc | README | Sections Evidence Package, Killer demo, Works with MCP present; links to PLAN_PHASE2 and demo script. |
 | Doc | docs/README | PLAN_PHASE2 listed in topic table (EN, RU, ET). |
 
+**→ Implemented:** Root README has [Evidence Package & offline verification](../../README.md#evidence-package--offline-verification), [Killer demo (Phase 2)](../../README.md#killer-demo-phase-2), and [Works with MCP / any agent](../../README.md#works-with-mcp--any-agent); links to [Plan Phase 2](PLAN_PHASE2.md) and [Demo script](../DEMO_SCRIPT.md). docs/README topic table lists Plan Phase 2 (EN, RU, ET) and Killer demo script. VISION_AND_ROADMAP links to PLAN_PHASE2 and DEMO_SCRIPT in the Killer demo section.
+
 ---
 
 ## Implementation status (DP2.1 & DP2.2)

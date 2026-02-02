@@ -114,7 +114,7 @@ Focus on **one** primary domain first. Recommended: **legal / compliance AI** (E
 
 Important: not “chat,” but **assertions with consequences**.
 
-**Concrete plan:** Step-by-step tasks (Evidence Package, offline verifier, one killer demo scenario, LLM-readable coding prompts) are in [Plan Phase 2](PLAN_PHASE2.md). It also describes [opportunities](PLAN_PHASE2.md#opportunities-why-this-direction) (market, niche, differentiator) in plain language.
+**Concrete plan:** Step-by-step tasks (Evidence Package, offline verifier, one killer demo scenario, LLM-readable coding prompts) are in [Plan Phase 2](PLAN_PHASE2.md). Run the demo in ≤5 min: [Demo script](../DEMO_SCRIPT.md). Plan Phase 2 also describes [opportunities](PLAN_PHASE2.md#opportunities-why-this-direction) (market, niche, differentiator) in plain language.
 
 ---
 
