@@ -104,7 +104,10 @@ public class AuditDemoController {
                 null,
                 null,
                 null,
-                1
+                1,
+                null,
+                null,
+                null
         );
         Long id = auditRecordService.save(auditRequest);
 

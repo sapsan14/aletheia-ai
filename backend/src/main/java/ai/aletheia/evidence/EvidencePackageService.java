@@ -37,6 +37,24 @@ public interface EvidencePackageService {
             String publicKeyPem);
 
     /**
+     * Build the Evidence Package with DP2.4 claim metadata (claim, confidence, policy_version in metadata.json).
+     * canonicalBytes must be the combined signed payload (canonical response + canonical claim metadata).
+     */
+    Map<String, byte[]> buildPackage(
+            String responseText,
+            byte[] canonicalBytes,
+            String hashHex,
+            byte[] signatureBytes,
+            byte[] tsaTokenBytes,
+            String model,
+            Instant createdAt,
+            Long responseId,
+            String publicKeyPem,
+            String claim,
+            Double confidence,
+            String policyVersion);
+
+    /**
      * Pack the evidence file map into a ZIP (e.g. .aep).
      *
      * @param files map from filename to content (e.g. from {@link #buildPackage})

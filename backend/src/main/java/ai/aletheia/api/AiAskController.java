@@ -4,6 +4,9 @@ import ai.aletheia.api.dto.AiAskRequest;
 import ai.aletheia.api.dto.AiAskResponse;
 import ai.aletheia.audit.AuditRecordService;
 import ai.aletheia.audit.dto.AuditRecordRequest;
+import ai.aletheia.claim.ClaimCanonical;
+import ai.aletheia.claim.ComplianceClaim;
+import ai.aletheia.claim.ComplianceInferenceService;
 import ai.aletheia.crypto.CanonicalizationService;
 import ai.aletheia.crypto.HashService;
 import ai.aletheia.crypto.SignatureService;
@@ -24,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Map;
 
@@ -46,6 +50,7 @@ public class AiAskController {
     private final SignatureService signatureService;
     private final TimestampService timestampService;
     private final AuditRecordService auditRecordService;
+    private final ComplianceInferenceService complianceInferenceService;
 
     public AiAskController(
             LLMClient llmClient,
@@ -53,13 +58,15 @@ public class AiAskController {
             HashService hashService,
             SignatureService signatureService,
             TimestampService timestampService,
-            AuditRecordService auditRecordService) {
+            AuditRecordService auditRecordService,
+            ComplianceInferenceService complianceInferenceService) {
         this.llmClient = llmClient;
         this.canonicalizationService = canonicalizationService;
         this.hashService = hashService;
         this.signatureService = signatureService;
         this.timestampService = timestampService;
         this.auditRecordService = auditRecordService;
+        this.complianceInferenceService = complianceInferenceService;
     }
 
     @Operation(summary = "Ask AI", description = "Full flow: prompt → LLM → canonicalize → hash → sign → timestamp → save. Requires OPENAI_API_KEY.")
@@ -79,8 +86,28 @@ public class AiAskController {
             String modelId = llmResult.modelId();
 
             byte[] canonical = canonicalizationService.canonicalize(responseText);
-            String responseHash = hashService.hash(canonical);
-            String canonicalResponse = new String(canonical, java.nio.charset.StandardCharsets.UTF_8);
+            String canonicalResponse = new String(canonical, StandardCharsets.UTF_8);
+
+            ComplianceClaim compliance = complianceInferenceService.infer(request.prompt(), responseText);
+            String responseHash;
+            String claim = null;
+            Double confidence = null;
+            String policyVersion = null;
+
+            if (compliance != null) {
+                byte[] claimBytes = ClaimCanonical.toCanonicalBytes(
+                        compliance.claim(), compliance.confidence(), modelId, compliance.policyVersion());
+                byte[] bytesToSign = new byte[canonical.length + 1 + claimBytes.length];
+                System.arraycopy(canonical, 0, bytesToSign, 0, canonical.length);
+                bytesToSign[canonical.length] = '\n';
+                System.arraycopy(claimBytes, 0, bytesToSign, canonical.length + 1, claimBytes.length);
+                responseHash = hashService.hash(bytesToSign);
+                claim = compliance.claim();
+                confidence = compliance.confidence();
+                policyVersion = compliance.policyVersion();
+            } else {
+                responseHash = hashService.hash(canonical);
+            }
 
             String signature = null;
             try {
@@ -113,7 +140,10 @@ public class AiAskController {
                     null,
                     llmResult.temperature(),
                     null,
-                    1
+                    1,
+                    claim,
+                    confidence,
+                    policyVersion
             );
             Long id = auditRecordService.save(auditRequest);
 

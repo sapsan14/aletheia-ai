@@ -52,3 +52,5 @@ docs/legal/downloads/
 
 # Optional: Liquibase / DB
 # *.liquibase-backup
+
+*.aep

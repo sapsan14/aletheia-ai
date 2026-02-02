@@ -42,6 +42,9 @@ public class AuditRecordService {
         e.setTemperature(r.temperature());
         e.setSystemPrompt(r.systemPrompt());
         e.setVersion(r.version() != null ? r.version() : 1);
+        e.setClaim(r.claim());
+        e.setConfidence(r.confidence());
+        e.setPolicyVersion(r.policyVersion());
         return e;
     }
 }

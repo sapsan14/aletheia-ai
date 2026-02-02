@@ -27,7 +27,10 @@ class AuditRecordServiceTest {
                 "req-123",
                 0.7,
                 "You are helpful.",
-                1
+                1,
+                null,
+                null,
+                null
         );
 
         Long id = service.save(request);

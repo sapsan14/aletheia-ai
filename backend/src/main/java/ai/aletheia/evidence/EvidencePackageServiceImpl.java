@@ -72,6 +72,55 @@ public class EvidencePackageServiceImpl implements EvidencePackageService {
     }
 
     @Override
+    public Map<String, byte[]> buildPackage(
+            String responseText,
+            byte[] canonicalBytes,
+            String hashHex,
+            byte[] signatureBytes,
+            byte[] tsaTokenBytes,
+            String model,
+            Instant createdAt,
+            Long responseId,
+            String publicKeyPem,
+            String claim,
+            Double confidence,
+            String policyVersion) {
+
+        Map<String, byte[]> out = new LinkedHashMap<>();
+
+        out.put(RESPONSE_TXT, (responseText != null ? responseText : "").getBytes(StandardCharsets.UTF_8));
+        out.put(CANONICAL_BIN, canonicalBytes != null ? canonicalBytes : new byte[0]);
+        out.put(HASH_SHA256, (hashHex != null ? hashHex : "").getBytes(StandardCharsets.UTF_8));
+        out.put(SIGNATURE_SIG, signatureBytes != null ? Base64.getEncoder().encode(signatureBytes) : new byte[0]);
+        out.put(TIMESTAMP_TSR, tsaTokenBytes != null ? Base64.getEncoder().encode(tsaTokenBytes) : new byte[0]);
+
+        Map<String, Object> metadata = new LinkedHashMap<>();
+        metadata.put("model", model != null ? model : "");
+        metadata.put("created_at", createdAt != null ? createdAt.toString() : "");
+        if (responseId != null) {
+            metadata.put("response_id", responseId);
+        }
+        if (claim != null) {
+            metadata.put("claim", claim);
+        }
+        if (confidence != null) {
+            metadata.put("confidence", confidence);
+        }
+        if (policyVersion != null) {
+            metadata.put("policy_version", policyVersion);
+        }
+        try {
+            out.put(METADATA_JSON, objectMapper.writeValueAsBytes(metadata));
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Failed to build metadata.json", e);
+        }
+
+        out.put(PUBLIC_KEY_PEM, (publicKeyPem != null ? publicKeyPem : "").getBytes(StandardCharsets.UTF_8));
+
+        return out;
+    }
+
+    @Override
     public byte[] toZip(Map<String, byte[]> files) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (ZipOutputStream zos = new ZipOutputStream(baos)) {

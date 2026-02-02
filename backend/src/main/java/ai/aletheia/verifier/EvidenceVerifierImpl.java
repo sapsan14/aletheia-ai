@@ -165,6 +165,20 @@ public class EvidenceVerifierImpl implements EvidenceVerifier {
                 }
             }
 
+            // DP2.4: Optionally display claim and policy_version from metadata.json
+            byte[] metadataFile = readFile(dir, ai.aletheia.evidence.EvidencePackageServiceImpl.METADATA_JSON);
+            if (metadataFile != null && metadataFile.length > 0) {
+                String metadataJson = new String(metadataFile, StandardCharsets.UTF_8);
+                String claim = extractJsonString(metadataJson, "claim");
+                String policyVer = extractJsonString(metadataJson, "policy_version");
+                if (claim != null && !claim.isEmpty()) {
+                    report.add("claim: " + (claim.length() > 80 ? claim.substring(0, 77) + "..." : claim));
+                }
+                if (policyVer != null && !policyVer.isEmpty()) {
+                    report.add("policy_version: " + policyVer);
+                }
+            }
+
             return VerificationResult.valid(report);
         } catch (IOException e) {
             report.add("error: " + e.getMessage());
@@ -177,6 +191,33 @@ public class EvidenceVerifierImpl implements EvidenceVerifier {
                 }
             }
         }
+    }
+
+    /** Extract a string value for key from a minimal JSON object (no nested objects). */
+    private static String extractJsonString(String json, String key) {
+        if (json == null || key == null) return null;
+        String search = "\"" + key + "\"";
+        int idx = json.indexOf(search);
+        if (idx < 0) return null;
+        idx = json.indexOf(':', idx);
+        if (idx < 0) return null;
+        idx = json.indexOf('"', idx + 1);
+        if (idx < 0) return null;
+        int start = idx + 1;
+        StringBuilder sb = new StringBuilder();
+        for (int i = start; i < json.length(); i++) {
+            char c = json.charAt(i);
+            if (c == '\\' && i + 1 < json.length()) {
+                char next = json.charAt(i + 1);
+                if (next == '"' || next == '\\') { sb.append(next); i++; continue; }
+                if (next == 'n') { sb.append('\n'); i++; continue; }
+                if (next == 'r') { sb.append('\r'); i++; continue; }
+                if (next == 't') { sb.append('\t'); i++; continue; }
+            }
+            if (c == '"') break;
+            sb.append(c);
+        }
+        return sb.toString();
     }
 
     private static byte[] readFile(Path dir, String name) throws IOException {

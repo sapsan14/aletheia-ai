@@ -1,6 +1,7 @@
 package ai.aletheia.api;
 
 import ai.aletheia.api.dto.ErrorResponse;
+import ai.aletheia.claim.ClaimCanonical;
 import ai.aletheia.crypto.CanonicalizationService;
 import ai.aletheia.crypto.SignatureService;
 import ai.aletheia.db.AiResponseRepository;
@@ -80,7 +81,23 @@ public class AiEvidenceController {
             ));
         }
 
-        byte[] canonicalBytes = canonicalizationService.canonicalize(entity.getResponse());
+        byte[] responseCanonical = canonicalizationService.canonicalize(entity.getResponse());
+        byte[] canonicalBytes;
+        String claim = entity.getClaim();
+        Double confidence = entity.getConfidence();
+        String policyVersion = entity.getPolicyVersion();
+
+        if (claim != null || policyVersion != null) {
+            byte[] claimBytes = ClaimCanonical.toCanonicalBytes(
+                    claim, confidence, entity.getLlmModel(), policyVersion);
+            canonicalBytes = new byte[responseCanonical.length + 1 + claimBytes.length];
+            System.arraycopy(responseCanonical, 0, canonicalBytes, 0, responseCanonical.length);
+            canonicalBytes[responseCanonical.length] = '\n';
+            System.arraycopy(claimBytes, 0, canonicalBytes, responseCanonical.length + 1, claimBytes.length);
+        } else {
+            canonicalBytes = responseCanonical;
+        }
+
         byte[] signatureBytes = entity.getSignature() != null && !entity.getSignature().isBlank()
                 ? Base64.getDecoder().decode(entity.getSignature())
                 : null;
@@ -88,7 +105,21 @@ public class AiEvidenceController {
                 ? Base64.getDecoder().decode(entity.getTsaToken())
                 : null;
 
-        Map<String, byte[]> files = evidencePackageService.buildPackage(
+        Map<String, byte[]> files = (claim != null || policyVersion != null)
+                ? evidencePackageService.buildPackage(
+                entity.getResponse(),
+                canonicalBytes,
+                entity.getResponseHash(),
+                signatureBytes,
+                tsaTokenBytes,
+                entity.getLlmModel(),
+                entity.getCreatedAt(),
+                entity.getId(),
+                publicKeyPem,
+                claim,
+                confidence,
+                policyVersion)
+                : evidencePackageService.buildPackage(
                 entity.getResponse(),
                 canonicalBytes,
                 entity.getResponseHash(),

@@ -64,6 +64,18 @@ public class AiResponse {
     @Column(columnDefinition = "INTEGER DEFAULT 1")
     private Integer version = 1;
 
+    /** DP2.4: Minimal AI Claim — claim text (e.g. first sentence of response). Null when not compliance. */
+    @Column(columnDefinition = "TEXT")
+    private String claim;
+
+    /** DP2.4: Confidence in [0,1]. Null when not compliance. */
+    @Column
+    private Double confidence;
+
+    /** DP2.4: Policy version (e.g. "gdpr-2024"). Null when not compliance. */
+    @Column(name = "policy_version", length = 64)
+    private String policyVersion;
+
     @PrePersist
     void onPersist() {
         if (createdAt == null) {
@@ -123,4 +135,13 @@ public class AiResponse {
 
     public Integer getVersion() { return version; }
     public void setVersion(Integer version) { this.version = version; }
+
+    public String getClaim() { return claim; }
+    public void setClaim(String claim) { this.claim = claim; }
+
+    public Double getConfidence() { return confidence; }
+    public void setConfidence(Double confidence) { this.confidence = confidence; }
+
+    public String getPolicyVersion() { return policyVersion; }
+    public void setPolicyVersion(String policyVersion) { this.policyVersion = policyVersion; }
 }

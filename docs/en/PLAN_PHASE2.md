@@ -241,6 +241,18 @@ Verification uses: `canonical.bin` → recompute hash and compare with `hash.sha
 | Unit | Package with claim in metadata | metadata.json contains claim, confidence, policy_version; signature still verifies. |
 | Manual | Verifier output | Can display claim and policy_version from package. |
 
+**→ Implemented (variant 4):** Compliance inferred from prompt (no UI mode). Keywords: GDPR, comply, compliance, clause, AI Act, legal, regulatory, compliant. Claim = first sentence of response; confidence = 0.85; policy_version = "gdpr-2024" / "ai-act-2024" / "compliance-2024". Signed payload = canonical(response) + canonical(claim metadata). Verifier prints claim and policy_version from metadata.json when present.
+
+**How claim, confidence, and policy_version are set (current vs future):**
+
+| Field | Current (Phase 2) | From model response? |
+|-------|-------------------|------------------------|
+| **claim** | First sentence (or truncation to 500 chars) of the **model response**. | Yes — the only field taken from the model output. |
+| **confidence** | Fixed constant **0.85** in code. | No — hard-coded for the demo. Could later come from: provider API (logprobs/score), heuristics on response text ("certainly" vs "perhaps"), or a prompt that asks the model to state confidence and parsing the answer. |
+| **policy_version** | Inferred from **prompt** only (keyword match: "gdpr" → gdpr-2024, "ai act" → ai-act-2024, else compliance-2024). | No — prompt-based only. Could later come from: keyword detection in the **response** (e.g. "Under GDPR..."), or structured output / JSON mode where the model returns a policy identifier. |
+
+So today **confidence** and **policy_version** do not depend on the model response; only **claim** does. Deriving confidence and policy_version from the model (API metrics, response text, or structured output) is possible for a future iteration.
+
 ---
 
 ### Step DP2.5 — Narrative and documentation updates

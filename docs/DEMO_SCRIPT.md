@@ -44,6 +44,8 @@ Does the following clause comply with GDPR?
 The data controller shall process personal data only for specified, explicit and legitimate purposes (purpose limitation).
 ```
 
+**Compliance claim (DP2.4):** If the prompt mentions GDPR, compliance, clause, AI Act, legal, or similar, the backend infers a compliance claim and adds `claim`, `confidence`, and `policy_version` to the Evidence Package metadata; the offline verifier will display them when reporting VALID. **Note:** `claim` is taken from the model response (first sentence); `confidence` is a fixed 0.85 and `policy_version` is inferred from the prompt only (e.g. "gdpr" → gdpr-2024). They do not come from the model output. See [Plan Phase 2 — DP2.4](en/PLAN_PHASE2.md#step-dp24--minimal-ai-claim-optional-for-demo) for how these fields are set and how they could be derived from the model in the future.
+
 **LLM-free alternative (no OpenAI):** use audit demo with fixed text; you still get a signed response and an id:
 
 ```bash
