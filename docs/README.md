@@ -37,6 +37,7 @@ Same topics exist in **Russian** ([docs/ru/](ru/)) and **Estonian** ([docs/et/](
 | **Testing strategy** | Unit, integration, fixtures, CI | [TESTING_STRATEGY](en/TESTING_STRATEGY.md) | [Стратегия тестирования](ru/TESTING_STRATEGY.md) | [Testimise strateegia](et/TESTING_STRATEGY.md) |
 | **Future ideas** (PKI for AI agents, OpenClaw, MCP) | — | [Идеи](ru/ideas/README.md) | [Ideed](et/ideas/README.md) |
 | **Legal & regulatory** | EU law: eIDAS, AI Act, GDPR, ETSI timestamps | [legal/README.md](legal/README.md) | | |
+| **Scripts** | Offline verifier (JAR, Java, OpenSSL), usage | [scripts/README.md](../scripts/README.md) | | |
 | **Diagrams** | Mermaid: pipeline, trust chain, stack | [diagrams/architecture.md](../diagrams/architecture.md) | | |
 
 ---

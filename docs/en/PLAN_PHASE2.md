@@ -11,6 +11,7 @@ This document describes **Phase 2** of the roadmap: the killer demo in legal/com
 - [Opportunities: why this direction](#opportunities-why-this-direction)
 - [Phase 2 goal and scope](#phase-2-goal-and-scope)
 - [Development steps (with LLM-readable prompts)](#development-steps-with-llm-readable-prompts)
+- [Implementation status (DP2.1 & DP2.2)](#implementation-status-dp21--dp22)
 - [Phase 2 completion criteria](#phase-2-completion-criteria)
 - [References](#references)
 
@@ -263,6 +264,21 @@ Verification uses: `canonical.bin` → recompute hash and compare with `hash.sha
 |-----------|--------------|---------------------|
 | Doc | README | Sections Evidence Package, Killer demo, Works with MCP present; links to PLAN_PHASE2 and demo script. |
 | Doc | docs/README | PLAN_PHASE2 listed in topic table (EN, RU, ET). |
+
+---
+
+## Implementation status (DP2.1 & DP2.2)
+
+The following tasks are implemented. Use this section to find code and entrypoints.
+
+| Task | Implemented in | How to use / verify |
+|------|----------------|---------------------|
+| **DP2.1.1** — Evidence Package format | Format table in this doc (above); file names in `EvidencePackageServiceImpl` | See [Evidence Package format](#evidence-package-format-aep--minimal-set) |
+| **DP2.1.2** — Backend: generate package | `EvidencePackageService`, `AiEvidenceController` | GET `/api/ai/evidence/:id` → ZIP or `?format=json`; root [README](../../README.md#evidence-package) |
+| **DP2.2.1** — Verifier logic | `EvidenceVerifierImpl` (Java), `scripts/verify-evidence.sh` (OpenSSL) | Java: `EvidenceVerifier.verify(path)`; script: `./scripts/verify-evidence.sh <path>`; unit tests: `EvidenceVerifierTest` |
+| **DP2.2.2** — CLI entrypoint | `VerifierMain`, `scripts/verify-evidence-java.sh`, standalone JAR | `java -jar backend/target/aletheia-verifier.jar <path>`; or `./scripts/verify-evidence-java.sh <path>`; root [README — Offline verification](../../README.md#offline-verification-dp22) |
+
+**Standalone verifier JAR:** From repo root, run `cd backend && mvn package -Pverifier -DskipTests`; then `java -jar backend/target/aletheia-verifier.jar <path-to-dir-or-.aep>`. No backend server or network required. See also [scripts/README.md](../../scripts/README.md).
 
 ---
 

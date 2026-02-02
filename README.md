@@ -199,7 +199,7 @@ java -jar backend/target/aletheia-verifier.jar /path/to/evidence.aep
 ./scripts/verify-evidence-java.sh /path/to/package-dir
 # Or from backend/: mvn exec:java -Dexec.mainClass="ai.aletheia.verifier.VerifierMain" -Dexec.args="/path/to/package"
 ```
-Exit 0 = VALID, 1 = INVALID. No backend server or network call. The `-Pverifier` profile builds a fat JAR (verifier + BouncyCastle only) at `backend/target/aletheia-verifier.jar`. Programmatic use: `new EvidenceVerifierImpl().verify(path)`. Unit tests: `EvidenceVerifierTest`.
+Exit 0 = VALID, 1 = INVALID. No backend server or network call. The `-Pverifier` profile builds a fat JAR (verifier + BouncyCastle only) at `backend/target/aletheia-verifier.jar`. Programmatic use: `new EvidenceVerifierImpl().verify(path)`. Unit tests: `EvidenceVerifierTest`. See [scripts/README.md](scripts/README.md) for all verifier options (JAR, Java+Maven, OpenSSL-only).
 
 ---
 
