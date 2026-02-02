@@ -28,6 +28,7 @@ Same topics exist in **Russian** ([docs/ru/](ru/)) and **Estonian** ([docs/et/](
 | **Vision & roadmap** | Next steps, Evidence Package, AI Claim | [Vision](en/VISION_AND_ROADMAP.md) | [Видение](ru/VISION_AND_ROADMAP.md) | [Visioon](et/VISION_AND_ROADMAP.md) |
 | **Plan** | Step-by-step implementation tasks | [PLAN](en/PLAN.md) | [План](ru/PLAN.md) | [Plaan](et/PLAN.md) |
 | **Plan Phase 2** | Killer demo, Evidence Package, offline verifier | [EN](en/PLAN_PHASE2.md) | [RU](ru/PLAN_PHASE2.md) | [ET](et/PLAN_PHASE2.md) |
+| **Plan Phase 3 UI** | Verify page wireframe, tooltips, UX (audit/compliance) | [PLAN_PHASE3_UI.md](en/PLAN_PHASE3_UI.md) | | |
 | **Killer demo script** | Step-by-step legal/compliance demo (≤5 min) | [DEMO_SCRIPT.md](DEMO_SCRIPT.md) | | |
 | **Signing** | What we sign, key, interface, storage | [SIGNING](en/SIGNING.md) | [Подпись](ru/SIGNING.md) | [Allkirjastamine](et/SIGNING.md) |
 | **Timestamping** | RFC 3161, TSA, mock/real, storage | [TIMESTAMPING](en/TIMESTAMPING.md) | [Временные метки](ru/TIMESTAMPING.md) | [Ajatemplid](et/TIMESTAMPING.md) |

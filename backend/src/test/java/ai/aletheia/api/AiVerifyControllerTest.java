@@ -42,6 +42,22 @@ class AiVerifyControllerTest {
     }
 
     @Test
+    void verify_recordWithClaim_returnsClaimConfidencePolicyVersion() throws Exception {
+        AiResponse entity = new AiResponse("Does this comply with GDPR?", "Yes, it does.", "abc123");
+        entity.setLlmModel("gpt-4");
+        entity.setClaim("Yes, it does.");
+        entity.setConfidence(0.85);
+        entity.setPolicyVersion("gdpr-2024");
+        AiResponse saved = repository.save(entity);
+
+        mockMvc.perform(get("/api/ai/verify/" + saved.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.claim").value("Yes, it does."))
+                .andExpect(jsonPath("$.confidence").value(0.85))
+                .andExpect(jsonPath("$.policyVersion").value("gdpr-2024"));
+    }
+
+    @Test
     void verify_unknownId_returns404WithJsonBody() throws Exception {
         mockMvc.perform(get("/api/ai/verify/999999"))
                 .andExpect(status().isNotFound())

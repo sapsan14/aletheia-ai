@@ -74,6 +74,9 @@ public class AiVerifyController {
                 e.getTemperature(),
                 e.getSystemPrompt(),
                 e.getVersion(),
+                e.getClaim(),
+                e.getConfidence(),
+                e.getPolicyVersion(),
                 hashMatch,
                 signatureValid
         );
