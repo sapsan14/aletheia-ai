@@ -77,6 +77,17 @@ function formatPolicyVersion(value: string | null | undefined): string {
     .join("-");
 }
 
+/** P3.9 — Short descriptions for Evidence Package file names (preview modal). */
+const EVIDENCE_FILE_DESCRIPTIONS: Record<string, string> = {
+  "response.txt": "Response text",
+  "canonical.bin": "Canonical bytes",
+  "hash.sha256": "SHA-256 hash",
+  "signature.sig": "Digital signature",
+  "timestamp.tsr": "Timestamp token",
+  "metadata.json": "Claim metadata",
+  "public_key.pem": "Public key",
+};
+
 function VerifyContent() {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
@@ -562,10 +573,15 @@ function VerifyContent() {
               <p className="mb-3 text-sm text-red-600 dark:text-red-400">{previewError}</p>
             )}
             {previewKeys && previewKeys.length > 0 && (
-              <ul className="mb-4 list-inside list-disc space-y-1 text-sm text-zinc-700 dark:text-zinc-300">
+              <ul className="mb-4 space-y-2 text-sm text-zinc-700 dark:text-zinc-300">
                 {previewKeys.map((key) => (
-                  <li key={key} className="font-mono">
-                    {key}
+                  <li key={key} className="flex flex-wrap items-baseline gap-2">
+                    <span className="font-mono text-zinc-800 dark:text-zinc-200">{key}</span>
+                    {EVIDENCE_FILE_DESCRIPTIONS[key] && (
+                      <span className="text-zinc-500 dark:text-zinc-400">
+                        — {EVIDENCE_FILE_DESCRIPTIONS[key]}
+                      </span>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -641,6 +657,8 @@ export default function VerifyPage() {
             {" — "}
             Tallinna Tehnikaülikool
           </p>
+          {/* P3.7 — Section 6: Footer line */}
+          <p className="mt-2">Designed for audit, compliance, and long-term verification</p>
         </footer>
       </main>
     </div>
