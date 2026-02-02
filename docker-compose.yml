@@ -40,6 +40,8 @@ services:
       AI_ALETHEIA_TSA_URL: ${AI_ALETHEIA_TSA_URL:-http://timestamp.digicert.com}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000}
+      # Offline verifier JAR for GET /api/ai/verifier (built in Dockerfile with -Pverifier)
+      AI_ALETHEIA_VERIFIER_JAR_PATH: /app/aletheia-verifier.jar
     volumes:
       - ./ai.key:/app/ai.key:ro
     depends_on:

@@ -232,6 +232,7 @@ function VerifyContent() {
   }
 
   function handleCopyResponse() {
+    if (!record) return;
     if (record.response) void navigator.clipboard.writeText(record.response);
   }
 
