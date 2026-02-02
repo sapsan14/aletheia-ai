@@ -123,6 +123,8 @@ function VerifyContent() {
   const [claimExpanded, setClaimExpanded] = useState(false);
   const [evidenceDownloading, setEvidenceDownloading] = useState(false);
   const [evidenceError, setEvidenceError] = useState<string | null>(null);
+  const [verifierDownloading, setVerifierDownloading] = useState(false);
+  const [verifierError, setVerifierError] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewKeys, setPreviewKeys] = useState<string[] | null>(null);
   const [previewError, setPreviewError] = useState<string | null>(null);
@@ -267,6 +269,44 @@ function VerifyContent() {
       setEvidenceError(err instanceof Error ? err.message : "Download failed");
     } finally {
       setEvidenceDownloading(false);
+    }
+  }
+
+  async function handleDownloadVerifier() {
+    setVerifierDownloading(true);
+    setVerifierError(null);
+    try {
+      const res = await fetch(`${apiUrl}/api/ai/verifier`);
+      if (!res.ok) {
+        const text = await res.text();
+        let msg = `Download failed (${res.status})`;
+        try {
+          const json = JSON.parse(text);
+          if (json.message) msg = json.message;
+          else if (json.error) msg = json.error;
+        } catch {
+          if (text) msg = text;
+        }
+        setVerifierError(msg);
+        return;
+      }
+      const blob = await res.blob();
+      const disposition = res.headers.get("Content-Disposition");
+      let filename = "aletheia-verifier.jar";
+      if (disposition) {
+        const match = /filename[*]?=(?:UTF-8'')?"?([^";\n]+)"?/i.exec(disposition);
+        if (match) filename = match[1].trim();
+      }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setVerifierError(err instanceof Error ? err.message : "Download failed");
+    } finally {
+      setVerifierDownloading(false);
     }
   }
 
@@ -585,6 +625,53 @@ function VerifyContent() {
         {evidenceError && (
           <p className="mt-2 text-sm text-red-600 dark:text-red-400">{evidenceError}</p>
         )}
+      </section>
+
+      {/* P3.10 — Section 5b: Verifier utility download and usage box */}
+      <section
+        className="rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-600 dark:bg-zinc-700/30"
+        aria-label="Verifier utility"
+      >
+        <h2 className="mb-3 text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+          🔧 Verifier utility
+        </h2>
+        <p className="mb-3 text-sm text-zinc-700 dark:text-zinc-300">
+          Verify Evidence Packages without the Aletheia server. Requires Java 21+.
+        </p>
+        <button
+          type="button"
+          onClick={handleDownloadVerifier}
+          disabled={verifierDownloading}
+          title={TOOLTIPS.download_verifier}
+          className="mb-4 inline-flex items-center gap-1.5 rounded border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-60 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+        >
+          {verifierDownloading ? "Downloading…" : "⬇ Download verifier"}
+        </button>
+        {verifierError && (
+          <p className="mb-4 text-sm text-red-600 dark:text-red-400">{verifierError}</p>
+        )}
+        <div
+          className="rounded border border-zinc-200 bg-white p-3 dark:border-zinc-600 dark:bg-zinc-800"
+          aria-label="How to use"
+        >
+          <p className="mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            How to use
+          </p>
+          <ol className="list-decimal list-inside space-y-1.5 text-sm text-zinc-600 dark:text-zinc-400">
+            <li>Download the verifier JAR above.</li>
+            <li>
+              Run from a terminal:
+              <pre className="mt-1 overflow-x-auto rounded bg-zinc-100 px-2 py-1.5 font-mono text-xs dark:bg-zinc-700">
+                java -jar aletheia-verifier.jar /path/to/your.evidence.aep
+              </pre>
+              <span className="text-zinc-500 dark:text-zinc-500">
+                (or path to an extracted Evidence Package folder)
+              </span>
+            </li>
+            <li>No network or backend required.</li>
+            <li>Exit code 0 = VALID, 1 = INVALID.</li>
+          </ol>
+        </div>
       </section>
 
       {/* Preview package modal */}

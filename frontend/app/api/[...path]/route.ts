@@ -43,9 +43,9 @@ function stripHopByHop(headers: Headers): Headers {
 /** Forward the request to the backend and return the response (status, headers, body). */
 async function proxy(
   request: NextRequest,
-  pathSegments: string[]
+  pathSegments: string | string[]
 ): Promise<Response> {
-  const path = pathSegments.join("/");
+  const path = Array.isArray(pathSegments) ? pathSegments.join("/") : pathSegments;
   const search = request.nextUrl.searchParams.toString();
   const url = `${BACKEND.replace(/\/$/, "")}/api/${path}${search ? `?${search}` : ""}`;
   const init: RequestInit = {

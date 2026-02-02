@@ -38,4 +38,6 @@ export const TOOLTIPS: Record<string, string> = {
     "Explore the contents of the evidence package before downloading.",
   verified_offline:
     "No connection to Aletheia AI is required to verify authenticity and integrity.",
+  download_verifier:
+    "Downloads the offline verifier (JAR) so you can verify Evidence Packages without the Aletheia server.",
 };

@@ -215,6 +215,44 @@ This response can be verified offline.
 
 ---
 
+### SECTION 5b — Verifier utility (download + usage)
+
+**Implementation step:** [P3.10 — Verifier utility download and usage box](#step-p310--verifier-utility-download-and-usage-box-section-5b)
+
+**Purpose:** Let users download the offline verifier (JAR) and see how to run it, so auditors can verify Evidence Packages without the Aletheia backend.
+
+**Wireframe (text):**
+
+```
+🔧 Verifier utility
+────────────────────────────────
+Verify Evidence Packages without the Aletheia server. Requires Java 21+.
+
+[ ⬇ Download verifier ]
+
+┌─ How to use ─────────────────────────────────────────┐
+│ 1. Download the verifier JAR above.                  │
+│ 2. Run from a terminal:                              │
+│    java -jar aletheia-verifier.jar /path/to/file.aep │
+│    (or path to an extracted Evidence Package folder)  │
+│ 3. No network or backend required.                   │
+│ 4. Exit code 0 = VALID, 1 = INVALID.                 │
+└─────────────────────────────────────────────────────┘
+```
+
+**Behavior:**
+
+- **Heading** — “Verifier utility” (or “Offline verifier”) with optional icon.
+- **Short description** — One sentence: verify packages without the server; Java 21+ required.
+- **Download verifier** — Button or link that triggers download of the verifier JAR (e.g. `aletheia-verifier.jar`). Source: GET from backend (e.g. `/api/ai/verifier` or `/api/verifier/download`) when the backend serves the JAR; or link to a stable URL (e.g. GitHub Releases) if JAR is not served by the app. Tooltip: see [Tooltip texts](#tooltip-texts-copy-paste-ready) — add **download_verifier**.
+- **Usage box** — A clearly bordered/boxed area (e.g. card, `<pre>`, or styled `<div>`) containing step-by-step instructions in plain language: (1) Download the JAR above. (2) Run `java -jar aletheia-verifier.jar /path/to/your.evidence.aep` (or path to extracted folder). (3) No network or backend required. (4) Exit code 0 = VALID, 1 = INVALID. Use monospace for the command. Do not display raw base64 or binary content.
+
+**Placement:** On the verify page, directly below or adjacent to the Evidence Package block (Section 5), so “Download evidence” and “Download verifier” are in the same flow.
+
+**Component suggestion:** `VerifierUtilityCard`. Download button has tooltip from TOOLTIPS.download_verifier.
+
+---
+
 ### SECTION 6 — Footer
 
 **Implementation step:** [P3.7 — Footer line](#step-p37--footer-line-section-6)
@@ -256,6 +294,7 @@ Use these verbatim for `title`, `aria-label`, or your tooltip component. Key: **
 | **download_evidence** | Downloads all cryptographic materials required for independent verification. |
 | **preview_package** | Explore the contents of the evidence package before downloading. |
 | **verified_offline** | No connection to Aletheia AI is required to verify authenticity and integrity. |
+| **download_verifier** | Downloads the offline verifier (JAR) so you can verify Evidence Packages without the Aletheia server. |
 
 **Implementation note:** Prefer a single source of truth (e.g. a `TOOLTIPS` map or i18n file) keyed by ID so copy can be updated in one place.
 
@@ -303,6 +342,7 @@ Every step that requires code changes has a number and a **Coding prompt (LLM-re
 | P3.7 | Footer line (Section 6) | 5 min | Yes |
 | P3.8 | “What is verified?” content | 15–20 min | Optional |
 | P3.9 | Preview package modal/expandable | 20–30 min | Optional |
+| P3.10 | Verifier utility download and usage box (Section 5b) | 35–50 min | Yes |
 
 ---
 
@@ -331,7 +371,7 @@ Every step that requires code changes has a number and a **Coding prompt (LLM-re
 
 - Create a single source of truth for all tooltip texts used on the verify page (and optionally the main page response block). In `frontend/`, add a file (e.g. `frontend/lib/tooltips.ts` or `frontend/app/verify/tooltips.ts`) that exports a constant object mapping **tooltip ID** to **text**. Use the exact IDs and text from the table in [Tooltip texts (copy-paste ready)](#tooltip-texts-copy-paste-ready). Example shape: `export const TOOLTIPS: Record<string, string> = { verified_ai_response: "This response was cryptographically signed...", integrity_not_altered: "The response content has not changed...", ... };`. Every UI element that shows a tooltip must read from this map by ID (e.g. `title={TOOLTIPS.verified_ai_response}` or `aria-label={TOOLTIPS.copy_response}`). Do not hard-code tooltip strings in components.
 
-**Acceptance:** One file exports TOOLTIPS with all 17 IDs and texts from the spec; no tooltip copy duplicated in JSX.
+**Acceptance:** One file exports TOOLTIPS with all IDs and texts from the [tooltip table](#tooltip-texts-copy-paste-ready) (including download_verifier); no tooltip copy duplicated in JSX.
 
 ---
 
@@ -455,6 +495,37 @@ Every step that requires code changes has a number and a **Coding prompt (LLM-re
 
 ---
 
+### Step P3.10 — Verifier utility download and usage box (Section 5b)
+
+| Field | Value |
+|-------|--------|
+| **Est.** | 35–50 min |
+| **Section** | [SECTION 5b — Verifier utility](#section-5b--verifier-utility-download--usage) |
+| **Depends on** | P3.6 (Evidence Package block); verifier JAR build (see [Plan Phase 2](PLAN_PHASE2.md) DP2.2.2, [scripts/README.md](../../scripts/README.md)) |
+
+**Coding prompt (LLM-readable):**
+
+1. **Placement:** On the verify page (`frontend/app/verify/page.tsx`), add a **Verifier utility** block (card or section) **below** the Evidence Package block (Section 5) and **above** the footer. Use the same visual style as the Evidence Package card (e.g. rounded border, light background) so it reads as part of the “offline verification” flow.
+
+2. **Heading and description:** (a) Heading: “Verifier utility” or “Offline verifier” (with optional icon, e.g. 🔧). (b) One short sentence below the heading: “Verify Evidence Packages without the Aletheia server. Requires Java 21+.” No tooltip required for this sentence.
+
+3. **Download verifier button:** Add a button “Download verifier” (or “⬇ Download verifier”). On click it must trigger a file download of the verifier JAR (`aletheia-verifier.jar`). Implementation options: (A) **Preferred:** Backend exposes GET `/api/ai/verifier` (or GET `/api/verifier/download`) that returns the JAR file with `Content-Type: application/java-archive` and `Content-Disposition: attachment; filename="aletheia-verifier.jar"`. The JAR may be read from a configured path (e.g. `backend/target/aletheia-verifier.jar`) or from a static resource; return 404 or 503 if the file is not available. Frontend: `fetch(apiUrl + "/api/ai/verifier")` (or the chosen path), get response as blob, create object URL, trigger download with filename `aletheia-verifier.jar`. (B) **Alternative:** If the JAR is not served by the backend, the button may link to a stable URL (e.g. GitHub Releases) or open a page with build instructions; document the choice. Attach tooltip **TOOLTIPS.download_verifier** to the button. Add the key `download_verifier` to the TOOLTIPS map (Step P3.1) with text: “Downloads the offline verifier (JAR) so you can verify Evidence Packages without the Aletheia server.”
+
+4. **Usage box:** Directly below the Download verifier button, add a **usage box**: a clearly bordered/contained area (e.g. a `<div>` or `<section>` with border and padding, or a `<details>` with summary “How to use”) that displays the following instructions in readable form (use a list or short paragraphs; use `<code>` or monospace for the command):
+   - Step 1: “Download the verifier JAR above.”
+   - Step 2: “Run from a terminal:” then on a new line the command in monospace: `java -jar aletheia-verifier.jar /path/to/your.evidence.aep` and optionally “(or path to an extracted Evidence Package folder)”.
+   - Step 3: “No network or backend required.”
+   - Step 4: “Exit code 0 = VALID, 1 = INVALID.”
+   Do not display raw binary or base64 content; only this short usage text. The box should be visible by default (not hidden behind a click) so users can read it without expanding.
+
+5. **Backend (if serving JAR):** If implementing option (A), add a controller method (e.g. in a new or existing controller under `/api/ai` or `/api`) that reads the verifier JAR from the file system or classpath (e.g. path configurable via `AI_ALETHEIA_VERIFIER_JAR_PATH` or default `target/aletheia-verifier.jar` relative to backend), returns `ResponseEntity<Resource>` with appropriate headers. If the file does not exist, return 404 or 503 with a short JSON message. Document in README or deploy notes that the JAR must be built with `mvn package -Pverifier` (see [scripts/README.md](../../scripts/README.md)) and placed where the server can read it.
+
+6. **Accessibility:** Ensure the download button has `title={TOOLTIPS.download_verifier}` and the usage box has a clear label (e.g. “How to use” or “Usage”) for screen readers.
+
+**Acceptance:** (1) Verifier utility block appears on the verify page below Evidence Package and above footer. (2) “Download verifier” button has tooltip TOOLTIPS.download_verifier and triggers download of the JAR when the backend serves it (or links to fallback when not). (3) Usage box is visible and contains the four steps above with the `java -jar` command in monospace. (4) If backend serves the JAR, GET `/api/ai/verifier` returns the file with correct headers; 404/503 when JAR unavailable.
+
+---
+
 ## Data requirements
 
 The verify page (and any component that shows claim or trust summary) needs the following from the API. Ensure GET `/api/ai/verify/:id` (or equivalent) returns:
@@ -487,6 +558,7 @@ If `claim`, `confidence`, or `policyVersion` are not yet in the verify API respo
 | **Manual** | Trust Summary | Section 1 visible without scroll; all four rows (Created, Model, Integrity, Timestamp) and both buttons have correct tooltips. |
 | **Manual** | AI Claim | Section 3 appears when record has claim/policyVersion; claim text, confidence, policy version, and “Included in signed payload” shown; tooltips on heading and each field. |
 | **Manual** | Evidence Package | Section 5 has “verified offline” sentence and Download (and optionally Preview) with correct tooltips. |
+| **Manual** | Verifier utility | Section 5b has “Download verifier” button with tooltip; usage box shows four steps and `java -jar` command; JAR downloads when backend serves it. |
 | **Manual** | Verification Details | Section 4 is collapsible; hash/signature/timestamp truncated; Verify hash and Copy hash work; tooltips on each label/button. |
 | **Manual** | Footer | Footer includes the line “Designed for audit, compliance, and long-term verification”. |
 | **Manual** | Tooltips | All tooltips use the exact text from the table (or approved variant); no algorithm-focused or jargon-heavy copy. |

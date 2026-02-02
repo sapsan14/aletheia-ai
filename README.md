@@ -204,6 +204,8 @@ java -jar backend/target/aletheia-verifier.jar /path/to/evidence.aep
 ```
 Exit 0 = VALID, 1 = INVALID. No backend server or network call. The `-Pverifier` profile builds a fat JAR (verifier + BouncyCastle only) at `backend/target/aletheia-verifier.jar`. Programmatic use: `new EvidenceVerifierImpl().verify(path)`. Unit tests: `EvidenceVerifierTest`. See [scripts/README.md](scripts/README.md) for all verifier options (JAR, Java+Maven, OpenSSL-only).
 
+On the **verify page** (`/verify?id=...`), a **Download verifier** button fetches the JAR from **GET /api/ai/verifier** when the backend has built it (`mvn package -Pverifier`); otherwise the button shows an error. Optional: set `AI_ALETHEIA_VERIFIER_JAR_PATH` to a custom JAR path.
+
 ### Killer demo (Phase 2)
 
 One reproducible scenario: **legal/compliance** — user asks AI a compliance question (e.g. “Is this clause GDPR-compliant?”), backend returns signed + timestamped response, user exports Evidence Package, auditor runs the offline verifier and sees VALID. Reproducible in ≤5 minutes. See [Demo script](docs/DEMO_SCRIPT.md) for step-by-step instructions and [Plan Phase 2](docs/en/PLAN_PHASE2.md) for scope and implementation status.
