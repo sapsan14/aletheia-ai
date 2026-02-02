@@ -62,7 +62,7 @@ ansible-playbook -i 'aletheia ansible_host=YOUR_VM_IP,' deploy/ansible/playbook.
 | `openai_api_key` | (empty) | OpenAI API key |
 | `cors_allowed_origins` | http://localhost:3000 | CORS allowed origins (comma-separated). **ngrok:** add `https://your-subdomain.ngrok-free.dev` |
 | `next_public_api_url` | http://localhost:8080 | **ngrok:** leave empty (playbook sets it); frontend uses relative `/api`, proxied by Next.js. **Production (no ngrok):** `http://YOUR_VM_IP:8080` |
-| `ngrok_enabled` | false | Set `true` to install ngrok and run as systemd service (auto-start on boot) |
+| `ngrok_enabled` | **true** | Single-port (3000) via ngrok; API proxied by Next.js. Set `false` to expose VM:3000 + VM:8080 directly. |
 | `ngrok_authtoken` | — | **Required** when ngrok_enabled. From https://dashboard.ngrok.com/get-started/your-authtoken |
 | `ngrok_domain` | kaia-uncharacterized-unorbitally.ngrok-free.dev | ngrok free domain for tunnel |
 | `signing_key_src` | `{{ playbook_dir }}/../../ai.key` | Override path to PEM key (`-e signing_key_src=/path/to/ai.key`) |
@@ -100,7 +100,7 @@ Get your authtoken at https://dashboard.ngrok.com/get-started/your-authtoken
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `ngrok_enabled` | false | Set to `true` to install and run ngrok as systemd service |
+| `ngrok_enabled` | **true** | Install and run ngrok as systemd service (port 3000). Set `-e ngrok_enabled=false` to disable. |
 | `ngrok_authtoken` | — | **Required** when ngrok_enabled. From ngrok dashboard |
 | `ngrok_domain` | kaia-uncharacterized-unorbitally.ngrok-free.dev | Your ngrok free domain |
 | `ngrok_port` | 3000 | Local port to tunnel (frontend) |
@@ -267,6 +267,23 @@ ansible-playbook -i deploy/ansible/inventory.yml deploy/ansible/playbook.yml -e 
 ```
 
 Add `NGROK_AUTHTOKEN` to `.env`. The playbook starts one tunnel (frontend on port 3000), sets `NEXT_PUBLIC_API_URL=` and rebuilds so the client uses relative `/api` URLs. The [Next.js runtime proxy](frontend/app/api/[...path]/route.ts) forwards `/api/*` to the backend at `BACKEND_INTERNAL_URL` (set to `http://backend:8080` in docker-compose). No second tunnel or CORS needed.
+
+### Changing OPENAI_API_KEY (or other .env) on the server
+
+**Symptom:** You set `OPENAI_API_KEY=sk-...` in `/opt/aletheia-ai/.env` and ran `docker compose restart backend`, but the app still shows "Set OPENAI_API_KEY on the server...".
+
+**Cause:** `docker compose restart` only stops and starts the same container. Environment variables are set when the container is **created**, not when it restarts. The backend container was created with the old (empty) `.env`.
+
+**Fix on the VM:** Recreate the backend container so it picks up the new `.env`:
+
+```bash
+cd /opt/aletheia-ai
+docker compose up -d --force-recreate backend
+```
+
+After any change to `.env` that affects a service, use `--force-recreate` for that service (or `docker compose down && docker compose up -d`) so the new variables are applied.
+
+**Note:** `OPENAI_API_KEY` is the OpenAI API key string (from https://platform.openai.com/api-keys). The signing key file `ai.key` is configured separately via docker-compose (mounted at `/app/ai.key`); do not set `OPENAI_API_KEY=./ai.key`.
 
 ### Other causes
 

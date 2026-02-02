@@ -21,9 +21,9 @@
     repo_version: "{{ deploy_repo_version | default('main') }}"
     # Path to signing key on control node; override with -e signing_key_src=/path/to/ai.key
     signing_key_path: "{{ signing_key_src | default(playbook_dir ~ '/../../ai.key') }}"
-    # ngrok: set ngrok_enabled=true (via -e) and ngrok_authtoken to run ngrok as systemd service.
+    # ngrok: single-port (3000) via tunnel; API proxied by Next.js. Override with -e ngrok_enabled=false to expose VM:3000 + VM:8080.
     # Free tier only: ngrok http PORT --domain=DOMAIN (no --oauth; OAuth is paid-only).
-    ngrok_enabled: false
+    ngrok_enabled: true
     ngrok_domain: kaia-uncharacterized-unorbitally.ngrok-free.dev
     ngrok_port: 3000
 
@@ -101,6 +101,11 @@
     - name: Set CORS and API URL for ngrok mode
       ansible.builtin.set_fact:
         cors_allowed_origins: "https://{{ ngrok_domain }},http://localhost:3000"
+      when: ngrok_enabled
+
+    - name: Set next_public_api_url empty for ngrok (single-port; API via proxy)
+      ansible.builtin.set_fact:
+        next_public_api_url: ""
       when: ngrok_enabled
 
     - name: Create .env from template
