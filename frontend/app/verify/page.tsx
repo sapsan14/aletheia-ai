@@ -170,6 +170,10 @@ function VerifyContent() {
     if (summaryLine) void navigator.clipboard.writeText(summaryLine);
   }
 
+  function handleCopyResponse() {
+    if (record.response) void navigator.clipboard.writeText(record.response);
+  }
+
   return (
     <div className="space-y-6">
       {/* P3.2 — Trust Summary Card (Section 1) */}
@@ -237,23 +241,33 @@ function VerifyContent() {
         </div>
       </section>
 
-      <div>
-        <h2 className="mb-1 text-sm font-medium text-zinc-600 dark:text-zinc-400">
-          Prompt
-        </h2>
-        <p className="whitespace-pre-wrap rounded bg-zinc-100 px-3 py-2 text-zinc-800 dark:bg-zinc-700 dark:text-zinc-200">
-          {record.prompt}
-        </p>
-      </div>
-
-      <div>
-        <h2 className="mb-1 text-sm font-medium text-zinc-600 dark:text-zinc-400">
-          Response
-        </h2>
-        <p className="whitespace-pre-wrap rounded bg-zinc-100 px-3 py-2 text-zinc-800 dark:bg-zinc-700 dark:text-zinc-200">
-          {record.response}
-        </p>
-      </div>
+      {/* P3.3 — Section 2: Prompt & Response with Copy response */}
+      <section aria-label="Prompt and Response" className="space-y-4">
+        <div>
+          <h2 className="mb-1 text-sm font-medium text-zinc-600 dark:text-zinc-400">
+            Prompt
+          </h2>
+          <p className="whitespace-pre-wrap rounded bg-zinc-100 px-3 py-2 text-zinc-800 dark:bg-zinc-700 dark:text-zinc-200">
+            {record.prompt}
+          </p>
+        </div>
+        <div>
+          <h2 className="mb-1 text-sm font-medium text-zinc-600 dark:text-zinc-400">
+            Response
+          </h2>
+          <p className="whitespace-pre-wrap rounded bg-zinc-100 px-3 py-2 text-zinc-800 dark:bg-zinc-700 dark:text-zinc-200">
+            {record.response}
+          </p>
+          <button
+            type="button"
+            onClick={handleCopyResponse}
+            title={TOOLTIPS.copy_response}
+            className="mt-2 inline-flex items-center gap-1.5 rounded border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+          >
+            📋 Copy response
+          </button>
+        </div>
+      </section>
 
       <div>
         <h2 className="mb-1 text-sm font-medium text-zinc-600 dark:text-zinc-400">
