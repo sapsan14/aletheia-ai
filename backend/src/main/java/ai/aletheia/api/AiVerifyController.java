@@ -1,5 +1,6 @@
 package ai.aletheia.api;
 
+import ai.aletheia.claim.ClaimCanonical;
 import ai.aletheia.api.dto.AiVerifyResponse;
 import ai.aletheia.api.dto.ErrorResponse;
 import ai.aletheia.crypto.CanonicalizationService;
@@ -87,7 +88,20 @@ public class AiVerifyController {
         if (stored == null || stored.isBlank()) return false;
         try {
             byte[] canonical = canonicalizationService.canonicalize(e.getResponse());
-            String computed = hashService.hash(canonical);
+            String computed;
+            boolean hasClaim = (e.getClaim() != null && !e.getClaim().isBlank())
+                    || (e.getPolicyVersion() != null && !e.getPolicyVersion().isBlank());
+            if (hasClaim) {
+                byte[] claimBytes = ClaimCanonical.toCanonicalBytes(
+                        e.getClaim(), e.getConfidence(), e.getLlmModel(), e.getPolicyVersion());
+                byte[] bytesToSign = new byte[canonical.length + 1 + claimBytes.length];
+                System.arraycopy(canonical, 0, bytesToSign, 0, canonical.length);
+                bytesToSign[canonical.length] = '\n';
+                System.arraycopy(claimBytes, 0, bytesToSign, canonical.length + 1, claimBytes.length);
+                computed = hashService.hash(bytesToSign);
+            } else {
+                computed = hashService.hash(canonical);
+            }
             return computed.equalsIgnoreCase(stored);
         } catch (Exception ex) {
             log.warn("Hash verification failed for id={}: {}", e.getId(), ex.getMessage());

@@ -63,6 +63,30 @@ async function sha256Hex(text: string): Promise<string> {
     .join("");
 }
 
+/**
+ * Build claim canonical JSON (same format as backend ClaimCanonical.toCanonicalBytes).
+ * Keys alphabetically: claim, confidence, model, policy_version. Used when record has claim.
+ */
+function claimCanonicalJson(
+  claim: string | null | undefined,
+  confidence: number | null | undefined,
+  model: string | null | undefined,
+  policyVersion: string | null | undefined
+): string {
+  const escapeJson = (s: string) =>
+    (s ?? "")
+      .replace(/\\/g, "\\\\")
+      .replace(/"/g, '\\"')
+      .replace(/\n/g, "\\n")
+      .replace(/\r/g, "\\r")
+      .replace(/\t/g, "\\t");
+  const c = escapeJson(claim ?? "");
+  const m = escapeJson(model ?? "");
+  const p = escapeJson(policyVersion ?? "");
+  const conf = confidence != null ? Number(confidence) : 0;
+  return `{"claim":"${c}","confidence":${conf},"model":"${m}","policy_version":"${p}"}`;
+}
+
 function truncateMiddle(str: string, head = 20, tail = 20): string {
   if (!str || str.length <= head + tail) return str;
   return `${str.slice(0, head)}...${str.slice(-tail)}`;
@@ -129,8 +153,14 @@ function VerifyContent() {
     setHashChecking(true);
     setHashMatch(null);
     try {
-      const canonical = canonicalize(record.response);
-      const computed = await sha256Hex(canonical);
+      const responseCanonical = canonicalize(record.response);
+      const hasClaim =
+        (record.claim != null && String(record.claim).trim() !== "") ||
+        (record.policyVersion != null && String(record.policyVersion).trim() !== "");
+      const toHash = hasClaim
+        ? responseCanonical + "\n" + claimCanonicalJson(record.claim, record.confidence, record.llmModel, record.policyVersion)
+        : responseCanonical;
+      const computed = await sha256Hex(toHash);
       const stored = (record.responseHash || "").toLowerCase();
       setHashMatch(computed === stored);
     } catch {

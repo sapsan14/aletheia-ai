@@ -46,7 +46,8 @@ async function proxy(
   pathSegments: string[]
 ): Promise<Response> {
   const path = pathSegments.join("/");
-  const url = `${BACKEND.replace(/\/$/, "")}/api/${path}`;
+  const search = request.nextUrl.searchParams.toString();
+  const url = `${BACKEND.replace(/\/$/, "")}/api/${path}${search ? `?${search}` : ""}`;
   const init: RequestInit = {
     method: request.method,
     headers: stripHopByHop(request.headers),
