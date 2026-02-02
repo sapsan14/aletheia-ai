@@ -1,31 +1,36 @@
-# Backend CI — build and test when backend/ changes
+# Backend CI — runs after CodeQL completes (same push/PR), so order is CodeQL → Backend CI
 name: "Backend CI"
 
 on:
-  push:
+  workflow_run:
+    workflows: ["CodeQL"]
+    types: [completed]
     branches: [main]
-    paths:
-      - "backend/**"
-      - ".github/workflows/backend.yml"
-  pull_request:
-    branches: [main]
-    paths:
-      - "backend/**"
-      - ".github/workflows/backend.yml"
 
 jobs:
   build-and-test:
     name: Build & test
     runs-on: ubuntu-latest
+    # Only run when CodeQL finished (success or failure — we still want to test backend)
+    if: github.event.workflow_run.conclusion != 'cancelled'
     defaults:
       run:
         working-directory: backend
 
     steps:
-      - name: Checkout
+      - name: Checkout (commit that triggered CodeQL)
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 2
+
+      - name: Check if backend changed
+        id: paths
+        run: |
+          git diff --name-only HEAD^ HEAD | grep -q '^backend/' && echo "backend=true" >> $GITHUB_OUTPUT || echo "backend=false" >> $GITHUB_OUTPUT
 
       - name: Set up Java 21
+        if: steps.paths.outputs.backend == 'true'
         uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -33,7 +38,9 @@ jobs:
           cache: maven
 
       - name: Build
+        if: steps.paths.outputs.backend == 'true'
         run: ./mvnw clean package -DskipTests -B -q
 
       - name: Test
+        if: steps.paths.outputs.backend == 'true'
         run: ./mvnw test -B -q
