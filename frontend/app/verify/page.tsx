@@ -24,6 +24,9 @@ interface VerifyRecord {
   createdAt: string;
   hashMatch?: boolean;
   signatureValid?: string; // "valid" | "invalid" | "n_a"
+  claim?: string | null;
+  confidence?: number | null;
+  policyVersion?: string | null;
 }
 
 /** Canonicalize text (same rules as backend). */
@@ -65,6 +68,15 @@ function truncateMiddle(str: string, head = 20, tail = 20): string {
   return `${str.slice(0, head)}...${str.slice(-tail)}`;
 }
 
+/** Format policy version for display (e.g. "gdpr-2024" → "GDPR-2024"). */
+function formatPolicyVersion(value: string | null | undefined): string {
+  if (value == null || value === "") return "";
+  return value
+    .split("-")
+    .map((part) => part.toUpperCase())
+    .join("-");
+}
+
 function VerifyContent() {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
@@ -73,6 +85,12 @@ function VerifyContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [hashMatch, setHashMatch] = useState<boolean | null>(null);
   const [hashChecking, setHashChecking] = useState(false);
+  const [claimExpanded, setClaimExpanded] = useState(false);
+  const [evidenceDownloading, setEvidenceDownloading] = useState(false);
+  const [evidenceError, setEvidenceError] = useState<string | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewKeys, setPreviewKeys] = useState<string[] | null>(null);
+  const [previewError, setPreviewError] = useState<string | null>(null);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
 
@@ -174,6 +192,68 @@ function VerifyContent() {
     if (record.response) void navigator.clipboard.writeText(record.response);
   }
 
+  async function handleDownloadEvidence() {
+    if (!record) return;
+    setEvidenceDownloading(true);
+    setEvidenceError(null);
+    try {
+      const res = await fetch(`${apiUrl}/api/ai/evidence/${record.id}`);
+      if (!res.ok) {
+        const text = await res.text();
+        const msg =
+          res.status === 404
+            ? "Response not found"
+            : res.status === 503
+              ? "Signing key not configured"
+              : text || `Download failed (${res.status})`;
+        setEvidenceError(msg);
+        return;
+      }
+      const blob = await res.blob();
+      const disposition = res.headers.get("Content-Disposition");
+      let filename = `aletheia-evidence-${record.id}.aep`;
+      if (disposition) {
+        const match = /filename[*]?=(?:UTF-8'')?"?([^";\n]+)"?/i.exec(disposition);
+        if (match) filename = match[1].trim();
+      }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setEvidenceError(err instanceof Error ? err.message : "Download failed");
+    } finally {
+      setEvidenceDownloading(false);
+    }
+  }
+
+  async function handlePreviewPackage() {
+    if (!record) return;
+    setPreviewError(null);
+    setPreviewKeys(null);
+    setPreviewOpen(true);
+    try {
+      const res = await fetch(`${apiUrl}/api/ai/evidence/${record.id}?format=json`);
+      if (!res.ok) {
+        const text = await res.text();
+        setPreviewError(
+          res.status === 404
+            ? "Response not found"
+            : res.status === 503
+              ? "Signing key not configured"
+              : text || `Request failed (${res.status})`
+        );
+        return;
+      }
+      const data = (await res.json()) as Record<string, string>;
+      setPreviewKeys(Object.keys(data).sort());
+    } catch (err) {
+      setPreviewError(err instanceof Error ? err.message : "Failed to load preview");
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* P3.2 — Trust Summary Card (Section 1) */}
@@ -269,6 +349,83 @@ function VerifyContent() {
         </div>
       </section>
 
+      {/* P3.4 — Section 3: AI Claim (only when claim or policyVersion present) */}
+      {(record.claim != null && String(record.claim).trim() !== "") ||
+      (record.policyVersion != null && String(record.policyVersion).trim() !== "") ? (
+        <section
+          className="rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-600 dark:bg-zinc-700/30"
+          aria-label="AI Claim"
+        >
+          <h2
+            className="mb-3 text-lg font-semibold text-zinc-900 dark:text-zinc-50"
+            title={TOOLTIPS.ai_claim_heading}
+          >
+            🧠 AI Claim
+          </h2>
+          {record.claim != null && String(record.claim).trim() !== "" && (
+            <div className="mb-3">
+              <p className="mb-1 text-sm font-medium text-zinc-600 dark:text-zinc-400">
+                Claim:
+              </p>
+              {record.claim.length > 200 && !claimExpanded ? (
+                <>
+                  <blockquote className="border-l-2 border-zinc-300 pl-3 text-zinc-700 dark:border-zinc-500 dark:text-zinc-300">
+                    &ldquo;{record.claim.slice(0, 200)}…&rdquo;
+                  </blockquote>
+                  <button
+                    type="button"
+                    onClick={() => setClaimExpanded(true)}
+                    className="mt-1 text-sm text-blue-600 hover:underline dark:text-blue-400"
+                  >
+                    Show more
+                  </button>
+                </>
+              ) : (
+                <blockquote className="border-l-2 border-zinc-300 pl-3 text-zinc-700 dark:border-zinc-500 dark:text-zinc-300">
+                  &ldquo;{record.claim}&rdquo;
+                </blockquote>
+              )}
+            </div>
+          )}
+          {record.confidence != null && (
+            <div className="mb-3 flex flex-wrap gap-x-2">
+              <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
+                Confidence:
+              </span>
+              <span
+                className="text-sm text-zinc-700 dark:text-zinc-300"
+                title={TOOLTIPS.confidence}
+              >
+                {typeof record.confidence === "number"
+                  ? record.confidence >= 0 && record.confidence <= 1
+                    ? `${Math.round(record.confidence * 100)}%`
+                    : String(record.confidence)
+                  : String(record.confidence)}
+              </span>
+            </div>
+          )}
+          {record.policyVersion != null && String(record.policyVersion).trim() !== "" && (
+            <div className="mb-3 flex flex-wrap gap-x-2">
+              <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
+                Policy version:
+              </span>
+              <span
+                className="text-sm text-zinc-700 dark:text-zinc-300"
+                title={TOOLTIPS.policy_version}
+              >
+                {formatPolicyVersion(record.policyVersion) || record.policyVersion}
+              </span>
+            </div>
+          )}
+          <p
+            className="inline-flex items-center gap-1.5 rounded bg-zinc-200/80 px-2 py-1 text-xs font-medium text-zinc-700 dark:bg-zinc-600/80 dark:text-zinc-300"
+            title={TOOLTIPS.included_in_signed_payload}
+          >
+            🔐 Included in signed payload
+          </p>
+        </section>
+      ) : null}
+
       <div>
         <h2 className="mb-1 text-sm font-medium text-zinc-600 dark:text-zinc-400">
           Backend verification
@@ -350,6 +507,86 @@ function VerifyContent() {
           </p>
         )}
       </div>
+
+      {/* P3.6 — Section 5: Evidence Package */}
+      <section
+        className="rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-600 dark:bg-zinc-700/30"
+        aria-label="Evidence Package"
+      >
+        <h2 className="mb-3 text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+          📦 Evidence Package
+        </h2>
+        <p
+          className="mb-3 text-sm text-zinc-700 dark:text-zinc-300"
+          title={TOOLTIPS.verified_offline}
+        >
+          This response can be verified offline.
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={handleDownloadEvidence}
+            disabled={evidenceDownloading}
+            title={TOOLTIPS.download_evidence}
+            className="inline-flex items-center gap-1.5 rounded border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-60 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+          >
+            {evidenceDownloading ? "Downloading…" : "⬇ Download evidence"}
+          </button>
+          <button
+            type="button"
+            onClick={handlePreviewPackage}
+            title={TOOLTIPS.preview_package}
+            className="inline-flex items-center gap-1.5 rounded border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+          >
+            👀 Preview package
+          </button>
+        </div>
+        {evidenceError && (
+          <p className="mt-2 text-sm text-red-600 dark:text-red-400">{evidenceError}</p>
+        )}
+      </section>
+
+      {/* Preview package modal */}
+      {previewOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="preview-modal-title"
+        >
+          <div className="max-h-[80vh] w-full max-w-md overflow-auto rounded-lg border border-zinc-200 bg-white p-4 shadow-lg dark:border-zinc-600 dark:bg-zinc-800">
+            <h3 id="preview-modal-title" className="mb-3 text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+              Package contents
+            </h3>
+            {previewError && (
+              <p className="mb-3 text-sm text-red-600 dark:text-red-400">{previewError}</p>
+            )}
+            {previewKeys && previewKeys.length > 0 && (
+              <ul className="mb-4 list-inside list-disc space-y-1 text-sm text-zinc-700 dark:text-zinc-300">
+                {previewKeys.map((key) => (
+                  <li key={key} className="font-mono">
+                    {key}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {previewKeys && previewKeys.length === 0 && !previewError && (
+              <p className="mb-4 text-sm text-zinc-500">No files in package.</p>
+            )}
+            <button
+              type="button"
+              onClick={() => {
+                setPreviewOpen(false);
+                setPreviewKeys(null);
+                setPreviewError(null);
+              }}
+              className="rounded border border-zinc-200 bg-zinc-100 px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-200 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-600"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
 
       <Link
         href="/"
