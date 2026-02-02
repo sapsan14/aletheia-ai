@@ -1,12 +1,13 @@
 /**
- * Task 6.3 — Verify page
+ * Task 6.3 + Plan Phase 3 UI — Verify page
  *
- * Fetches GET /api/ai/verify/:id, displays prompt, response, hash, signature,
- * tsaToken, model, date. Optional "Verify hash" button for client-side check.
+ * Fetches GET /api/ai/verify/:id, displays Trust Summary (P3.2), prompt, response,
+ * hash, signature, tsaToken, model, date. Optional "Verify hash" button for client-side check.
  */
 
 "use client";
 
+import { TOOLTIPS } from "@/lib/tooltips";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -138,17 +139,103 @@ function VerifyContent() {
 
   if (!record) return null;
 
+  const hasSignature = !!(record.signature?.trim());
+  const hasTsaToken = !!(record.tsaToken?.trim());
+  const isVerified = hasSignature && hasTsaToken;
+
+  const createdUtc =
+    record.createdAt &&
+    `${new Date(record.createdAt).toISOString().slice(0, 19).replace("T", " ")} UTC`;
+
+  const integrityLabel =
+    record.hashMatch === true
+      ? "Not altered"
+      : record.hashMatch === false
+        ? "Altered or unknown"
+        : "—";
+
+  const timestampLabel = hasTsaToken ? "Trusted (RFC 3161)" : "—";
+
+  const summaryLine = [
+    isVerified ? "Verified AI Response" : "AI Response",
+    createdUtc && `Created: ${createdUtc}`,
+    record.llmModel && `Model: ${record.llmModel}`,
+    `Integrity: ${integrityLabel}`,
+    `Timestamp: ${timestampLabel}`,
+  ]
+    .filter(Boolean)
+    .join(" — ");
+
+  function handleCopySummary() {
+    if (summaryLine) void navigator.clipboard.writeText(summaryLine);
+  }
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap gap-2 text-sm">
-        <span className="text-zinc-500 dark:text-zinc-400">Model:</span>
-        <span className="text-zinc-700 dark:text-zinc-300">{record.llmModel}</span>
-        <span className="text-zinc-400">·</span>
-        <span className="text-zinc-500 dark:text-zinc-400">Created:</span>
-        <span className="text-zinc-700 dark:text-zinc-300">
-          {new Date(record.createdAt).toLocaleString()}
-        </span>
-      </div>
+      {/* P3.2 — Trust Summary Card (Section 1) */}
+      <section
+        className="rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-600 dark:bg-zinc-700/30"
+        aria-label="Trust summary"
+      >
+        <h2
+          className="mb-3 text-lg font-semibold text-zinc-900 dark:text-zinc-50"
+          title={TOOLTIPS.verified_ai_response}
+        >
+          {isVerified ? "✅ Verified AI Response" : "AI Response"}
+        </h2>
+        <dl className="space-y-1.5 text-sm">
+          <div className="flex flex-wrap gap-x-2">
+            <dt className="text-zinc-500 dark:text-zinc-400">🕒 Created:</dt>
+            <dd className="text-zinc-700 dark:text-zinc-300">{createdUtc || "—"}</dd>
+          </div>
+          <div className="flex flex-wrap gap-x-2">
+            <dt className="text-zinc-500 dark:text-zinc-400">🤖 Model:</dt>
+            <dd className="text-zinc-700 dark:text-zinc-300">{record.llmModel || "—"}</dd>
+          </div>
+          <div className="flex flex-wrap gap-x-2">
+            <dt className="text-zinc-500 dark:text-zinc-400">🛡️ Integrity:</dt>
+            <dd
+              className="text-zinc-700 dark:text-zinc-300"
+              title={TOOLTIPS.integrity_not_altered}
+            >
+              {integrityLabel}
+            </dd>
+          </div>
+          <div className="flex flex-wrap gap-x-2">
+            <dt className="text-zinc-500 dark:text-zinc-400">⏱️ Timestamp:</dt>
+            <dd
+              className="text-zinc-700 dark:text-zinc-300"
+              title={TOOLTIPS.timestamp_trusted}
+            >
+              {timestampLabel}
+            </dd>
+          </div>
+        </dl>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <details className="rounded border border-zinc-200 bg-white px-3 py-2 dark:border-zinc-600 dark:bg-zinc-800">
+            <summary
+              className="cursor-pointer list-none text-sm font-medium text-blue-600 dark:text-blue-400"
+              title={TOOLTIPS.what_is_verified}
+            >
+              🔎 What is verified?
+            </summary>
+            <p className="mt-2 text-xs text-zinc-600 dark:text-zinc-400">
+              The signature covers the response text in canonical form. If this response
+              includes an AI claim (claim, confidence, policy version), those are also
+              part of the signed payload. You can verify the response offline using the
+              Evidence Package.
+            </p>
+          </details>
+          <button
+            type="button"
+            onClick={handleCopySummary}
+            title={TOOLTIPS.copy_summary}
+            className="inline-flex items-center gap-1.5 rounded border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+          >
+            📋 Copy summary
+          </button>
+        </div>
+      </section>
 
       <div>
         <h2 className="mb-1 text-sm font-medium text-zinc-600 dark:text-zinc-400">
