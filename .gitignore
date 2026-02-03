@@ -54,3 +54,4 @@ docs/legal/downloads/
 # *.liquibase-backup
 
 *.aep
+*/tmp/*

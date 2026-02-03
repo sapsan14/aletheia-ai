@@ -49,13 +49,13 @@ We focus Phase 2 on **legal / compliance AI** (contracts, clauses, EU AI Act, au
 
 **Deliverables:**
 
-| # | Deliverable | Purpose |
-|---|-------------|---------|
-| 1 | Evidence Package (minimal) | Single request → one .aep (or equivalent) with response/canonical, hash, signature, tsa_token, public_key, metadata. |
-| 2 | Offline verifier (CLI or script) | `aletheia verify <path>` runs without our server; outputs valid/invalid + report. |
-| 3 | One killer demo scenario | Legal/compliance: e.g. “AI states this clause is GDPR-compliant” → signed + timestamped → auditor verifies offline; reproducible in ≤5 min. |
-| 4 | Minimal AI Claim in bundle | Optional structured claim (claim, confidence, policy_version) in signed payload for demo. |
-| 5 | Narrative and docs | README block “Works with MCP / OpenClaw / any agent”; link to [Vision](VISION_AND_ROADMAP.md) Phase 2; investor-facing one-liner updated. |
+| # | Deliverable | Status | Purpose |
+|---|-------------|--------|---------|
+| 1 | Evidence Package (minimal) | ✅ Done | Single request → one .aep (or equivalent) with response/canonical, hash, signature, tsa_token, public_key, metadata. |
+| 2 | Offline verifier (CLI or script) | ✅ Done | `aletheia verify <path>` runs without our server; outputs valid/invalid + report. |
+| 3 | One killer demo scenario | ✅ Done | Legal/compliance: e.g. “AI states this clause is GDPR-compliant” → signed + timestamped → auditor verifies offline; reproducible in ≤5 min. |
+| 4 | Minimal AI Claim in bundle | ✅ Done | Optional structured claim (claim, confidence, policy_version) in signed payload for demo. |
+| 5 | Narrative and docs | ✅ Done | README block “Works with MCP / OpenClaw / any agent”; link to [Vision](VISION_AND_ROADMAP.md) Phase 2; investor-facing one-liner updated. |
 
 ---
 
@@ -67,11 +67,12 @@ We focus Phase 2 on **legal / compliance AI** (contracts, clauses, EU AI Act, au
 
 **Est.** 4–6 h
 
-#### Task DP2.1.1 — Define Evidence Package format
+#### Task DP2.1.1 — Define Evidence Package format ✅
 
 | Field | Value |
 |-------|--------|
 | **Est.** | 1 h |
+| **Status** | ✅ Done |
 | **Description** | Document and implement the minimal .aep structure: which files, naming, and contents. |
 
 **Coding prompt (LLM-readable):**
@@ -101,11 +102,12 @@ Verification uses: `canonical.bin` → recompute hash and compare with `hash.sha
 
 ---
 
-#### Task DP2.1.2 — Backend: generate Evidence Package for a response
+#### Task DP2.1.2 — Backend: generate Evidence Package for a response ✅
 
 | Field | Value |
 |-------|--------|
 | **Est.** | 2–3 h |
+| **Status** | ✅ Done |
 | **Description** | Add service or endpoint that, given a stored response id (or the response + signature + tsa_token), writes an Evidence Package to a directory or returns a ZIP/base64 bundle. |
 
 **Coding prompt (LLM-readable):**
@@ -128,11 +130,12 @@ Verification uses: `canonical.bin` → recompute hash and compare with `hash.sha
 
 **Est.** 4–6 h
 
-#### Task DP2.2.1 — Verifier logic (signature + TSA)
+#### Task DP2.2.1 — Verifier logic (signature + TSA) ✅
 
 | Field | Value |
 |-------|--------|
 | **Est.** | 2–3 h |
+| **Status** | ✅ Done |
 | **Description** | Implement verification: (1) load canonical bytes and hash from package; (2) load public key from public_key.pem; (3) verify signature over hash (or over canonical bytes, consistent with backend); (4) parse RFC 3161 token from timestamp.tsr and validate (signature verification of TSA token; optionally check certificate chain). Output: valid/invalid and short report (e.g. hash OK, signature OK, timestamp time). |
 
 **Coding prompt (LLM-readable):**
@@ -150,11 +153,12 @@ Verification uses: `canonical.bin` → recompute hash and compare with `hash.sha
 
 ---
 
-#### Task DP2.2.2 — CLI entrypoint
+#### Task DP2.2.2 — CLI entrypoint ✅
 
 | Field | Value |
 |-------|--------|
 | **Est.** | 1–2 h |
+| **Status** | ✅ Done |
 | **Description** | Expose verifier as a CLI command, e.g. `aletheia verify <path-to-aep-or-dir>`. |
 
 **Coding prompt (LLM-readable):**
@@ -176,11 +180,12 @@ Verification uses: `canonical.bin` → recompute hash and compare with `hash.sha
 
 **Est.** 2–4 h (mostly narrative and flow; backend/UI may already support it)
 
-#### Task DP2.3.1 — Define and document demo script
+#### Task DP2.3.1 — Define and document demo script ✅
 
 | Field | Value |
 |-------|--------|
 | **Est.** | 1 h |
+| **Status** | ✅ Done |
 | **Description** | Write a short, step-by-step script for the killer demo: prompt text, how to get response, how to export Evidence Package, how to run verifier. |
 
 **Coding prompt (LLM-readable):**
@@ -198,11 +203,12 @@ Verification uses: `canonical.bin` → recompute hash and compare with `hash.sha
 
 ---
 
-#### Task DP2.3.2 — Optional: “Download evidence” in frontend
+#### Task DP2.3.2 — Optional: "Download evidence" in frontend ✅
 
 | Field | Value |
 |-------|--------|
 | **Est.** | 1–2 h |
+| **Status** | ✅ Done |
 | **Description** | If not already present, add a way in the UI to download the Evidence Package for the last response (or by response id). |
 
 **Coding prompt (LLM-readable):**
@@ -223,11 +229,12 @@ Verification uses: `canonical.bin` → recompute hash and compare with `hash.sha
 
 **Est.** 2–3 h
 
-#### Task DP2.4.1 — Claim structure in metadata and signed payload
+#### Task DP2.4.1 — Claim structure in metadata and signed payload ✅
 
 | Field | Value |
 |-------|--------|
 | **Est.** | 1–2 h |
+| **Status** | ✅ Done |
 | **Description** | Extend metadata (or a dedicated claim field) to include claim, confidence, policy_version; ensure the signed content includes this so the verifier can show “what was claimed” and under which policy. |
 
 **Coding prompt (LLM-readable):**
@@ -261,11 +268,12 @@ So today **confidence** and **policy_version** do not depend on the model respon
 
 **Est.** 1–2 h
 
-#### Task DP2.5.1 — README and Vision links
+#### Task DP2.5.1 — README and Vision links ✅
 
 | Field | Value |
 |-------|--------|
 | **Est.** | 1 h |
+| **Status** | ✅ Done |
 | **Description** | Add README section “Evidence Package & offline verification” and “Killer demo (Phase 2)”; add “Works with MCP / OpenClaw / any agent framework” with one diagram or sentence; link to PLAN_PHASE2.md and DEMO_SCRIPT. |
 
 **Coding prompt (LLM-readable):**
@@ -300,15 +308,15 @@ The following tasks are implemented. Use this section to find code and entrypoin
 
 ## Phase 2 completion criteria
 
-Phase 2 is complete when all of the following are true:
+Phase 2 is **complete** — all of the following are true:
 
-| # | Criterion | How to verify |
-|---|-----------|----------------|
-| 1 | Evidence Package is generated for every signed response (or via dedicated endpoint) | Generate package for a response; unzip/open; all 7 components present. |
-| 2 | Offline verifier runs without backend | Run `aletheia verify <path>` on a machine with no Aletheia backend; valid package → VALID. |
-| 3 | Killer demo script is documented and reproducible in ≤5 min | Follow docs/DEMO_SCRIPT (or equivalent); complete flow in ≤5 min. |
-| 4 | Narrative updated | README and docs reference Phase 2, Evidence Package, “works with MCP/any agent.” |
-| 5 | Optional: one pilot feedback or LOI | External validation (legal/compliance team or auditor) has run the demo and provided feedback or letter of intent. |
+| # | Criterion | Status | How to verify |
+|---|-----------|--------|---------------|
+| 1 | Evidence Package is generated for every signed response (or via dedicated endpoint) | ✅ | Generate package for a response; unzip/open; all 7 components present. |
+| 2 | Offline verifier runs without backend | ✅ | Run `aletheia verify <path>` on a machine with no Aletheia backend; valid package → VALID. |
+| 3 | Killer demo script is documented and reproducible in ≤5 min | ✅ | Follow docs/DEMO_SCRIPT (or equivalent); complete flow in ≤5 min. |
+| 4 | Narrative updated | ✅ | README and docs reference Phase 2, Evidence Package, “works with MCP/any agent.” |
+| 5 | Optional: one pilot feedback or LOI | — | External validation (legal/compliance team or auditor) has run the demo and provided feedback or letter of intent. |
 
 ---
 

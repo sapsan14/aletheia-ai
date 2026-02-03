@@ -2,6 +2,8 @@
 
 Detailed, machine-readable specification for the **verify page** (and related response UI): wireframe, tooltips, and UX rationale. Use this document to implement the UI without guessing copy or structure.
 
+**Status:** ✅ **Phase 3 complete** — All implementation steps (P3.0–P3.10) are done. Trust Summary, AI Claim, Evidence Package, Verifier utility, tooltips, and footer are implemented.
+
 **Related:** [Plan Phase 2](PLAN_PHASE2.md) (Evidence Package, killer demo) · [Demo script](../DEMO_SCRIPT.md) · [Vision Phase 2](VISION_AND_ROADMAP.md#2-killer-demo--domain-choice)
 
 ---
@@ -330,27 +332,28 @@ Then add Prompt & Response refinements (Section 2), collapsible Verification Det
 
 Every step that requires code changes has a number and a **Coding prompt (LLM-readable)** block. Implement in order unless otherwise noted. Steps P3.0, P3.8, P3.9 are optional.
 
-| Step | Title | Est. | Required |
-|------|--------|------|----------|
-| P3.0 | Backend: verify API returns claim, confidence, policyVersion | 15–30 min | Optional |
-| P3.1 | Create TOOLTIPS map (single source of truth) | 15 min | Yes |
-| P3.2 | Trust Summary Card (Section 1) | 45–60 min | Yes |
-| P3.3 | Prompt & Response block with Copy response (Section 2) | 20–30 min | Yes |
-| P3.4 | AI Claim block (Section 3) | 30–45 min | Yes |
-| P3.5 | Verification Details collapsible (Section 4) | 40–50 min | Yes |
-| P3.6 | Evidence Package block (Section 5) | 25–35 min | Yes |
-| P3.7 | Footer line (Section 6) | 5 min | Yes |
-| P3.8 | “What is verified?” content | 15–20 min | Optional |
-| P3.9 | Preview package modal/expandable | 20–30 min | Optional |
-| P3.10 | Verifier utility download and usage box (Section 5b) | 35–50 min | Yes |
+| Step | Title | Est. | Required | Status |
+|------|--------|------|----------|--------|
+| P3.0 | Backend: verify API returns claim, confidence, policyVersion | 15–30 min | Optional | ✅ Done |
+| P3.1 | Create TOOLTIPS map (single source of truth) | 15 min | Yes | ✅ Done |
+| P3.2 | Trust Summary Card (Section 1) | 45–60 min | Yes | ✅ Done |
+| P3.3 | Prompt & Response block with Copy response (Section 2) | 20–30 min | Yes | ✅ Done |
+| P3.4 | AI Claim block (Section 3) | 30–45 min | Yes | ✅ Done |
+| P3.5 | Verification Details collapsible (Section 4) | 40–50 min | Yes | ✅ Done |
+| P3.6 | Evidence Package block (Section 5) | 25–35 min | Yes | ✅ Done |
+| P3.7 | Footer line (Section 6) | 5 min | Yes | ✅ Done |
+| P3.8 | “What is verified?” content | 15–20 min | Optional | ✅ Done |
+| P3.9 | Preview package modal/expandable | 20–30 min | Optional | ✅ Done |
+| P3.10 | Verifier utility download and usage box (Section 5b) | 35–50 min | Yes | ✅ Done |
 
 ---
 
-### Step P3.0 — Backend: verify API returns claim, confidence, policyVersion (optional)
+### Step P3.0 — Backend: verify API returns claim, confidence, policyVersion (optional) ✅
 
 | Field | Value |
 |-------|--------|
 | **Est.** | 15–30 min |
+| **Status** | ✅ Done |
 | **When** | Only if GET `/api/ai/verify/:id` does not yet return `claim`, `confidence`, `policyVersion`. |
 
 **Coding prompt (LLM-readable):**
@@ -361,11 +364,12 @@ Every step that requires code changes has a number and a **Coding prompt (LLM-re
 
 ---
 
-### Step P3.1 — Create TOOLTIPS map (single source of truth)
+### Step P3.1 — Create TOOLTIPS map (single source of truth) ✅
 
 | Field | Value |
 |-------|--------|
 | **Est.** | 15 min |
+| **Status** | ✅ Done |
 
 **Coding prompt (LLM-readable):**
 
@@ -390,11 +394,12 @@ Every step that requires code changes has a number and a **Coding prompt (LLM-re
 
 ---
 
-### Step P3.3 — Prompt & Response block with Copy response (Section 2)
+### Step P3.3 — Prompt & Response block with Copy response (Section 2) ✅
 
 | Field | Value |
 |-------|--------|
 | **Est.** | 20–30 min |
+| **Status** | ✅ Done |
 | **Section** | [SECTION 2 — Prompt & Response](#section-2--prompt--response) |
 
 **Coding prompt (LLM-readable):**
@@ -405,11 +410,12 @@ Every step that requires code changes has a number and a **Coding prompt (LLM-re
 
 ---
 
-### Step P3.4 — AI Claim block (Section 3)
+### Step P3.4 — AI Claim block (Section 3) ✅
 
 | Field | Value |
 |-------|--------|
 | **Est.** | 30–45 min |
+| **Status** | ✅ Done |
 | **Section** | [SECTION 3 — AI Claim](#section-3--ai-claim-new-show-only-when-claim-exists) |
 
 **Coding prompt (LLM-readable):**
@@ -420,11 +426,12 @@ Every step that requires code changes has a number and a **Coding prompt (LLM-re
 
 ---
 
-### Step P3.5 — Verification Details collapsible (Section 4)
+### Step P3.5 — Verification Details collapsible (Section 4) ✅
 
 | Field | Value |
 |-------|--------|
 | **Est.** | 40–50 min |
+| **Status** | ✅ Done |
 | **Section** | [SECTION 4 — Verification Details](#section-4--verification-details-advanced-collapsible) |
 
 **Coding prompt (LLM-readable):**
@@ -435,11 +442,12 @@ Every step that requires code changes has a number and a **Coding prompt (LLM-re
 
 ---
 
-### Step P3.6 — Evidence Package block (Section 5)
+### Step P3.6 — Evidence Package block (Section 5) ✅
 
 | Field | Value |
 |-------|--------|
 | **Est.** | 25–35 min |
+| **Status** | ✅ Done |
 | **Section** | [SECTION 5 — Evidence Package](#section-5--evidence-package) |
 
 **Coding prompt (LLM-readable):**
@@ -450,11 +458,12 @@ Every step that requires code changes has a number and a **Coding prompt (LLM-re
 
 ---
 
-### Step P3.7 — Footer line (Section 6)
+### Step P3.7 — Footer line (Section 6) ✅
 
 | Field | Value |
 |-------|--------|
 | **Est.** | 5 min |
+| **Status** | ✅ Done |
 | **Section** | [SECTION 6 — Footer](#section-6--footer) |
 
 **Coding prompt (LLM-readable):**
@@ -465,11 +474,12 @@ Every step that requires code changes has a number and a **Coding prompt (LLM-re
 
 ---
 
-### Step P3.8 — “What is verified?” content (optional)
+### Step P3.8 — “What is verified?” content (optional) ✅
 
 | Field | Value |
 |-------|--------|
 | **Est.** | 15–20 min |
+| **Status** | ✅ Done |
 | **Depends on** | P3.2 (Trust Summary) |
 
 **Coding prompt (LLM-readable):**
@@ -480,11 +490,12 @@ Every step that requires code changes has a number and a **Coding prompt (LLM-re
 
 ---
 
-### Step P3.9 — Preview package modal/expandable (optional)
+### Step P3.9 — Preview package modal/expandable (optional) ✅
 
 | Field | Value |
 |-------|--------|
 | **Est.** | 20–30 min |
+| **Status** | ✅ Done |
 | **Depends on** | P3.6 (Evidence Package block) |
 
 **Coding prompt (LLM-readable):**
@@ -495,11 +506,12 @@ Every step that requires code changes has a number and a **Coding prompt (LLM-re
 
 ---
 
-### Step P3.10 — Verifier utility download and usage box (Section 5b)
+### Step P3.10 — Verifier utility download and usage box (Section 5b) ✅
 
 | Field | Value |
 |-------|--------|
 | **Est.** | 35–50 min |
+| **Status** | ✅ Done |
 | **Section** | [SECTION 5b — Verifier utility](#section-5b--verifier-utility-download--usage) |
 | **Depends on** | P3.6 (Evidence Package block); verifier JAR build (see [Plan Phase 2](PLAN_PHASE2.md) DP2.2.2, [scripts/README.md](../../scripts/README.md)) |
 

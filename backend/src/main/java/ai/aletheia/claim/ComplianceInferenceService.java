@@ -25,6 +25,7 @@ public class ComplianceInferenceService {
                 || lower.contains("regulatory") || lower.contains("compliant");
         if (!hasCompliance) return null;
 
+    // TODO: add more policies here?
         String policyVersion = "compliance-2024";
         if (lower.contains("gdpr")) policyVersion = "gdpr-2024";
         else if (lower.contains("ai act")) policyVersion = "ai-act-2024";

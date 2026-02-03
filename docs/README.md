@@ -55,3 +55,4 @@ Same topics exist in **Russian** ([docs/ru/](ru/)) and **Estonian** ([docs/et/](
 
 - From any `docs/<lang>/` file: same-language docs use relative links (e.g. `[SIGNING](SIGNING.md)`). README and diagrams: `../../README.md`, `../../diagrams/architecture.md`.
 - Root [README](../README.md) links to `docs/en/`, `docs/ru/`, `docs/et/` and [diagrams/architecture.md](../diagrams/architecture.md).
+- **Plan documents by language:** PLAN, Phase 2, Phase 4, PQC exist in EN, RU, ET. Plan Phase 3 UI and Plan Phase 5 are EN-only (translations can be added later).

@@ -71,7 +71,7 @@
 			<version>2.8.4</version>
 		</dependency>
 
-		<!-- BouncyCastle for crypto (signing, TSA): bcpkix, bcprov -->
+		<!-- BouncyCastle for crypto (signing, TSA): bcpkix, bcprov. bcprov includes PQC (Dilithium/ML-DSA) for optional post-quantum signing; see docs/en/PLAN_PQC.md -->
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcpkix-jdk18on</artifactId>

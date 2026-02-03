@@ -48,6 +48,8 @@ So we attest *what* was said; the TSA attests *when* it was signed. See [Trust m
 - **Location:** Configurable path via `ai.aletheia.signing.key-path` (file or `classpath:...`). Optional at startup; sign/verify fail with a clear message if the key is not loaded.
 - **PoC scope:** One key is enough; key rotation is out of scope. No HSM; key is loaded from file or classpath.
 
+**Post-quantum (PQC):** Optionally, a second ML-DSA (Dilithium) signature can be produced over the same hash for long-term verification. Set `ai.aletheia.signing.pqc-enabled=true` and `ai.aletheia.signing.pqc-key-path` to the path of an ML-DSA private key. PQC keys can be generated with a Bouncy Castle PQC key generation utility (see [Plan PQC](PLAN_PQC.md)). If not set, behaviour is unchanged (classical RSA only).
+
 ---
 
 ## Interface and algorithm
