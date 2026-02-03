@@ -1,5 +1,6 @@
 package ai.aletheia.evidence;
 
+import ai.aletheia.policy.PolicyRuleResult;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
@@ -10,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -45,7 +47,9 @@ public class EvidencePackageServiceImpl implements EvidencePackageService {
             String model,
             Instant createdAt,
             Long responseId,
-            String publicKeyPem) {
+            String publicKeyPem,
+            Double policyCoverage,
+            List<PolicyRuleResult> policyRulesEvaluated) {
 
         Map<String, byte[]> out = new LinkedHashMap<>();
 
@@ -61,6 +65,7 @@ public class EvidencePackageServiceImpl implements EvidencePackageService {
         if (responseId != null) {
             metadata.put("response_id", responseId);
         }
+        addPolicyMetadata(metadata, policyCoverage, policyRulesEvaluated);
         try {
             out.put(METADATA_JSON, objectMapper.writeValueAsBytes(metadata));
         } catch (JsonProcessingException e) {
@@ -83,13 +88,15 @@ public class EvidencePackageServiceImpl implements EvidencePackageService {
             Instant createdAt,
             Long responseId,
             String publicKeyPem,
+            Double policyCoverage,
+            List<PolicyRuleResult> policyRulesEvaluated,
             byte[] signaturePqcBytes,
             String pqcPublicKeyPem,
             String pqcAlgorithmName) {
 
         Map<String, byte[]> out = buildPackage(
                 responseText, canonicalBytes, hashHex, signatureBytes, tsaTokenBytes,
-                model, createdAt, responseId, publicKeyPem);
+                model, createdAt, responseId, publicKeyPem, policyCoverage, policyRulesEvaluated);
         addPqcIfPresent(out, signaturePqcBytes, pqcPublicKeyPem, pqcAlgorithmName);
         return out;
     }
@@ -107,7 +114,9 @@ public class EvidencePackageServiceImpl implements EvidencePackageService {
             String publicKeyPem,
             String claim,
             Double confidence,
-            String policyVersion) {
+            String policyVersion,
+            Double policyCoverage,
+            List<PolicyRuleResult> policyRulesEvaluated) {
 
         Map<String, byte[]> out = new LinkedHashMap<>();
 
@@ -132,6 +141,7 @@ public class EvidencePackageServiceImpl implements EvidencePackageService {
         if (policyVersion != null) {
             metadata.put("policy_version", policyVersion);
         }
+        addPolicyMetadata(metadata, policyCoverage, policyRulesEvaluated);
         try {
             out.put(METADATA_JSON, objectMapper.writeValueAsBytes(metadata));
         } catch (JsonProcessingException e) {
@@ -157,13 +167,16 @@ public class EvidencePackageServiceImpl implements EvidencePackageService {
             String claim,
             Double confidence,
             String policyVersion,
+            Double policyCoverage,
+            List<PolicyRuleResult> policyRulesEvaluated,
             byte[] signaturePqcBytes,
             String pqcPublicKeyPem,
             String pqcAlgorithmName) {
 
         Map<String, byte[]> out = buildPackage(
                 responseText, canonicalBytes, hashHex, signatureBytes, tsaTokenBytes,
-                model, createdAt, responseId, publicKeyPem, claim, confidence, policyVersion);
+                model, createdAt, responseId, publicKeyPem, claim, confidence, policyVersion,
+                policyCoverage, policyRulesEvaluated);
         addPqcIfPresent(out, signaturePqcBytes, pqcPublicKeyPem, pqcAlgorithmName);
         return out;
     }
@@ -186,6 +199,17 @@ public class EvidencePackageServiceImpl implements EvidencePackageService {
             out.put(PQC_ALGORITHM_JSON, objectMapper.writeValueAsBytes(algo));
         } catch (JsonProcessingException e) {
             throw new IllegalStateException("Failed to build pqc_algorithm.json", e);
+        }
+    }
+
+    private void addPolicyMetadata(Map<String, Object> metadata,
+                                   Double policyCoverage,
+                                   List<PolicyRuleResult> policyRulesEvaluated) {
+        if (policyCoverage != null) {
+            metadata.put("policy_coverage", policyCoverage);
+        }
+        if (policyRulesEvaluated != null) {
+            metadata.put("policy_rules_evaluated", policyRulesEvaluated);
         }
     }
 

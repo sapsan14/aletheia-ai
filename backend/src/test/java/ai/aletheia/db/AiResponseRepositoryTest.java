@@ -32,6 +32,8 @@ class AiResponseRepositoryTest {
         entity.setTemperature(0.7);
         entity.setSystemPrompt("You are helpful.");
         entity.setVersion(1);
+        entity.setPolicyCoverage(0.5);
+        entity.setPolicyRulesEvaluated("[{\"ruleId\":\"R1\",\"status\":\"pass\"}]");
 
         AiResponse saved = repository.save(entity);
         assertThat(saved.getId()).isNotNull();
@@ -48,6 +50,8 @@ class AiResponseRepositoryTest {
         assertThat(found.getTemperature()).isEqualTo(0.7);
         assertThat(found.getSystemPrompt()).isEqualTo("You are helpful.");
         assertThat(found.getVersion()).isEqualTo(1);
+        assertThat(found.getPolicyCoverage()).isEqualTo(0.5);
+        assertThat(found.getPolicyRulesEvaluated()).contains("\"ruleId\":\"R1\"");
         assertThat(found.getCreatedAt()).isNotNull();
     }
 
@@ -67,5 +71,7 @@ class AiResponseRepositoryTest {
         assertThat(found.getTemperature()).isNull();
         assertThat(found.getSystemPrompt()).isNull();
         assertThat(found.getVersion()).isEqualTo(1);
+        assertThat(found.getPolicyCoverage()).isNull();
+        assertThat(found.getPolicyRulesEvaluated()).isNull();
     }
 }

@@ -8,6 +8,8 @@ import ai.aletheia.crypto.HashService;
 import ai.aletheia.crypto.SignatureService;
 import ai.aletheia.db.AiResponseRepository;
 import ai.aletheia.db.entity.AiResponse;
+import ai.aletheia.policy.PolicyEvaluationService;
+import ai.aletheia.policy.PolicyRuleResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.slf4j.Logger;
@@ -18,6 +20,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * Returns stored audit record by id for the verification page.
@@ -35,16 +39,19 @@ public class AiVerifyController {
     private final CanonicalizationService canonicalizationService;
     private final HashService hashService;
     private final SignatureService signatureService;
+    private final PolicyEvaluationService policyEvaluationService;
 
     public AiVerifyController(
             AiResponseRepository repository,
             CanonicalizationService canonicalizationService,
             HashService hashService,
-            SignatureService signatureService) {
+            SignatureService signatureService,
+            PolicyEvaluationService policyEvaluationService) {
         this.repository = repository;
         this.canonicalizationService = canonicalizationService;
         this.hashService = hashService;
         this.signatureService = signatureService;
+        this.policyEvaluationService = policyEvaluationService;
     }
 
     @Operation(summary = "Verify record", description = "Fetch stored record by id with hashMatch and signatureValid")
@@ -66,6 +73,8 @@ public class AiVerifyController {
         String signatureValid = computeSignatureValid(e);
         String signaturePqc = e.getSignaturePqc() != null && !e.getSignaturePqc().isBlank() ? e.getSignaturePqc() : null;
         String pqcAlgorithm = signaturePqc != null ? PQC_ALGORITHM : null;
+        Double policyCoverage = e.getPolicyCoverage();
+        List<PolicyRuleResult> policyRules = policyEvaluationService.fromJson(e.getPolicyRulesEvaluated());
         return new AiVerifyResponse(
                 e.getId(),
                 e.getPrompt(),
@@ -84,6 +93,8 @@ public class AiVerifyController {
                 e.getPolicyVersion(),
                 hashMatch,
                 signatureValid,
+                policyCoverage,
+                policyRules,
                 signaturePqc,
                 pqcAlgorithm
         );

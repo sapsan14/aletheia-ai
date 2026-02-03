@@ -1,6 +1,9 @@
 package ai.aletheia.evidence;
 
+import ai.aletheia.policy.PolicyRuleResult;
+
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -35,7 +38,9 @@ public interface EvidencePackageService {
             String model,
             Instant createdAt,
             Long responseId,
-            String publicKeyPem);
+            String publicKeyPem,
+            Double policyCoverage,
+            List<PolicyRuleResult> policyRulesEvaluated);
 
     /**
      * Build the Evidence Package with optional PQC artifacts (PQC.4). When signaturePqcBytes is non-null,
@@ -51,6 +56,8 @@ public interface EvidencePackageService {
             Instant createdAt,
             Long responseId,
             String publicKeyPem,
+            Double policyCoverage,
+            List<PolicyRuleResult> policyRulesEvaluated,
             byte[] signaturePqcBytes,
             String pqcPublicKeyPem,
             String pqcAlgorithmName);
@@ -71,7 +78,9 @@ public interface EvidencePackageService {
             String publicKeyPem,
             String claim,
             Double confidence,
-            String policyVersion);
+            String policyVersion,
+            Double policyCoverage,
+            List<PolicyRuleResult> policyRulesEvaluated);
 
     /**
      * Build with DP2.4 claim metadata and optional PQC artifacts (PQC.4).
@@ -89,6 +98,8 @@ public interface EvidencePackageService {
             String claim,
             Double confidence,
             String policyVersion,
+            Double policyCoverage,
+            List<PolicyRuleResult> policyRulesEvaluated,
             byte[] signaturePqcBytes,
             String pqcPublicKeyPem,
             String pqcAlgorithmName);

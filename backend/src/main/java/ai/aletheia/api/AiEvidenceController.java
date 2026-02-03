@@ -8,6 +8,8 @@ import ai.aletheia.crypto.SignatureService;
 import ai.aletheia.db.AiResponseRepository;
 import ai.aletheia.db.entity.AiResponse;
 import ai.aletheia.evidence.EvidencePackageService;
+import ai.aletheia.policy.PolicyEvaluationService;
+import ai.aletheia.policy.PolicyRuleResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.slf4j.Logger;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Base64;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -45,17 +48,20 @@ public class AiEvidenceController {
     private final SignatureService signatureService;
     private final EvidencePackageService evidencePackageService;
     private final PqcSignatureService pqcSignatureService;
+    private final PolicyEvaluationService policyEvaluationService;
 
     public AiEvidenceController(
             AiResponseRepository repository,
             CanonicalizationService canonicalizationService,
             SignatureService signatureService,
             EvidencePackageService evidencePackageService,
+            PolicyEvaluationService policyEvaluationService,
             @org.springframework.beans.factory.annotation.Autowired(required = false) PqcSignatureService pqcSignatureService) {
         this.repository = repository;
         this.canonicalizationService = canonicalizationService;
         this.signatureService = signatureService;
         this.evidencePackageService = evidencePackageService;
+        this.policyEvaluationService = policyEvaluationService;
         this.pqcSignatureService = pqcSignatureService;
     }
 
@@ -92,6 +98,8 @@ public class AiEvidenceController {
         String claim = entity.getClaim();
         Double confidence = entity.getConfidence();
         String policyVersion = entity.getPolicyVersion();
+        Double policyCoverage = entity.getPolicyCoverage();
+        List<PolicyRuleResult> policyRules = policyEvaluationService.fromJson(entity.getPolicyRulesEvaluated());
 
         if (claim != null || policyVersion != null) {
             byte[] claimBytes = ClaimCanonical.toCanonicalBytes(
@@ -138,6 +146,8 @@ public class AiEvidenceController {
                     claim,
                     confidence,
                     policyVersion,
+                    policyCoverage,
+                    policyRules,
                     signaturePqcBytes,
                     pqcPublicKeyPem,
                     PQC_ALGORITHM_NAME);
@@ -152,6 +162,8 @@ public class AiEvidenceController {
                     entity.getCreatedAt(),
                     entity.getId(),
                     publicKeyPem,
+                    policyCoverage,
+                    policyRules,
                     signaturePqcBytes,
                     pqcPublicKeyPem,
                     PQC_ALGORITHM_NAME);

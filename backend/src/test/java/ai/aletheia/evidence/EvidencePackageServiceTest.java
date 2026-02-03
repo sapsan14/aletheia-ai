@@ -1,5 +1,6 @@
 package ai.aletheia.evidence;
 
+import ai.aletheia.policy.PolicyRuleResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -8,6 +9,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.HexFormat;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,7 +48,9 @@ class EvidencePackageServiceTest {
                 MODEL,
                 CREATED_AT,
                 RESPONSE_ID,
-                PUBLIC_KEY_PEM
+                PUBLIC_KEY_PEM,
+                null,
+                null
         );
 
         assertThat(files).containsKeys(
@@ -72,7 +76,9 @@ class EvidencePackageServiceTest {
                 MODEL,
                 CREATED_AT,
                 RESPONSE_ID,
-                PUBLIC_KEY_PEM
+                PUBLIC_KEY_PEM,
+                null,
+                null
         );
 
         byte[] hashFile = files.get(EvidencePackageServiceImpl.HASH_SHA256);
@@ -91,7 +97,9 @@ class EvidencePackageServiceTest {
                 MODEL,
                 CREATED_AT,
                 RESPONSE_ID,
-                PUBLIC_KEY_PEM
+                PUBLIC_KEY_PEM,
+                null,
+                null
         );
 
         byte[] responseFile = files.get(EvidencePackageServiceImpl.RESPONSE_TXT);
@@ -109,7 +117,9 @@ class EvidencePackageServiceTest {
                 MODEL,
                 CREATED_AT,
                 RESPONSE_ID,
-                PUBLIC_KEY_PEM
+                PUBLIC_KEY_PEM,
+                null,
+                null
         );
 
         assertThat(files.get(EvidencePackageServiceImpl.CANONICAL_BIN)).isEqualTo(CANONICAL_BYTES);
@@ -126,7 +136,9 @@ class EvidencePackageServiceTest {
                 MODEL,
                 CREATED_AT,
                 RESPONSE_ID,
-                PUBLIC_KEY_PEM
+                PUBLIC_KEY_PEM,
+                null,
+                null
         );
 
         byte[] zip = service.toZip(files);
@@ -146,7 +158,9 @@ class EvidencePackageServiceTest {
                 MODEL,
                 CREATED_AT,
                 null,
-                PUBLIC_KEY_PEM
+                PUBLIC_KEY_PEM,
+                null,
+                null
         );
 
         assertThat(files).hasSize(7);
@@ -167,6 +181,8 @@ class EvidencePackageServiceTest {
                 CREATED_AT,
                 RESPONSE_ID,
                 PUBLIC_KEY_PEM,
+                null,
+                null,
                 (byte[]) null,
                 (String) null,
                 (String) null
@@ -194,6 +210,8 @@ class EvidencePackageServiceTest {
                 CREATED_AT,
                 RESPONSE_ID,
                 PUBLIC_KEY_PEM,
+                null,
+                null,
                 pqcSig,
                 pqcPem,
                 algoName
@@ -209,6 +227,35 @@ class EvidencePackageServiceTest {
         assertThat(new String(files.get(EvidencePackageServiceImpl.PQC_PUBLIC_KEY_PEM), StandardCharsets.UTF_8)).isEqualTo(pqcPem);
         String algoJson = new String(files.get(EvidencePackageServiceImpl.PQC_ALGORITHM_JSON), StandardCharsets.UTF_8);
         assertThat(algoJson).contains("ML-DSA").contains("Dilithium3").contains("FIPS 204");
+    }
+
+    @Test
+    void buildPackage_includesPolicyCoverageMetadataWhenPresent() {
+        List<PolicyRuleResult> rules = List.of(
+                new PolicyRuleResult("R1", "pass"),
+                new PolicyRuleResult("R2", "pass"),
+                new PolicyRuleResult("R3", "not_evaluated"),
+                new PolicyRuleResult("R4", "not_evaluated")
+        );
+        Map<String, byte[]> files = service.buildPackage(
+                RESPONSE_TEXT,
+                CANONICAL_BYTES,
+                HASH_HEX,
+                MOCK_SIGNATURE,
+                MOCK_TSA_TOKEN,
+                MODEL,
+                CREATED_AT,
+                RESPONSE_ID,
+                PUBLIC_KEY_PEM,
+                0.5,
+                rules
+        );
+
+        byte[] metadataBytes = files.get(EvidencePackageServiceImpl.METADATA_JSON);
+        assertThat(metadataBytes).isNotNull();
+        String metadataJson = new String(metadataBytes, StandardCharsets.UTF_8);
+        assertThat(metadataJson).contains("\"policy_coverage\":0.5");
+        assertThat(metadataJson).contains("\"ruleId\":\"R1\"");
     }
 
     private static String sha256Hex(byte[] input) {

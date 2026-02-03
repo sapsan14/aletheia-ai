@@ -3,6 +3,8 @@ package ai.aletheia.audit;
 import ai.aletheia.audit.dto.AuditRecordRequest;
 import ai.aletheia.db.AiResponseRepository;
 import ai.aletheia.db.entity.AiResponse;
+import ai.aletheia.policy.PolicyEvaluationResult;
+import ai.aletheia.policy.PolicyEvaluationService;
 import org.springframework.stereotype.Service;
 
 /**
@@ -16,9 +18,12 @@ import org.springframework.stereotype.Service;
 public class AuditRecordService {
 
     private final AiResponseRepository repository;
+    private final PolicyEvaluationService policyEvaluationService;
 
-    public AuditRecordService(AiResponseRepository repository) {
+    public AuditRecordService(AiResponseRepository repository,
+                              PolicyEvaluationService policyEvaluationService) {
         this.repository = repository;
+        this.policyEvaluationService = policyEvaluationService;
     }
 
     /**
@@ -29,6 +34,9 @@ public class AuditRecordService {
      */
     public Long save(AuditRecordRequest request) {
         AiResponse entity = mapToEntity(request);
+        PolicyEvaluationResult evaluation = policyEvaluationService.evaluate(entity);
+        entity.setPolicyCoverage(evaluation.coverage());
+        entity.setPolicyRulesEvaluated(policyEvaluationService.toJson(evaluation.rules()));
         AiResponse saved = repository.save(entity);
         return saved.getId();
     }

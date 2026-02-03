@@ -5,4 +5,8 @@ public record ErrorResponse(String error, Object details) {
     public static ErrorResponse notFound(String message, Object id) {
         return new ErrorResponse(message, id);
     }
+
+    public static ErrorResponse badRequest(String message) {
+        return new ErrorResponse(message, null);
+    }
 }

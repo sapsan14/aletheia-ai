@@ -26,6 +26,8 @@ class AiVerifyControllerTest {
     void verify_existingId_returnsRecord() throws Exception {
         AiResponse entity = new AiResponse("Q", "A", "hash123");
         entity.setLlmModel("gpt-4");
+        entity.setPolicyCoverage(0.5);
+        entity.setPolicyRulesEvaluated("[{\"ruleId\":\"R1\",\"status\":\"pass\"}]");
         AiResponse saved = repository.save(entity);
 
         mockMvc.perform(get("/api/ai/verify/" + saved.getId()))
@@ -38,7 +40,10 @@ class AiVerifyControllerTest {
                 .andExpect(jsonPath("$.llmModel").value("gpt-4"))
                 .andExpect(jsonPath("$.createdAt").exists())
                 .andExpect(jsonPath("$.hashMatch").exists())
-                .andExpect(jsonPath("$.signatureValid").exists());
+                .andExpect(jsonPath("$.signatureValid").exists())
+                .andExpect(jsonPath("$.policyCoverage").value(0.5))
+                .andExpect(jsonPath("$.policyRulesEvaluated[0].ruleId").value("R1"))
+                .andExpect(jsonPath("$.policyRulesEvaluated[0].status").value("pass"));
     }
 
     @Test

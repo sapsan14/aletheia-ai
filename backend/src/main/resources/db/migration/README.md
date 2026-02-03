@@ -10,6 +10,11 @@ Migrations run **automatically** when the backend starts. No manual steps needed
 
 **H2 Console (dev):** With H2 file-based DB, open `http://localhost:8080/h2-console`. Use JDBC URL `jdbc:h2:file:./data/aletheia`, user `sa`, password empty. Data persists in `backend/data/`. See [README — H2 section](../../../../../../../README.md#h2-default--file-based-db) for details.
 
+**Recent migrations:**
+
+- `V5__add_policy_coverage_to_ai_response.sql` — Phase 4 policy coverage fields.
+- `V6__add_metrics_event_table.sql` — Phase 4 minimal analytics events.
+
 **JPA mapping:** The `ai_response` table is mapped by `AiResponse` entity in `ai.aletheia.db.entity`. `AiResponseRepository` (Spring Data JPA) provides `save` and `findById`. See Task 4.1 in the plan.
 
 ---

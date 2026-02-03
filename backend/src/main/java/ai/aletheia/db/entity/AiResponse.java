@@ -84,6 +84,14 @@ public class AiResponse {
     @Column(name = "policy_version", length = 64)
     private String policyVersion;
 
+    /** Phase 4: Policy coverage ratio in [0,1] for the demo policy. */
+    @Column(name = "policy_coverage")
+    private Double policyCoverage;
+
+    /** Phase 4: JSON array of policy rule results (ruleId + status). */
+    @Column(name = "policy_rules_evaluated", columnDefinition = "TEXT")
+    private String policyRulesEvaluated;
+
     @PrePersist
     void onPersist() {
         if (createdAt == null) {
@@ -158,4 +166,10 @@ public class AiResponse {
 
     public String getPolicyVersion() { return policyVersion; }
     public void setPolicyVersion(String policyVersion) { this.policyVersion = policyVersion; }
+
+    public Double getPolicyCoverage() { return policyCoverage; }
+    public void setPolicyCoverage(Double policyCoverage) { this.policyCoverage = policyCoverage; }
+
+    public String getPolicyRulesEvaluated() { return policyRulesEvaluated; }
+    public void setPolicyRulesEvaluated(String policyRulesEvaluated) { this.policyRulesEvaluated = policyRulesEvaluated; }
 }

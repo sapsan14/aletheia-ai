@@ -71,7 +71,9 @@ class EvidenceVerifierTest {
                 "test-model",
                 java.time.Instant.now(),
                 1L,
-                publicKeyPem
+                publicKeyPem,
+                null,
+                null
         );
 
         Path dir = tempDir.resolve("valid");
@@ -110,7 +112,9 @@ class EvidenceVerifierTest {
                 "test-model",
                 java.time.Instant.now(),
                 1L,
-                publicKeyPem
+                publicKeyPem,
+                null,
+                null
         );
 
         Path dir = tempDir.resolve("tampered-sig");
@@ -144,7 +148,9 @@ class EvidenceVerifierTest {
                 "test-model",
                 java.time.Instant.now(),
                 1L,
-                publicKeyPem
+                publicKeyPem,
+                null,
+                null
         );
 
         Path dir = tempDir.resolve("tampered-hash");
@@ -188,6 +194,8 @@ class EvidenceVerifierTest {
                 java.time.Instant.now(),
                 1L,
                 publicKeyPem,
+                null,
+                null,
                 pqcSigBytes,
                 pqcPublicKeyPem,
                 "ML-DSA (Dilithium3)"
