@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aletheia-client"
+version = "0.1.0"
+description = "Python client for the Aletheia AI API"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+authors = [{ name = "Aletheia AI" }]
+dependencies = ["requests>=2.0"]
+
+[project.urls]
+Homepage = "https://github.com/sapsan14/aletheia-ai"
+Repository = "https://github.com/sapsan14/aletheia-ai"
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

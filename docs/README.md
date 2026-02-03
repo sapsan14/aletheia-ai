@@ -35,6 +35,12 @@ Same topics exist in **Russian** ([docs/ru/](ru/)) and **Estonian** ([docs/et/](
 | **Plan Phase 3 UI** | Verify page wireframe, tooltips, UX (audit/compliance) | [PLAN_PHASE3_UI.md](en/PLAN_PHASE3_UI.md) | | |
 | **Plan Phase 4** | Market validation & policy foundation (demo policy, coverage, landing, outreach) | [EN](en/PLAN_PHASE4.md) | [RU](ru/PLAN_PHASE4.md) | [ET](et/PLAN_PHASE4.md) |
 | **Plan Phase 5** | API platform & integrations (OpenAPI, sign-only, SDKs, MCP, SIEM) | [EN](en/PLAN_PHASE5.md) | — | — |
+| **Public API (OpenAPI)** | Spec and error codes | [docs/api/openapi.yaml](api/openapi.yaml) | — | — |
+| **MCP attestation** | Agent output attestation flow | [MCP attestation](en/mcp/attestation.md) | — | — |
+| **SIEM integration** | Event schema and delivery | [SIEM](en/integrations/SIEM.md) | — | — |
+| **Blockchain anchoring** | Proof-of-existence design | [Blockchain](en/integrations/BLOCKCHAIN.md) | — | — |
+| **Partner integrations** | Pilots and outcomes | [Partners](en/partners/README.md) | — | — |
+| **SDKs** | Python + TypeScript clients | [SDKs](../sdk/) | — | — |
 | **Plan PQC** | Post-quantum crypto (hybrid classical + ML-DSA; optional PoC) | [EN](en/PLAN_PQC.md) | [RU](ru/PLAN_PQC.md) | [ET](et/PLAN_PQC.md) |
 | **Plan EDU** | Education platform: lab scenarios, PQC and AI accountability training | — | [RU](ru/PLAN_EDU.md) | [ET](et/PLAN_EDU.md) |
 | **Killer demo script** | Step-by-step legal/compliance demo (≤5 min) | [DEMO_SCRIPT.md](DEMO_SCRIPT.md) | | |

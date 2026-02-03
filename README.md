@@ -30,9 +30,11 @@ Docs are grouped by language in `docs/<lang>/` (en, ru, et). **Overview and wher
 | **Vision & roadmap** (next steps, AI Claim, evidence package) | [Vision & roadmap](docs/en/VISION_AND_ROADMAP.md) | [Видение и дорожная карта](docs/ru/VISION_AND_ROADMAP.md) | [Visioon ja teekond](docs/et/VISION_AND_ROADMAP.md) |
 | **Implementation plan** | [PLAN](docs/en/PLAN.md) | [План реализации](docs/ru/PLAN.md) | [Rakendusplaan](docs/et/PLAN.md) |
 | **Plan Phase 2** (killer demo, Evidence Package, offline verifier) | [EN](docs/en/PLAN_PHASE2.md) | [RU](docs/ru/PLAN_PHASE2.md) | [ET](docs/et/PLAN_PHASE2.md) |
+| **Public API (OpenAPI)** | [OpenAPI spec](docs/api/openapi.yaml) | — | — |
 | **Signing** | [Signing](docs/en/SIGNING.md) | [Подпись](docs/ru/SIGNING.md) | [Allkirjastamine](docs/et/SIGNING.md) |
 | **Timestamping** | [Timestamping](docs/en/TIMESTAMPING.md) | [Временные метки](docs/ru/TIMESTAMPING.md) | [Ajatemplid](docs/et/TIMESTAMPING.md) |
 | **Trust model & eIDAS** | [Trust model](docs/en/TRUST_MODEL.md) | [Модель доверия](docs/ru/TRUST_MODEL.md) | [Usaldusmudel](docs/et/TRUST_MODEL.md) |
+| **Partner integrations** | [Partners](docs/en/partners/README.md) | — | — |
 | **MOCK_TSA (testing)** | [MOCK_TSA](docs/en/MOCK_TSA.md) | [MOCK_TSA (тестирование)](docs/ru/MOCK_TSA.md) | — |
 | **Cryptographic Oracle** | [Crypto Oracle](docs/en/CRYPTO_ORACLE.md) | [Криптографический оракул](docs/ru/CRYPTO_ORACLE.md) | [Krüptograafiline oraakel](docs/et/CRYPTO_ORACLE.md) |
 | **Agent Audit Model** | [Agent Audit](docs/en/AGENT_AUDIT_MODEL.md) | [Модель аудита агентов](docs/ru/AGENT_AUDIT_MODEL.md) | [Agentide auditi mudel](docs/et/AGENT_AUDIT_MODEL.md) |

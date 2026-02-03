@@ -1,0 +1,386 @@
+openapi: 3.0.3
+info:
+  title: Aletheia AI API
+  version: 1.0.0
+  description: |
+    Public API for verifiable AI responses. Endpoints cover generation/signing,
+    verification records, Evidence Package downloads, and the offline verifier.
+servers:
+  - url: http://localhost:8080
+    description: Local development
+  - url: https://api.aletheia.example
+    description: Example production base URL (replace with your deployment)
+tags:
+  - name: AI
+    description: AI response signing, verification, and evidence
+  - name: Sign
+    description: Sign-only API for external LLM responses
+paths:
+  /api/ai/ask:
+    post:
+      tags: [AI]
+      summary: Generate AI response, sign it, and store it
+      description: |
+        Full flow: prompt → LLM → canonicalize → hash → sign → timestamp → store.
+        Returns the signed response and an id for verification.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AiAskRequest'
+            examples:
+              basic:
+                summary: Basic prompt
+                value:
+                  prompt: What is 2+2?
+      responses:
+        '200':
+          description: Signed response with id, hash, signature, TSA token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AiAskResponse'
+              examples:
+                success:
+                  summary: Example response
+                  value:
+                    response: "2+2 equals 4.\n"
+                    responseHash: 7e7ed3f4dfe18f5c7e2c7f50c7efab0c6f2f3a8a2d16f30c6fef27f7d0c9a1a5
+                    signature: "BASE64_SIGNATURE"
+                    tsaToken: "BASE64_TSA_TOKEN"
+                    id: 123
+                    model: gpt-4
+        '400':
+          description: |
+            Validation error. Possible codes: VALIDATION_ERROR.
+            Error body format may vary; always check HTTP status first.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '502':
+          description: |
+            LLM unavailable. Possible codes: LLM_UNAVAILABLE.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: |
+            Processing failed. Possible codes: INTERNAL_ERROR, TIMESTAMP_UNAVAILABLE.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/sign:
+    post:
+      tags: [Sign]
+      summary: Sign-only API for external responses
+      description: |
+        Sign a pre-generated LLM response without calling any LLM.
+        Returns id, signature, TSA token, and optional compliance metadata.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignRequest'
+            examples:
+              signOnly:
+                summary: Sign-only example
+                value:
+                  response: "Here is your LLM output."
+                  modelId: external-llm
+                  policyId: compliance-2024
+                  prompt: Optional prompt for audit
+      responses:
+        '200':
+          description: Signed response metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignResponse'
+        '400':
+          description: |
+            Validation error. Possible codes: VALIDATION_ERROR.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '502':
+          description: |
+            Timestamping failed. Possible codes: TIMESTAMP_UNAVAILABLE.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        '503':
+          description: |
+            Signing failed or key not configured. Possible codes: SIGNING_ERROR.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+  /api/ai/verify/{id}:
+    get:
+      tags: [AI]
+      summary: Get verification record by id
+      description: Returns the full verification record with hashMatch and signatureValid.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Full verification record
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AiVerifyResponse'
+              examples:
+                verify:
+                  summary: Example verify response
+                  value:
+                    id: 123
+                    prompt: What is 2+2?
+                    response: "2+2 equals 4.\n"
+                    responseHash: 7e7ed3f4dfe18f5c7e2c7f50c7efab0c6f2f3a8a2d16f30c6fef27f7d0c9a1a5
+                    signature: "BASE64_SIGNATURE"
+                    tsaToken: "BASE64_TSA_TOKEN"
+                    llmModel: gpt-4
+                    createdAt: "2026-02-03T10:15:30Z"
+                    hashMatch: true
+                    signatureValid: valid
+                    claim: "2+2 equals 4."
+                    confidence: 0.85
+                    policyVersion: gdpr-2024
+        '404':
+          description: |
+            Record not found. Possible codes: NOT_FOUND.
+            Error body format may vary; always check HTTP status first.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/ai/evidence/{id}:
+    get:
+      tags: [AI]
+      summary: Download Evidence Package (.aep) by id
+      description: |
+        Returns Evidence Package ZIP (application/zip).
+        Use ?format=json to retrieve base64-encoded files as JSON.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: format
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [json]
+      responses:
+        '200':
+          description: Evidence Package ZIP or JSON (base64 file contents)
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        '404':
+          description: Record not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Signing key not configured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/ai/verifier:
+    get:
+      tags: [AI]
+      summary: Download offline verifier (JAR)
+      description: Returns the offline verifier JAR if built.
+      responses:
+        '200':
+          description: Verifier JAR file
+          content:
+            application/java-archive:
+              schema:
+                type: string
+                format: binary
+        '503':
+          description: Verifier JAR not available
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    AiAskRequest:
+      type: object
+      required: [prompt]
+      properties:
+        prompt:
+          type: string
+          description: User prompt for the LLM
+    AiAskResponse:
+      type: object
+      properties:
+        response:
+          type: string
+          description: Canonical AI response text
+        responseHash:
+          type: string
+          description: SHA-256 hex of canonical response (or response + claim metadata)
+        signature:
+          type: string
+          nullable: true
+          description: Base64 signature of hash
+        tsaToken:
+          type: string
+          nullable: true
+          description: Base64 RFC 3161 timestamp token
+        id:
+          type: integer
+          format: int64
+        model:
+          type: string
+          description: LLM model identifier
+    SignRequest:
+      type: object
+      required: [response]
+      properties:
+        response:
+          type: string
+          description: LLM response to sign (required)
+        modelId:
+          type: string
+          description: Model identifier (default: "external")
+        policyId:
+          type: string
+          description: Policy/version id to store in metadata
+        prompt:
+          type: string
+          description: Optional prompt for audit trail or claim inference
+        requestId:
+          type: string
+          description: Optional request correlation id
+    SignResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        responseHash:
+          type: string
+        signature:
+          type: string
+        tsaToken:
+          type: string
+        claim:
+          type: string
+          nullable: true
+        confidence:
+          type: number
+          format: double
+          nullable: true
+        policyVersion:
+          type: string
+          nullable: true
+        modelId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    AiVerifyResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        prompt:
+          type: string
+        response:
+          type: string
+        responseHash:
+          type: string
+        signature:
+          type: string
+          nullable: true
+        tsaToken:
+          type: string
+          nullable: true
+        llmModel:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        requestId:
+          type: string
+          nullable: true
+        temperature:
+          type: number
+          format: double
+          nullable: true
+        systemPrompt:
+          type: string
+          nullable: true
+        version:
+          type: integer
+          nullable: true
+        claim:
+          type: string
+          nullable: true
+        confidence:
+          type: number
+          format: double
+          nullable: true
+        policyVersion:
+          type: string
+          nullable: true
+        hashMatch:
+          type: boolean
+        signatureValid:
+          type: string
+          description: "valid | invalid | n_a"
+        signaturePqc:
+          type: string
+          nullable: true
+        pqcAlgorithm:
+          type: string
+          nullable: true
+    ErrorResponse:
+      type: object
+      description: |
+        Error body format may vary; always check HTTP status first.
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+      additionalProperties: true
+    ApiErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string

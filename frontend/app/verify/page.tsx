@@ -826,6 +826,20 @@ export default function VerifyPage() {
 
         <footer className="mt-8 border-t border-zinc-200 pt-4 text-center text-xs text-zinc-500 dark:border-zinc-600 dark:text-zinc-400">
           <p>© 2026 Anton Sokolov &amp; Team 3</p>
+          <p className="mt-1">
+            <Link href="/developers" className="underline hover:text-zinc-700 dark:hover:text-zinc-300">
+              Developers
+            </Link>
+            {" — "}
+            <a
+              href="https://github.com/sapsan14/aletheia-ai/blob/main/docs/api/openapi.yaml"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-zinc-700 dark:hover:text-zinc-300"
+            >
+              OpenAPI spec
+            </a>
+          </p>
           <p>
             <a
               href="https://taltech.ee/vanemarendajaks"
