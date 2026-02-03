@@ -925,7 +925,7 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 p-4 dark:bg-zinc-900 md:p-6">
+    <div className="min-h-screen overflow-x-hidden bg-zinc-50 p-4 dark:bg-zinc-900 md:p-6">
       <div className="mx-auto grid w-full max-w-6xl items-start gap-6 lg:grid-cols-[minmax(0,672px)_380px]">
         {/* Left: Chat — fixed max width so it doesn't grow when right column content grows */}
         <main className="min-w-0 space-y-6 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-700 dark:bg-zinc-800">
@@ -1044,7 +1044,7 @@ export default function Home() {
                 <p className="text-red-600 dark:text-red-400">{error}</p>
               )}
               {responseData && !error && !isLoading && (
-                <div className="space-y-3 pr-8">
+                <div className="min-w-0 space-y-3 pr-8">
                   <div className="border-b border-zinc-200 pb-3 dark:border-zinc-600">
                     <div className="flex flex-wrap items-center gap-2">
                       <StatusItem label="Signed" ok={signed} />
@@ -1055,7 +1055,7 @@ export default function Home() {
                       Model: {responseData.model} · ID: {responseData.id}
                     </p>
                   </div>
-                  <p className="whitespace-pre-wrap text-zinc-700 dark:text-zinc-300">
+                  <p className="break-words whitespace-pre-wrap text-zinc-700 dark:text-zinc-300">
                     {responseData.response}
                   </p>
                 </div>
