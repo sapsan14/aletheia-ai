@@ -177,7 +177,6 @@ function TrustPanel({
   verifyRecord,
   responseData,
   apiBase,
-  apiUrl,
   onDownloadEvidence,
   downloading,
   downloadError,
@@ -185,7 +184,6 @@ function TrustPanel({
   verifyRecord: VerifyRecord | null;
   responseData: AiAskResponse | null;
   apiBase: string;
-  apiUrl: string;
   onDownloadEvidence: () => void;
   downloading: boolean;
   downloadError: string | null;
@@ -1131,7 +1129,6 @@ export default function Home() {
             verifyRecord={verifyRecord}
             responseData={responseData}
             apiBase={apiBase}
-            apiUrl={apiUrl}
             onDownloadEvidence={handleDownloadEvidence}
             downloading={downloading}
             downloadError={downloadError}
