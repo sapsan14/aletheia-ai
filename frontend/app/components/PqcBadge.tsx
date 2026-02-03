@@ -33,8 +33,8 @@ function PqcIcon({ className }: { className?: string }) {
 }
 
 interface PqcBadgeProps {
-  /** "default" = full "Quantum-Resistant" pill; "compact" = small inline for landing */
-  variant?: "default" | "compact";
+  /** "default" = full "Quantum-Resistant" pill + subtext; "compact" = small "PQC"; "landing" = atom + "Quantum-Resistant" only (for first page) */
+  variant?: "default" | "compact" | "landing";
   /** Override tooltip (default from TOOLTIPS.pqc_badge) */
   tooltip?: string;
   className?: string;
@@ -52,7 +52,20 @@ export function PqcBadge({
   const subtext =
     variant === "compact"
       ? null
-      : "Post-quantum signature included";
+      : variant === "landing"
+        ? null
+        : "Post-quantum signature included";
+
+  const sizeClass =
+    variant === "compact"
+      ? "px-2 py-0.5 text-xs"
+      : variant === "landing"
+        ? "px-2 py-1 text-xs"
+        : "px-3 py-1.5 text-sm";
+  const iconClass =
+    variant === "compact"
+      ? "h-3 w-3 shrink-0"
+      : "h-4 w-4 shrink-0 text-teal-600 dark:text-teal-400";
 
   return (
     <span
@@ -64,15 +77,11 @@ export function PqcBadge({
         inline-flex items-center gap-1.5 rounded-md font-medium
         bg-teal-50 text-teal-800 dark:bg-teal-950/60 dark:text-teal-200
         border border-teal-200/80 dark:border-teal-700/80
-        ${variant === "compact" ? "px-2 py-0.5 text-xs" : "px-3 py-1.5 text-sm"}
+        ${sizeClass}
         ${className}
       `}
     >
-      <PqcIcon
-        className={
-          variant === "compact" ? "h-3 w-3 shrink-0" : "h-4 w-4 shrink-0 text-teal-600 dark:text-teal-400"
-        }
-      />
+      <PqcIcon className={iconClass} />
       <span>{label}</span>
       {subtext && (
         <span className="text-teal-600/90 dark:text-teal-400/90 font-normal hidden sm:inline">

@@ -8,7 +8,6 @@
 
 "use client";
 
-import { PqcBadge } from "@/app/components/PqcBadge";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -186,9 +185,27 @@ export default function Home() {
             <p className="text-sm text-zinc-600 dark:text-zinc-400">
               Verifiable AI responses with signing and timestamps
             </p>
-            <p className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
-              <span>Hybrid attestation: classical + post-quantum signatures for long-term evidence.</span>
-              <PqcBadge variant="compact" />
+            <p className="mt-1.5 flex flex-wrap items-center gap-2 text-xs">
+              <a
+                href="https://csrc.nist.gov/pubs/fips/204/final"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Защищено алгоритмом ML-DSA. Ваши доказательства останутся валидными даже в эпоху квантовых вычислений."
+                className="inline-flex items-center gap-1.5 rounded-md border px-2 py-1 font-medium bg-indigo-50 text-indigo-800 border-indigo-200 hover:bg-indigo-100 dark:bg-indigo-950/50 dark:text-indigo-200 dark:border-indigo-700 dark:hover:bg-indigo-900/50"
+              >
+                <span aria-hidden>⚛️</span>
+                Quantum-Proof Trust Anchor
+              </a>
+              <a
+                href="https://www.rfc-editor.org/rfc/rfc3161"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="RFC 3161 Trusted Timestamp. Внешнее подтверждение того, что этот ответ существовал именно в этот момент времени."
+                className="inline-flex items-center gap-1.5 rounded-md border px-2 py-1 font-medium bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100 dark:bg-amber-950/50 dark:text-amber-200 dark:border-amber-700 dark:hover:bg-amber-900/50"
+              >
+                <span aria-hidden>⏳</span>
+                Non-Repudiable Time-Proof
+              </a>
             </p>
           </div>
         </div>

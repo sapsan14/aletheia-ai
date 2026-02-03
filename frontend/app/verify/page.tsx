@@ -548,6 +548,13 @@ function VerifyContent() {
           >
             Signature: {record.signatureValid === "valid" ? "✓ valid" : record.signatureValid === "invalid" ? "✗ invalid" : "n/a"}
           </span>
+          {record.signaturePqc != null && record.signaturePqc.trim() !== "" ? (
+            <span className="text-emerald-600 dark:text-emerald-400" title={TOOLTIPS.pqc_badge}>
+              PQC signature: ✓ present
+            </span>
+          ) : (
+            <span className="text-zinc-500">PQC signature: — not included</span>
+          )}
         </div>
       </div>
 
@@ -580,6 +587,32 @@ function VerifyContent() {
             {truncateMiddle(record.tsaToken)}
           </p>
         </div>
+      )}
+
+      {record.signaturePqc != null && record.signaturePqc.trim() !== "" && (
+        <>
+          <div>
+            <h2 className="mb-1 text-sm font-medium text-zinc-600 dark:text-zinc-400">
+              PQC signature (Base64)
+            </h2>
+            <p
+              className="break-all font-mono text-sm text-zinc-700 dark:text-zinc-300"
+              title={TOOLTIPS.pqc_badge}
+            >
+              {truncateMiddle(record.signaturePqc)}
+            </p>
+          </div>
+          {record.pqcAlgorithm && (
+            <div>
+              <h2 className="mb-1 text-sm font-medium text-zinc-600 dark:text-zinc-400">
+                PQC algorithm
+              </h2>
+              <p className="font-mono text-sm text-zinc-700 dark:text-zinc-300">
+                {record.pqcAlgorithm}
+              </p>
+            </div>
+          )}
+        </>
       )}
 
       <div className="border-t border-zinc-200 pt-4 dark:border-zinc-600">
