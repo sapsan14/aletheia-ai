@@ -21,6 +21,8 @@
     repo_version: "{{ deploy_repo_version | default('main') }}"
     # Path to signing key on control node; override with -e signing_key_src=/path/to/ai.key
     signing_key_path: "{{ signing_key_src | default(playbook_dir ~ '/../../ai.key') }}"
+    # Path to PQC key on control node; override with -e pqc_key_src=/path/to/ai_pqc.key (optional)
+    pqc_key_path: "{{ pqc_key_src | default(playbook_dir ~ '/../../backend/ai_pqc.key') }}"
     # ngrok: single-port (3000) via tunnel; API proxied by Next.js. Override with -e ngrok_enabled=false to expose VM:3000 + VM:8080.
     # Free tier only: ngrok http PORT --domain=DOMAIN (no --oauth; OAuth is paid-only).
     ngrok_enabled: true
@@ -107,6 +109,45 @@
       ansible.builtin.set_fact:
         next_public_api_url: ""
       when: ngrok_enabled
+
+    - name: Check if PQC key exists locally
+      ansible.builtin.stat:
+        path: "{{ pqc_key_path }}"
+      register: pqc_key_stat
+
+    - name: Copy PQC key to server
+      ansible.builtin.copy:
+        src: "{{ pqc_key_path }}"
+        dest: "{{ app_dir }}/ai_pqc.key"
+        owner: ubuntu
+        group: ubuntu
+        mode: "0600"
+      when: pqc_key_stat.stat.exists | default(false)
+
+    - name: Set PQC env facts when PQC key was copied
+      ansible.builtin.set_fact:
+        ai_aletheia_pqc_enabled: "true"
+        ai_aletheia_pqc_key_path: "/app/ai_pqc.key"
+      when: pqc_key_stat.stat.exists | default(false)
+
+    - name: Create docker-compose override for PQC key mount
+      ansible.builtin.copy:
+        content: |
+          services:
+            backend:
+              volumes:
+                - ./ai_pqc.key:/app/ai_pqc.key:ro
+        dest: "{{ app_dir }}/docker-compose.override.yml"
+        owner: ubuntu
+        group: ubuntu
+        mode: "0644"
+      when: pqc_key_stat.stat.exists | default(false)
+
+    - name: Remove docker-compose override when PQC key not used
+      ansible.builtin.file:
+        path: "{{ app_dir }}/docker-compose.override.yml"
+        state: absent
+      when: not (pqc_key_stat.stat.exists | default(false))
 
     - name: Create .env from template
       ansible.builtin.template:

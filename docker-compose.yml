@@ -38,6 +38,8 @@ services:
       AI_ALETHEIA_SIGNING_KEY_PATH: /app/ai.key
       AI_ALETHEIA_TSA_MODE: ${AI_ALETHEIA_TSA_MODE:-real}
       AI_ALETHEIA_TSA_URL: ${AI_ALETHEIA_TSA_URL:-http://timestamp.digicert.com}
+      AI_ALETHEIA_PQC_ENABLED: ${AI_ALETHEIA_PQC_ENABLED:-false}
+      AI_ALETHEIA_PQC_KEY_PATH: ${AI_ALETHEIA_PQC_KEY_PATH:-}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000}
       # Offline verifier JAR for GET /api/ai/verifier (built in Dockerfile with -Pverifier)
