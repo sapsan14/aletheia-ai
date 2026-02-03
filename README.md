@@ -40,8 +40,13 @@ Docs are grouped by language in `docs/<lang>/` (en, ru, et). **Overview and wher
 | **Future ideas** (PKI for AI agents, OpenClaw, MCP) | — | [Будущие идеи](docs/ru/ideas/README.md) | [Tuleviku ideed](docs/et/ideas/README.md) |
 | **Crypto reference** (algorithms, keys, why tsaToken) | [Crypto reference](docs/en/CRYPTO_REFERENCE.md) | — | — |
 | **Plan PQC** (post-quantum, ML-DSA, quantum-resistant) | [Plan PQC](docs/en/PLAN_PQC.md) | [RU](docs/ru/PLAN_PQC.md) | [ET](docs/et/PLAN_PQC.md) |
-| **Legal & regulatory** (eIDAS, EU AI Act, GDPR, ETSI) | [Legal docs](docs/legal/README.md) | | |
+| **Legal & regulatory** (eIDAS, EU AI Act, GDPR, ETSI, PQC) | [Legal docs](docs/legal/README.md) | | |
 | **Architecture diagrams** | [Architecture diagrams](diagrams/architecture.md) (Mermaid: pipeline, trust chain, stack) | | |
+| **Plan EDU** (education platform, lab scenarios, PQC training) | — | [PLAN_EDU (RU)](docs/ru/PLAN_EDU.md) | — |
+
+### Education & Research
+
+Aletheia can be used as a **hands-on lab** for post-quantum cryptography (PQC) and verifiable AI accountability: reproducible experiments, Evidence Package inspection, and offline verification. For a structured education plan, lab scenarios, and LLM-friendly prompts, see [Plan EDU (RU)](docs/ru/PLAN_EDU.md). Standards and regulatory references (NIST FIPS 203/204/205, eIDAS, EU AI Act) are indexed in [docs/legal/README.md](docs/legal/README.md); run `./docs/legal/download.sh` to fetch PQC and EU PDFs for local use and teaching.
 
 ### README contents
 

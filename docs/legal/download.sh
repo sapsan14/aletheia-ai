@@ -24,5 +24,17 @@ curl -sSL -o "${OUT}/gdpr_regulation_2016_679.pdf" \
 curl -sSL -o "${OUT}/rfc3161_timestamp_protocol.pdf" \
   "https://www.rfc-editor.org/rfc/pdfrfc/rfc3161.txt.pdf"
 
-echo "Done. ETSI EN 319421/319422, RFC 3161: download manually if script yields empty files (see README)."
+echo "Downloading NIST Post-Quantum Cryptography (PQC) standards to $OUT ..."
+
+curl -sSL -o "${OUT}/nist_fips_203_mlkem.pdf" \
+  "https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.203.pdf"
+
+curl -sSL -o "${OUT}/nist_fips_204_mldsa.pdf" \
+  "https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.204.pdf"
+
+curl -sSL -o "${OUT}/nist_fips_205_slhdsa.pdf" \
+  "https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.205.pdf"
+
+echo "Done. EU regulations, RFC 3161, NIST FIPS 203/204/205 (PQC) saved to $OUT."
+echo "ETSI EN 319421/319422 and ETSI TR (PQC): download manually from www.etsi.org if needed (see README)."
 ls -la "$OUT"

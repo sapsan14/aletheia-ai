@@ -16,6 +16,7 @@ Documentation is grouped by language in `docs/<lang>/` (en, ru, et). This page g
 | **Run the killer demo** | [Demo script](DEMO_SCRIPT.md) (≤5 min) | [Offline verifier](../scripts/README.md) |
 | **Understand crypto** | [Crypto reference](en/CRYPTO_REFERENCE.md) (algorithms, keys, why tsaToken) | [Signing](en/SIGNING.md), [Trust model](en/TRUST_MODEL.md) |
 | **PQC / quantum-ready** | [Plan PQC](en/PLAN_PQC.md) (post-quantum hybrid signing, optional PoC) | [Signing](en/SIGNING.md), [Crypto reference](en/CRYPTO_REFERENCE.md) |
+| **Education & research** | [Plan EDU (RU)](ru/PLAN_EDU.md) (lab platform, PQC and AI accountability training) | [Plan PQC](en/PLAN_PQC.md), [legal/README](legal/README.md) (PQC standards, EU law) |
 | **Test or CI** | [MOCK_TSA](en/MOCK_TSA.md), [Cryptographic Oracle](en/CRYPTO_ORACLE.md) | [Testing strategy](en/TESTING_STRATEGY.md) |
 | **Deploy** | [README → Deployment](../README.md#deployment) | [deploy/ansible/README](../deploy/ansible/README.md) (includes [API proxy (Docker)](../deploy/ansible/README.md#api-proxy-docker), ngrok, CORS) |
 
@@ -35,6 +36,7 @@ Same topics exist in **Russian** ([docs/ru/](ru/)) and **Estonian** ([docs/et/](
 | **Plan Phase 4** | Market validation & policy foundation (demo policy, coverage, landing, outreach) | [EN](en/PLAN_PHASE4.md) | [RU](ru/PLAN_PHASE4.md) | [ET](et/PLAN_PHASE4.md) |
 | **Plan Phase 5** | API platform & integrations (OpenAPI, sign-only, SDKs, MCP, SIEM) | [EN](en/PLAN_PHASE5.md) | — | — |
 | **Plan PQC** | Post-quantum crypto (hybrid classical + ML-DSA; optional PoC) | [EN](en/PLAN_PQC.md) | [RU](ru/PLAN_PQC.md) | [ET](et/PLAN_PQC.md) |
+| **Plan EDU** | Education platform: lab scenarios, PQC and AI accountability training (RU) | — | [RU](ru/PLAN_EDU.md) | — |
 | **Killer demo script** | Step-by-step legal/compliance demo (≤5 min) | [DEMO_SCRIPT.md](DEMO_SCRIPT.md) | | |
 | **Signing** | What we sign, key, interface, storage | [SIGNING](en/SIGNING.md) | [Подпись](ru/SIGNING.md) | [Allkirjastamine](et/SIGNING.md) |
 | **Timestamping** | RFC 3161, TSA, mock/real, storage | [TIMESTAMPING](en/TIMESTAMPING.md) | [Временные метки](ru/TIMESTAMPING.md) | [Ajatemplid](et/TIMESTAMPING.md) |
@@ -45,7 +47,7 @@ Same topics exist in **Russian** ([docs/ru/](ru/)) and **Estonian** ([docs/et/](
 | **Agent Audit** | Audit model for LLM agents | [AGENT_AUDIT](en/AGENT_AUDIT_MODEL.md) | [Аудит агентов](ru/AGENT_AUDIT_MODEL.md) | [Agentide audit](et/AGENT_AUDIT_MODEL.md) |
 | **Testing strategy** | Unit, integration, fixtures, CI | [TESTING_STRATEGY](en/TESTING_STRATEGY.md) | [Стратегия тестирования](ru/TESTING_STRATEGY.md) | [Testimise strateegia](et/TESTING_STRATEGY.md) |
 | **Future ideas** (PKI for AI agents, OpenClaw, MCP) | — | [Идеи](ru/ideas/README.md) | [Ideed](et/ideas/README.md) |
-| **Legal & regulatory** | EU law: eIDAS, AI Act, GDPR; ETSI timestamps; **PQC:** NIST FIPS 203/204/205, ETSI TRs, with significance and links | [legal/README.md](legal/README.md) | | |
+| **Legal & regulatory** | EU law: eIDAS, AI Act, GDPR; ETSI timestamps; **PQC:** NIST FIPS 203/204/205, ETSI TRs; **Education:** use of docs for courses and research | [legal/README.md](legal/README.md) | | |
 | **Scripts** | Offline verifier (JAR, Java, OpenSSL), usage | [scripts/README.md](../scripts/README.md) | | |
 | **Diagrams** | Mermaid: pipeline, trust chain, stack | [diagrams/architecture.md](../diagrams/architecture.md) | | |
 

@@ -67,9 +67,28 @@ For implementation details and algorithm choice in Aletheia, see [Plan PQC](../e
 
 ---
 
+## For education and academic research
+
+The documents in this folder and in `downloads/` are suitable for courses on cryptography, security, digital trust, and AI regulation.
+
+| Document | Use in teaching / research |
+|----------|----------------------------|
+| **NIST FIPS 204** (ML-DSA) | Primary standard for post-quantum digital signatures; lab work on PQC, hybrid signing, long-term verification. |
+| **NIST FIPS 203** (ML-KEM) | Key encapsulation; optional topic for PQC key agreement and future TLS. |
+| **NIST FIPS 205** (SLH-DSA) | Hash-based PQC signatures; comparison with lattice-based ML-DSA. |
+| **NIST PQC project, FAQs** | Motivation for PQC, migration timeline, algorithm selection (see links in [Post-Quantum Cryptography](#post-quantum-cryptography-nist-and-related)). |
+| **eIDAS, EU AI Act, GDPR** | Legal and policy context for trust services, timestamps, and AI accountability. |
+| **RFC 3161** | Timestamp protocol used in Aletheia and in many TSA implementations. |
+
+**Lab and curriculum:** For lab scenarios and a structured education plan, see [Plan EDU (RU)](../ru/PLAN_EDU.md). Laboratory scripts (when added) live under `docs/ru/LAB_*.md`. Implementation and PQC design are described in [Plan PQC](../en/PLAN_PQC.md).
+
+---
+
 ## Download Script
 
 Run from project root: `./docs/legal/download.sh` — saves PDFs to `docs/legal/downloads/`.
+
+**Downloaded files:** EU regulations (eIDAS 1/2, AI Act, GDPR), RFC 3161, and **NIST FIPS 203, 204, 205** (post-quantum standards). These PQC PDFs are useful for local reference and teaching.
 
 **Note:** EUR-Lex may require a browser session; if the script yields empty files, download manually via the links in the tables above. ETSI standards: download from www.etsi.org (see README links).
 
