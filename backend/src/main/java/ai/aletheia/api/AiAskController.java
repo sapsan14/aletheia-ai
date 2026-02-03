@@ -9,6 +9,8 @@ import ai.aletheia.claim.ComplianceClaim;
 import ai.aletheia.claim.ComplianceInferenceService;
 import ai.aletheia.crypto.CanonicalizationService;
 import ai.aletheia.crypto.HashService;
+import ai.aletheia.crypto.PqcSignatureService;
+import ai.aletheia.crypto.PqcSignatureServiceImpl;
 import ai.aletheia.crypto.SignatureService;
 import ai.aletheia.crypto.TimestampException;
 import ai.aletheia.crypto.TimestampService;
@@ -51,6 +53,7 @@ public class AiAskController {
     private final TimestampService timestampService;
     private final AuditRecordService auditRecordService;
     private final ComplianceInferenceService complianceInferenceService;
+    private final PqcSignatureService pqcSignatureService;
 
     public AiAskController(
             LLMClient llmClient,
@@ -59,7 +62,8 @@ public class AiAskController {
             SignatureService signatureService,
             TimestampService timestampService,
             AuditRecordService auditRecordService,
-            ComplianceInferenceService complianceInferenceService) {
+            ComplianceInferenceService complianceInferenceService,
+            @org.springframework.beans.factory.annotation.Autowired(required = false) PqcSignatureService pqcSignatureService) {
         this.llmClient = llmClient;
         this.canonicalizationService = canonicalizationService;
         this.hashService = hashService;
@@ -67,6 +71,7 @@ public class AiAskController {
         this.timestampService = timestampService;
         this.auditRecordService = auditRecordService;
         this.complianceInferenceService = complianceInferenceService;
+        this.pqcSignatureService = pqcSignatureService;
     }
 
     @Operation(summary = "Ask AI", description = "Full flow: prompt → LLM → canonicalize → hash → sign → timestamp → save. Requires OPENAI_API_KEY.")
@@ -130,11 +135,22 @@ public class AiAskController {
                 }
             }
 
+            String signaturePqcBase64 = null;
+            if (signature != null && pqcSignatureService != null && pqcSignatureService.isAvailable()) {
+                try {
+                    byte[] hashBytes = PqcSignatureServiceImpl.hashHexToBytes(responseHash);
+                    byte[] pqcSig = pqcSignatureService.sign(hashBytes);
+                    signaturePqcBase64 = Base64.getEncoder().encodeToString(pqcSig);
+                } catch (Exception e) {
+                    log.warn("PQC signing failed, continuing without PQC signature: {}", e.getMessage());
+                }
+            }
             AuditRecordRequest auditRequest = new AuditRecordRequest(
                     request.prompt(),
                     canonicalResponse,
                     responseHash,
                     signature,
+                    signaturePqcBase64,
                     tsaToken,
                     modelId,
                     null,

@@ -36,6 +36,7 @@ public class AuditRecordService {
     private AiResponse mapToEntity(AuditRecordRequest r) {
         AiResponse e = new AiResponse(r.prompt(), r.response(), r.responseHash());
         e.setSignature(r.signature());
+        e.setSignaturePqc(r.signaturePqc());
         e.setTsaToken(r.tsaToken());
         e.setLlmModel(r.llmModel());
         e.setRequestId(r.requestId());

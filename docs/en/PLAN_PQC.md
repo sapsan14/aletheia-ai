@@ -186,6 +186,16 @@ If someone steals the secret key, they can sign in your name. The public key is 
 | Unit/Integration | Evidence Package | When PQC is enabled, .aep contains `signature_pqc.sig`, `pqc_public_key.pem`, `pqc_algorithm.json`. When disabled, these files are absent. |
 | Doc | Format | Document in PLAN_PQC or Evidence Package spec the names and formats of the new files. |
 
+**Evidence Package PQC files (PQC.4):**
+
+| File | Content |
+|------|---------|
+| `signature_pqc.sig` | Base64-encoded ML-DSA signature over the same 32-byte SHA-256 hash as the classical signature. |
+| `pqc_public_key.pem` | PEM of the ML-DSA (Dilithium) public key (UTF-8). |
+| `pqc_algorithm.json` | JSON: `algorithm` (e.g. `"ML-DSA (Dilithium3)"`), `parameter_set` (`"Dilithium3"`), `standard` (`"FIPS 204"`). |
+
+When PQC is disabled or the record has no `signature_pqc`, these files are **not** added to the .aep (backward compatibility).
+
 ---
 
 ### PQC.5 — Backend: Expose PQC status and signature in API (GET /api/ai/verify/:id)

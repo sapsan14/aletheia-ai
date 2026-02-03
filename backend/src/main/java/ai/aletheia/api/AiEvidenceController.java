@@ -3,6 +3,7 @@ package ai.aletheia.api;
 import ai.aletheia.api.dto.ErrorResponse;
 import ai.aletheia.claim.ClaimCanonical;
 import ai.aletheia.crypto.CanonicalizationService;
+import ai.aletheia.crypto.PqcSignatureService;
 import ai.aletheia.crypto.SignatureService;
 import ai.aletheia.db.AiResponseRepository;
 import ai.aletheia.db.entity.AiResponse;
@@ -37,20 +38,25 @@ public class AiEvidenceController {
 
     private static final Logger log = LoggerFactory.getLogger(AiEvidenceController.class);
 
+    private static final String PQC_ALGORITHM_NAME = "ML-DSA (Dilithium3)";
+
     private final AiResponseRepository repository;
     private final CanonicalizationService canonicalizationService;
     private final SignatureService signatureService;
     private final EvidencePackageService evidencePackageService;
+    private final PqcSignatureService pqcSignatureService;
 
     public AiEvidenceController(
             AiResponseRepository repository,
             CanonicalizationService canonicalizationService,
             SignatureService signatureService,
-            EvidencePackageService evidencePackageService) {
+            EvidencePackageService evidencePackageService,
+            @org.springframework.beans.factory.annotation.Autowired(required = false) PqcSignatureService pqcSignatureService) {
         this.repository = repository;
         this.canonicalizationService = canonicalizationService;
         this.signatureService = signatureService;
         this.evidencePackageService = evidencePackageService;
+        this.pqcSignatureService = pqcSignatureService;
     }
 
     @Operation(summary = "Evidence Package", description = "Build and return Evidence Package (.aep) for a stored response by id. Returns ZIP or JSON with base64 file contents.")
@@ -105,31 +111,47 @@ public class AiEvidenceController {
                 ? Base64.getDecoder().decode(entity.getTsaToken())
                 : null;
 
-        Map<String, byte[]> files = (claim != null || policyVersion != null)
-                ? evidencePackageService.buildPackage(
-                entity.getResponse(),
-                canonicalBytes,
-                entity.getResponseHash(),
-                signatureBytes,
-                tsaTokenBytes,
-                entity.getLlmModel(),
-                entity.getCreatedAt(),
-                entity.getId(),
-                publicKeyPem,
-                claim,
-                confidence,
-                policyVersion)
-                : evidencePackageService.buildPackage(
-                entity.getResponse(),
-                canonicalBytes,
-                entity.getResponseHash(),
-                signatureBytes,
-                tsaTokenBytes,
-                entity.getLlmModel(),
-                entity.getCreatedAt(),
-                entity.getId(),
-                publicKeyPem
-        );
+        byte[] signaturePqcBytes = null;
+        String pqcPublicKeyPem = null;
+        if (entity.getSignaturePqc() != null && !entity.getSignaturePqc().isBlank()
+                && pqcSignatureService != null && pqcSignatureService.isAvailable()) {
+            signaturePqcBytes = Base64.getDecoder().decode(entity.getSignaturePqc());
+            pqcPublicKeyPem = pqcSignatureService.getPublicKeyPem();
+        }
+
+        Map<String, byte[]> files;
+        if (claim != null || policyVersion != null) {
+            files = evidencePackageService.buildPackage(
+                    entity.getResponse(),
+                    canonicalBytes,
+                    entity.getResponseHash(),
+                    signatureBytes,
+                    tsaTokenBytes,
+                    entity.getLlmModel(),
+                    entity.getCreatedAt(),
+                    entity.getId(),
+                    publicKeyPem,
+                    claim,
+                    confidence,
+                    policyVersion,
+                    signaturePqcBytes,
+                    pqcPublicKeyPem,
+                    PQC_ALGORITHM_NAME);
+        } else {
+            files = evidencePackageService.buildPackage(
+                    entity.getResponse(),
+                    canonicalBytes,
+                    entity.getResponseHash(),
+                    signatureBytes,
+                    tsaTokenBytes,
+                    entity.getLlmModel(),
+                    entity.getCreatedAt(),
+                    entity.getId(),
+                    publicKeyPem,
+                    signaturePqcBytes,
+                    pqcPublicKeyPem,
+                    PQC_ALGORITHM_NAME);
+        }
 
         boolean wantJson = "json".equalsIgnoreCase(format);
 

@@ -37,6 +37,10 @@ public class AiResponse {
     @Column(length = 2048)
     private String signature;
 
+    /** PQC (ML-DSA) signature (Base64) of the same hash. Null when PQC disabled or key not configured. */
+    @Column(name = "signature_pqc", length = 4096)
+    private String signaturePqc;
+
     /** RFC 3161 TSA token (Base64). Null when TSA not used or failed. */
     @Column(name = "tsa_token", length = 4096)
     private String tsaToken;
@@ -114,6 +118,9 @@ public class AiResponse {
 
     public String getSignature() { return signature; }
     public void setSignature(String signature) { this.signature = signature; }
+
+    public String getSignaturePqc() { return signaturePqc; }
+    public void setSignaturePqc(String signaturePqc) { this.signaturePqc = signaturePqc; }
 
     public String getTsaToken() { return tsaToken; }
     public void setTsaToken(String tsaToken) { this.tsaToken = tsaToken; }

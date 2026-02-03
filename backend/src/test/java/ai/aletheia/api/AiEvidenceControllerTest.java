@@ -59,7 +59,10 @@ class AiEvidenceControllerTest {
                 .andExpect(jsonPath("$['signature.sig']").exists())
                 .andExpect(jsonPath("$['timestamp.tsr']").exists())
                 .andExpect(jsonPath("$['metadata.json']").exists())
-                .andExpect(jsonPath("$['public_key.pem']").exists());
+                .andExpect(jsonPath("$['public_key.pem']").exists())
+                .andExpect(jsonPath("$['signature_pqc.sig']").doesNotExist())
+                .andExpect(jsonPath("$['pqc_public_key.pem']").doesNotExist())
+                .andExpect(jsonPath("$['pqc_algorithm.json']").doesNotExist());
     }
 
     @Test

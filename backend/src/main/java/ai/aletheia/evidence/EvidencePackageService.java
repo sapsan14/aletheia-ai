@@ -7,7 +7,8 @@ import java.util.Map;
  * Builds an Evidence Package (.aep): the set of files required for offline verification.
  *
  * <p>Format (DP2.1.1): response.txt, canonical.bin, hash.sha256, signature.sig,
- * timestamp.tsr, metadata.json, public_key.pem. All keys are filenames; values are file contents (bytes).
+ * timestamp.tsr, metadata.json, public_key.pem. Optional PQC (PQC.4): signature_pqc.sig,
+ * pqc_public_key.pem, pqc_algorithm.json when PQC was used.
  */
 public interface EvidencePackageService {
 
@@ -37,6 +38,24 @@ public interface EvidencePackageService {
             String publicKeyPem);
 
     /**
+     * Build the Evidence Package with optional PQC artifacts (PQC.4). When signaturePqcBytes is non-null,
+     * adds signature_pqc.sig, pqc_public_key.pem, pqc_algorithm.json.
+     */
+    Map<String, byte[]> buildPackage(
+            String responseText,
+            byte[] canonicalBytes,
+            String hashHex,
+            byte[] signatureBytes,
+            byte[] tsaTokenBytes,
+            String model,
+            Instant createdAt,
+            Long responseId,
+            String publicKeyPem,
+            byte[] signaturePqcBytes,
+            String pqcPublicKeyPem,
+            String pqcAlgorithmName);
+
+    /**
      * Build the Evidence Package with DP2.4 claim metadata (claim, confidence, policy_version in metadata.json).
      * canonicalBytes must be the combined signed payload (canonical response + canonical claim metadata).
      */
@@ -53,6 +72,26 @@ public interface EvidencePackageService {
             String claim,
             Double confidence,
             String policyVersion);
+
+    /**
+     * Build with DP2.4 claim metadata and optional PQC artifacts (PQC.4).
+     */
+    Map<String, byte[]> buildPackage(
+            String responseText,
+            byte[] canonicalBytes,
+            String hashHex,
+            byte[] signatureBytes,
+            byte[] tsaTokenBytes,
+            String model,
+            Instant createdAt,
+            Long responseId,
+            String publicKeyPem,
+            String claim,
+            Double confidence,
+            String policyVersion,
+            byte[] signaturePqcBytes,
+            String pqcPublicKeyPem,
+            String pqcAlgorithmName);
 
     /**
      * Pack the evidence file map into a ZIP (e.g. .aep).

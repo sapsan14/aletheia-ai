@@ -8,6 +8,8 @@ import ai.aletheia.audit.AuditRecordService;
 import ai.aletheia.audit.dto.AuditRecordRequest;
 import ai.aletheia.crypto.CanonicalizationService;
 import ai.aletheia.crypto.HashService;
+import ai.aletheia.crypto.PqcSignatureService;
+import ai.aletheia.crypto.PqcSignatureServiceImpl;
 import ai.aletheia.crypto.SignatureService;
 import ai.aletheia.crypto.TimestampException;
 import ai.aletheia.crypto.TimestampService;
@@ -44,18 +46,21 @@ public class AuditDemoController {
     private final SignatureService signatureService;
     private final TimestampService timestampService;
     private final AuditRecordService auditRecordService;
+    private final PqcSignatureService pqcSignatureService;
 
     public AuditDemoController(
             CanonicalizationService canonicalizationService,
             HashService hashService,
             SignatureService signatureService,
             TimestampService timestampService,
-            AuditRecordService auditRecordService) {
+            AuditRecordService auditRecordService,
+            @org.springframework.beans.factory.annotation.Autowired(required = false) PqcSignatureService pqcSignatureService) {
         this.canonicalizationService = canonicalizationService;
         this.hashService = hashService;
         this.signatureService = signatureService;
         this.timestampService = timestampService;
         this.auditRecordService = auditRecordService;
+        this.pqcSignatureService = pqcSignatureService;
     }
 
     @Operation(summary = "Audit demo", description = "Crypto pipeline + save to DB. Test flow without LLM.")
@@ -89,16 +94,27 @@ public class AuditDemoController {
                 byte[] token = timestampService.timestamp(signatureBytes);
                 tsaToken = Base64.getEncoder().encodeToString(token);
                 tsaStatus = timestampService.getClass().getSimpleName().contains("Mock") ? TSA_MOCK : TSA_REAL;
-            } catch (TimestampException e) {
-                tsaStatus = TSA_ERROR;
-            }
+        } catch (TimestampException e) {
+            tsaStatus = TSA_ERROR;
+        }
         }
 
+        String signaturePqcBase64 = null;
+        if (signature != null && pqcSignatureService != null && pqcSignatureService.isAvailable()) {
+            try {
+                byte[] hashBytes = PqcSignatureServiceImpl.hashHexToBytes(hash);
+                byte[] pqcSig = pqcSignatureService.sign(hashBytes);
+                signaturePqcBase64 = Base64.getEncoder().encodeToString(pqcSig);
+            } catch (Exception e) {
+                // log and continue without PQC
+            }
+        }
         AuditRecordRequest auditRequest = new AuditRecordRequest(
                 request.text(),
                 request.text(),
                 hash,
                 signature,
+                signaturePqcBase64,
                 tsaToken,
                 LLM_MODEL_DEMO,
                 null,

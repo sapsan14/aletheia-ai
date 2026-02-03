@@ -3,15 +3,17 @@ package ai.aletheia.audit.dto;
 /**
  * Request to persist a verifiable AI response record.
  *
- * <p>Required: prompt, response, responseHash. Optional: signature, tsaToken,
+ * <p>Required: prompt, response, responseHash. Optional: signature, signaturePqc, tsaToken,
  * llmModel, requestId, temperature, systemPrompt, version.
  * DP2.4: Optional claim, confidence, policy_version (Minimal AI Claim).
+ * PQC.3: Optional signaturePqc (ML-DSA over same hash).
  */
 public record AuditRecordRequest(
         String prompt,
         String response,
         String responseHash,
         String signature,
+        String signaturePqc,
         String tsaToken,
         String llmModel,
         String requestId,
@@ -26,7 +28,7 @@ public record AuditRecordRequest(
     public static AuditRecordRequest of(String prompt, String response, String responseHash) {
         return new AuditRecordRequest(
                 prompt, response, responseHash,
-                null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null,
                 null, null, null
         );
     }

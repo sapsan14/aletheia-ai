@@ -28,9 +28,10 @@ public class EvidencePackageServiceImpl implements EvidencePackageService {
     public static final String METADATA_JSON = "metadata.json";
     public static final String PUBLIC_KEY_PEM = "public_key.pem";
 
-    private static final String[] ALL_FILES = {
-            RESPONSE_TXT, CANONICAL_BIN, HASH_SHA256, SIGNATURE_SIG, TIMESTAMP_TSR, METADATA_JSON, PUBLIC_KEY_PEM
-    };
+    /** PQC.4: PQC signature and public key (when PQC enabled). */
+    public static final String SIGNATURE_PQC_SIG = "signature_pqc.sig";
+    public static final String PQC_PUBLIC_KEY_PEM = "pqc_public_key.pem";
+    public static final String PQC_ALGORITHM_JSON = "pqc_algorithm.json";
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -68,6 +69,28 @@ public class EvidencePackageServiceImpl implements EvidencePackageService {
 
         out.put(PUBLIC_KEY_PEM, (publicKeyPem != null ? publicKeyPem : "").getBytes(StandardCharsets.UTF_8));
 
+        return out;
+    }
+
+    @Override
+    public Map<String, byte[]> buildPackage(
+            String responseText,
+            byte[] canonicalBytes,
+            String hashHex,
+            byte[] signatureBytes,
+            byte[] tsaTokenBytes,
+            String model,
+            Instant createdAt,
+            Long responseId,
+            String publicKeyPem,
+            byte[] signaturePqcBytes,
+            String pqcPublicKeyPem,
+            String pqcAlgorithmName) {
+
+        Map<String, byte[]> out = buildPackage(
+                responseText, canonicalBytes, hashHex, signatureBytes, tsaTokenBytes,
+                model, createdAt, responseId, publicKeyPem);
+        addPqcIfPresent(out, signaturePqcBytes, pqcPublicKeyPem, pqcAlgorithmName);
         return out;
     }
 
@@ -121,10 +144,56 @@ public class EvidencePackageServiceImpl implements EvidencePackageService {
     }
 
     @Override
+    public Map<String, byte[]> buildPackage(
+            String responseText,
+            byte[] canonicalBytes,
+            String hashHex,
+            byte[] signatureBytes,
+            byte[] tsaTokenBytes,
+            String model,
+            Instant createdAt,
+            Long responseId,
+            String publicKeyPem,
+            String claim,
+            Double confidence,
+            String policyVersion,
+            byte[] signaturePqcBytes,
+            String pqcPublicKeyPem,
+            String pqcAlgorithmName) {
+
+        Map<String, byte[]> out = buildPackage(
+                responseText, canonicalBytes, hashHex, signatureBytes, tsaTokenBytes,
+                model, createdAt, responseId, publicKeyPem, claim, confidence, policyVersion);
+        addPqcIfPresent(out, signaturePqcBytes, pqcPublicKeyPem, pqcAlgorithmName);
+        return out;
+    }
+
+    /** When signaturePqcBytes is non-null, add PQC files (PQC.4). Backward compatible: null = no PQC entries. */
+    private void addPqcIfPresent(Map<String, byte[]> out,
+                                byte[] signaturePqcBytes,
+                                String pqcPublicKeyPem,
+                                String pqcAlgorithmName) {
+        if (signaturePqcBytes == null) {
+            return;
+        }
+        out.put(SIGNATURE_PQC_SIG, Base64.getEncoder().encode(signaturePqcBytes));
+        out.put(PQC_PUBLIC_KEY_PEM, (pqcPublicKeyPem != null ? pqcPublicKeyPem : "").getBytes(StandardCharsets.UTF_8));
+        Map<String, String> algo = new LinkedHashMap<>();
+        algo.put("algorithm", pqcAlgorithmName != null ? pqcAlgorithmName : "ML-DSA");
+        algo.put("parameter_set", "Dilithium3");
+        algo.put("standard", "FIPS 204");
+        try {
+            out.put(PQC_ALGORITHM_JSON, objectMapper.writeValueAsBytes(algo));
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Failed to build pqc_algorithm.json", e);
+        }
+    }
+
+    @Override
     public byte[] toZip(Map<String, byte[]> files) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (ZipOutputStream zos = new ZipOutputStream(baos)) {
-            for (String name : ALL_FILES) {
+            for (String name : files.keySet()) {
                 byte[] content = files.get(name);
                 if (content == null) {
                     content = new byte[0];
