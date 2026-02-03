@@ -113,10 +113,14 @@ public class AiEvidenceController {
 
         byte[] signaturePqcBytes = null;
         String pqcPublicKeyPem = null;
-        if (entity.getSignaturePqc() != null && !entity.getSignaturePqc().isBlank()
-                && pqcSignatureService != null && pqcSignatureService.isAvailable()) {
+        if (entity.getSignaturePqc() != null && !entity.getSignaturePqc().isBlank()) {
             signaturePqcBytes = Base64.getDecoder().decode(entity.getSignaturePqc());
-            pqcPublicKeyPem = pqcSignatureService.getPublicKeyPem();
+            pqcPublicKeyPem = entity.getPqcPublicKeyPem();
+            if (pqcPublicKeyPem == null || pqcPublicKeyPem.isBlank()) {
+                if (pqcSignatureService != null && pqcSignatureService.isAvailable()) {
+                    pqcPublicKeyPem = pqcSignatureService.getPublicKeyPem();
+                }
+            }
         }
 
         Map<String, byte[]> files;

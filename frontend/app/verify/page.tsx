@@ -7,6 +7,7 @@
 
 "use client";
 
+import { PqcBadge } from "@/app/components/PqcBadge";
 import { TOOLTIPS } from "@/lib/tooltips";
 import Image from "next/image";
 import Link from "next/link";
@@ -27,6 +28,10 @@ interface VerifyRecord {
   claim?: string | null;
   confidence?: number | null;
   policyVersion?: string | null;
+  /** PQC.5/PQC.6: Base64 ML-DSA signature when PQC enabled */
+  signaturePqc?: string | null;
+  /** e.g. "ML-DSA (Dilithium3)" */
+  pqcAlgorithm?: string | null;
 }
 
 /** Canonicalize text (same rules as backend). */
@@ -101,7 +106,7 @@ function formatPolicyVersion(value: string | null | undefined): string {
     .join("-");
 }
 
-/** P3.9 — Short descriptions for Evidence Package file names (preview modal). */
+/** P3.9 — Short descriptions for Evidence Package file names (preview modal). PQC.4: PQC artifacts. */
 const EVIDENCE_FILE_DESCRIPTIONS: Record<string, string> = {
   "response.txt": "Response text",
   "canonical.bin": "Canonical bytes",
@@ -110,6 +115,9 @@ const EVIDENCE_FILE_DESCRIPTIONS: Record<string, string> = {
   "timestamp.tsr": "Timestamp token",
   "metadata.json": "Claim metadata",
   "public_key.pem": "Public key",
+  "signature_pqc.sig": "Post-quantum (ML-DSA) signature",
+  "pqc_public_key.pem": "PQC public key",
+  "pqc_algorithm.json": "PQC algorithm (e.g. ML-DSA Dilithium3)",
 };
 
 function VerifyContent() {
@@ -343,12 +351,17 @@ function VerifyContent() {
         className="rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-600 dark:bg-zinc-700/30"
         aria-label="Trust summary"
       >
-        <h2
-          className="mb-3 text-lg font-semibold text-zinc-900 dark:text-zinc-50"
-          title={TOOLTIPS.verified_ai_response}
-        >
-          {isVerified ? "✅ Verified AI Response" : "AI Response"}
-        </h2>
+        <div className="mb-3 flex flex-wrap items-center gap-2">
+          <h2
+            className="text-lg font-semibold text-zinc-900 dark:text-zinc-50"
+            title={TOOLTIPS.verified_ai_response}
+          >
+            {isVerified ? "✅ Verified AI Response" : "AI Response"}
+          </h2>
+          {record.signaturePqc != null && record.signaturePqc.trim() !== "" && (
+            <PqcBadge variant="default" />
+          )}
+        </div>
         <dl className="space-y-1.5 text-sm">
           <div className="flex flex-wrap gap-x-2">
             <dt className="text-zinc-500 dark:text-zinc-400">🕒 Created:</dt>

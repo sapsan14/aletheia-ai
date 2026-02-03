@@ -114,6 +114,14 @@ openssl genpkey -algorithm RSA -out ai.key -pkeyopt rsa_keygen_bits:2048
 # In .env set: AI_ALETHEIA_SIGNING_KEY_PATH=../ai.key  (or absolute path)
 ```
 
+**Optional (PQC):** to enable post-quantum ML-DSA signing, generate a key pair and set in `.env`:
+
+```bash
+cd backend
+mvn -q compile exec:java -Dexec.mainClass="ai.aletheia.crypto.PqcKeyGen" -Dexec.args="."
+# Then in project root .env: AI_ALETHEIA_PQC_ENABLED=true  AI_ALETHEIA_PQC_KEY_PATH=./ai_pqc.key
+```
+
 **Run backend** (from project root or `backend/`):
 
 ```bash
@@ -128,7 +136,22 @@ cd backend && mvn spring-boot:run
 cd frontend && cp .env.example .env.local && npm install && npm run dev
 ```
 
-Open http://localhost:3000. For POST /api/ai/ask set `OPENAI_API_KEY` in `.env`. LLM-free test: `curl -X POST http://localhost:8080/api/audit/demo -H "Content-Type: application/json" -d '{"text":"hello"}'`.
+- Ensure `NEXT_PUBLIC_API_URL=http://localhost:8080` in `frontend/.env.local` so the UI can call the backend.
+
+Open http://localhost:3000. For POST /api/ai/ask set `OPENAI_API_KEY` in project root `.env`. LLM-free test: `curl -X POST http://localhost:8080/api/audit/demo -H "Content-Type: application/json" -d '{"text":"hello"}'`.
+
+### Local development checklist
+
+| Step | Action |
+|------|--------|
+| 1 | Copy `.env.example` → `.env` at project root and set `AI_ALETHEIA_SIGNING_KEY_PATH=../ai.key` (or path to your `ai.key`) |
+| 2 | Generate RSA key: `openssl genpkey -algorithm RSA -out ai.key -pkeyopt rsa_keygen_bits:2048` (at project root) |
+| 3 | (Optional) PQC: `cd backend && mvn -q compile exec:java -Dexec.mainClass="ai.aletheia.crypto.PqcKeyGen" -Dexec.args="."` then in `.env`: `AI_ALETHEIA_PQC_ENABLED=true`, `AI_ALETHEIA_PQC_KEY_PATH=./ai_pqc.key` |
+| 4 | Backend: `cd backend && mvn spring-boot:run` (loads `../.env`; H2 at `backend/data/`) |
+| 5 | Frontend: `cd frontend && cp .env.example .env.local && npm install && npm run dev`; set `NEXT_PUBLIC_API_URL=http://localhost:8080` in `frontend/.env.local` |
+| 6 | Open http://localhost:3000 and http://localhost:8080/swagger-ui.html |
+
+Full variable list: [.env.example](.env.example). PQC details: [docs/en/PLAN_PQC.md](docs/en/PLAN_PQC.md).
 
 ---
 

@@ -59,9 +59,13 @@ public class AiVerifyController {
         return ResponseEntity.status(404).body(ErrorResponse.notFound("Record not found", id));
     }
 
+    private static final String PQC_ALGORITHM = "ML-DSA (Dilithium3)";
+
     private AiVerifyResponse toResponse(AiResponse e) {
         boolean hashMatch = computeHashMatch(e);
         String signatureValid = computeSignatureValid(e);
+        String signaturePqc = e.getSignaturePqc() != null && !e.getSignaturePqc().isBlank() ? e.getSignaturePqc() : null;
+        String pqcAlgorithm = signaturePqc != null ? PQC_ALGORITHM : null;
         return new AiVerifyResponse(
                 e.getId(),
                 e.getPrompt(),
@@ -79,7 +83,9 @@ public class AiVerifyController {
                 e.getConfidence(),
                 e.getPolicyVersion(),
                 hashMatch,
-                signatureValid
+                signatureValid,
+                signaturePqc,
+                pqcAlgorithm
         );
     }
 

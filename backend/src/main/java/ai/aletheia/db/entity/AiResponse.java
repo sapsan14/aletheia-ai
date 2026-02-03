@@ -41,6 +41,10 @@ public class AiResponse {
     @Column(name = "signature_pqc", length = 4096)
     private String signaturePqc;
 
+    /** PQC public key PEM (stored when record saved with PQC). Used when building Evidence Package. */
+    @Column(name = "pqc_public_key_pem", columnDefinition = "TEXT")
+    private String pqcPublicKeyPem;
+
     /** RFC 3161 TSA token (Base64). Null when TSA not used or failed. */
     @Column(name = "tsa_token", length = 4096)
     private String tsaToken;
@@ -121,6 +125,9 @@ public class AiResponse {
 
     public String getSignaturePqc() { return signaturePqc; }
     public void setSignaturePqc(String signaturePqc) { this.signaturePqc = signaturePqc; }
+
+    public String getPqcPublicKeyPem() { return pqcPublicKeyPem; }
+    public void setPqcPublicKeyPem(String pqcPublicKeyPem) { this.pqcPublicKeyPem = pqcPublicKeyPem; }
 
     public String getTsaToken() { return tsaToken; }
     public void setTsaToken(String tsaToken) { this.tsaToken = tsaToken; }

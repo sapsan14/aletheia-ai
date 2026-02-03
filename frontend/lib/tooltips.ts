@@ -40,4 +40,7 @@ export const TOOLTIPS: Record<string, string> = {
     "No connection to Aletheia AI is required to verify authenticity and integrity.",
   download_verifier:
     "Downloads the offline verifier (JAR) so you can verify Evidence Packages without the Aletheia server.",
+  // PQC.6 — Quantum-Resistant badge
+  pqc_badge:
+    "This response includes a post-quantum (ML-DSA) signature in addition to the classical signature, so it remains verifiable even in a future with large-scale quantum computers.",
 };

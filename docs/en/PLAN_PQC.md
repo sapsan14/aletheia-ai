@@ -91,6 +91,31 @@ If someone steals the secret key, they can sign in your name. The public key is 
 
 ---
 
+## Configuration and local run
+
+Backend loads configuration from the project root `.env` (see [README Quick start](../../README.md#quick-start) and [.env.example](../../.env.example)).
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `AI_ALETHEIA_PQC_ENABLED` | Set to `true` to enable ML-DSA signing alongside classical RSA. | `true` |
+| `AI_ALETHEIA_PQC_KEY_PATH` | Path to ML-DSA private key file. Relative to backend working directory when running `mvn spring-boot:run` from `backend/`. | `./ai_pqc.key` |
+
+**Generate PQC key pair (one-time):**
+
+```bash
+cd backend
+mvn -q compile exec:java -Dexec.mainClass="ai.aletheia.crypto.PqcKeyGen" -Dexec.args="."
+```
+
+This creates `ai_pqc.key` and `ai_pqc_public.pem` in `backend/`. Do not commit them. In `.env` at project root set:
+
+- `AI_ALETHEIA_PQC_ENABLED=true`
+- `AI_ALETHEIA_PQC_KEY_PATH=./ai_pqc.key`
+
+Then run the backend from `backend/` so the path resolves. Frontend needs `NEXT_PUBLIC_API_URL=http://localhost:8080` in `frontend/.env.local` to call the API.
+
+---
+
 ## Deliverables and tasks (LLM-readable)
 
 ---
@@ -195,6 +220,61 @@ If someone steals the secret key, they can sign in your name. The public key is 
 | `pqc_algorithm.json` | JSON: `algorithm` (e.g. `"ML-DSA (Dilithium3)"`), `parameter_set` (`"Dilithium3"`), `standard` (`"FIPS 204"`). |
 
 When PQC is disabled or the record has no `signature_pqc`, these files are **not** added to the .aep (backward compatibility).
+
+**How to get PQC files in your .aep (required for testing)**
+
+PQC files are added only when the **record was saved with PQC enabled**. You must:
+
+1. **Generate a PQC key pair** (once):
+   ```bash
+   cd backend && mvn -q exec:java -Dexec.mainClass="ai.aletheia.crypto.PqcKeyGen" -Dexec.args="."
+   ```
+   This creates `ai_pqc.key` and `ai_pqc_public.pem` in the current directory.
+
+2. **Start the backend with PQC enabled** when creating the response:
+   ```bash
+   cd backend
+   export AI_ALETHEIA_PQC_ENABLED=true
+   export AI_ALETHEIA_PQC_KEY_PATH=/absolute/path/to/ai_pqc.key
+   mvn spring-boot:run
+   ```
+   (Or set `ai.aletheia.signing.pqc-enabled=true` and `ai.aletheia.signing.pqc-key-path` in `application.properties` or env.)
+
+3. **Create a response** (e.g. send a prompt via the frontend or POST to `/api/ai/ask`, or use `/api/audit/demo`). The saved record will have `signature_pqc` and `pqc_public_key_pem` stored.
+
+4. **Download the Evidence Package** (GET `/api/ai/evidence/:id` or “Download evidence” on the frontend). The .aep will contain `signature_pqc.sig`, `pqc_public_key.pem`, and `pqc_algorithm.json`. The PQC public key is now stored in the database when the record is saved, so the package includes PQC even if you later run the backend without PQC enabled.
+
+**How to verify that an .aep package uses PQC**
+
+The .aep file is a ZIP archive. To check that it includes PQC:
+
+1. **List contents** (any of these):
+   ```bash
+   unzip -l aletheia-evidence-123.aep
+   ```
+   or
+   ```bash
+   jar tf aletheia-evidence-123.aep
+   ```
+   Look for: `signature_pqc.sig`, `pqc_public_key.pem`, `pqc_algorithm.json`. If all three are present, the package was built with PQC enabled.
+
+2. **One-liner** (exit 0 only if all three PQC files exist):
+   ```bash
+   unzip -l aletheia-evidence-123.aep | grep -q signature_pqc.sig && \
+   unzip -l aletheia-evidence-123.aep | grep -q pqc_public_key.pem && \
+   unzip -l aletheia-evidence-123.aep | grep -q pqc_algorithm.json && echo "PQC present"
+   ```
+
+3. **Extract and inspect**:
+   ```bash
+   unzip aletheia-evidence-123.aep -d /tmp/aep
+   ls -la /tmp/aep/signature_pqc.sig /tmp/aep/pqc_public_key.pem /tmp/aep/pqc_algorithm.json
+   cat /tmp/aep/pqc_algorithm.json   # e.g. {"algorithm":"ML-DSA (Dilithium3)","parameter_set":"Dilithium3","standard":"FIPS 204"}
+   ```
+
+4. **Frontend**: On the verify page (`/verify?id=<id>`), if the response has a PQC signature, the **Quantum-Resistant** badge is shown. Use **Preview package** to see the list of files including the PQC entries.
+
+The offline verifier JAR currently validates only the classical (RSA) signature and TSA; PQC signature verification in the JAR is planned (PQC.8).
 
 ---
 

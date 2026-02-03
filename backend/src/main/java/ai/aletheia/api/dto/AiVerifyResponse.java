@@ -13,6 +13,8 @@ import java.time.Instant;
  * @param claim           DP2.4: minimal AI claim text (null when not compliance)
  * @param confidence      DP2.4: confidence in [0,1] (null when not compliance)
  * @param policyVersion   DP2.4: e.g. "gdpr-2024" (null when not compliance)
+ * @param signaturePqc    PQC.5: Base64 ML-DSA signature (null when PQC disabled)
+ * @param pqcAlgorithm    PQC.5: e.g. "ML-DSA (Dilithium3)" (null when no PQC)
  */
 @JsonInclude(JsonInclude.Include.ALWAYS)
 public record AiVerifyResponse(
@@ -32,5 +34,7 @@ public record AiVerifyResponse(
         Double confidence,
         String policyVersion,
         Boolean hashMatch,
-        String signatureValid
+        String signatureValid,
+        String signaturePqc,
+        String pqcAlgorithm
 ) {}

@@ -136,11 +136,13 @@ public class AiAskController {
             }
 
             String signaturePqcBase64 = null;
+            String pqcPublicKeyPem = null;
             if (signature != null && pqcSignatureService != null && pqcSignatureService.isAvailable()) {
                 try {
                     byte[] hashBytes = PqcSignatureServiceImpl.hashHexToBytes(responseHash);
                     byte[] pqcSig = pqcSignatureService.sign(hashBytes);
                     signaturePqcBase64 = Base64.getEncoder().encodeToString(pqcSig);
+                    pqcPublicKeyPem = pqcSignatureService.getPublicKeyPem();
                 } catch (Exception e) {
                     log.warn("PQC signing failed, continuing without PQC signature: {}", e.getMessage());
                 }
@@ -151,6 +153,7 @@ public class AiAskController {
                     responseHash,
                     signature,
                     signaturePqcBase64,
+                    pqcPublicKeyPem,
                     tsaToken,
                     modelId,
                     null,

@@ -23,6 +23,7 @@ class AuditRecordServiceTest {
                 "a1b2c3d4e5f6",
                 "sig-base64",
                 null,
+                null,
                 "tsa-base64",
                 "gpt-4",
                 "req-123",

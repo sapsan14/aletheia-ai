@@ -8,6 +8,7 @@
 
 "use client";
 
+import { PqcBadge } from "@/app/components/PqcBadge";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -85,12 +86,26 @@ export default function Home() {
       }
 
       if (!res.ok) {
-        const msg =
+        let msg =
           typeof data === "object" && data !== null && "message" in data
             ? String((data as { message?: unknown }).message)
             : typeof data === "object" && data !== null && "error" in data
               ? String((data as { error?: unknown }).error)
               : `Request failed (${res.status})`;
+        const bodyStr =
+          typeof data === "string"
+            ? data
+            : typeof data === "object" && data !== null && "error" in data
+              ? String((data as { error?: unknown }).error)
+              : "";
+        if (
+          res.status === 501 ||
+          bodyStr.includes("Unsupported method") ||
+          bodyStr.includes("501")
+        ) {
+          msg =
+            "Server does not support POST. Run the app with npm run dev (Next.js) and start the backend — do not use a static file server.";
+        }
         setError(msg || `Request failed (${res.status})`);
         return;
       }
@@ -170,6 +185,10 @@ export default function Home() {
             </h1>
             <p className="text-sm text-zinc-600 dark:text-zinc-400">
               Verifiable AI responses with signing and timestamps
+            </p>
+            <p className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+              <span>Hybrid attestation: classical + post-quantum signatures for long-term evidence.</span>
+              <PqcBadge variant="compact" />
             </p>
           </div>
         </div>

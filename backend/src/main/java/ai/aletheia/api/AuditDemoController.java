@@ -40,6 +40,7 @@ public class AuditDemoController {
     private static final String TSA_NO_SIGNATURE = "NO_SIGNATURE";
     private static final String TSA_ERROR = "TSA_ERROR";
     private static final String LLM_MODEL_DEMO = "audit-demo";
+    private static final String PQC_ALGORITHM = "ML-DSA (Dilithium3)";
 
     private final CanonicalizationService canonicalizationService;
     private final HashService hashService;
@@ -100,11 +101,13 @@ public class AuditDemoController {
         }
 
         String signaturePqcBase64 = null;
+        String pqcPublicKeyPem = null;
         if (signature != null && pqcSignatureService != null && pqcSignatureService.isAvailable()) {
             try {
                 byte[] hashBytes = PqcSignatureServiceImpl.hashHexToBytes(hash);
                 byte[] pqcSig = pqcSignatureService.sign(hashBytes);
                 signaturePqcBase64 = Base64.getEncoder().encodeToString(pqcSig);
+                pqcPublicKeyPem = pqcSignatureService.getPublicKeyPem();
             } catch (Exception e) {
                 // log and continue without PQC
             }
@@ -115,6 +118,7 @@ public class AuditDemoController {
                 hash,
                 signature,
                 signaturePqcBase64,
+                pqcPublicKeyPem,
                 tsaToken,
                 LLM_MODEL_DEMO,
                 null,
@@ -128,6 +132,7 @@ public class AuditDemoController {
         Long id = auditRecordService.save(auditRequest);
 
         String canonicalBase64 = Base64.getEncoder().encodeToString(canonical);
+        String pqcAlgorithm = signaturePqcBase64 != null ? PQC_ALGORITHM : null;
         return ResponseEntity.ok(new AuditDemoResponse(
                 id,
                 request.text(),
@@ -136,7 +141,9 @@ public class AuditDemoController {
                 signature,
                 signatureStatus,
                 tsaToken,
-                tsaStatus
+                tsaStatus,
+                signaturePqcBase64,
+                pqcAlgorithm
         ));
     }
 }

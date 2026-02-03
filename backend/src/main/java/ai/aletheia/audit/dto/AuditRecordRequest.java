@@ -6,7 +6,7 @@ package ai.aletheia.audit.dto;
  * <p>Required: prompt, response, responseHash. Optional: signature, signaturePqc, tsaToken,
  * llmModel, requestId, temperature, systemPrompt, version.
  * DP2.4: Optional claim, confidence, policy_version (Minimal AI Claim).
- * PQC.3: Optional signaturePqc (ML-DSA over same hash).
+ * PQC.3: Optional signaturePqc (ML-DSA over same hash), pqcPublicKeyPem (stored for Evidence Package).
  */
 public record AuditRecordRequest(
         String prompt,
@@ -14,6 +14,7 @@ public record AuditRecordRequest(
         String responseHash,
         String signature,
         String signaturePqc,
+        String pqcPublicKeyPem,
         String tsaToken,
         String llmModel,
         String requestId,
@@ -28,7 +29,7 @@ public record AuditRecordRequest(
     public static AuditRecordRequest of(String prompt, String response, String responseHash) {
         return new AuditRecordRequest(
                 prompt, response, responseHash,
-                null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null,
                 null, null, null
         );
     }

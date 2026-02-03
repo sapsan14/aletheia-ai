@@ -37,6 +37,7 @@ public class AuditRecordService {
         AiResponse e = new AiResponse(r.prompt(), r.response(), r.responseHash());
         e.setSignature(r.signature());
         e.setSignaturePqc(r.signaturePqc());
+        e.setPqcPublicKeyPem(r.pqcPublicKeyPem());
         e.setTsaToken(r.tsaToken());
         e.setLlmModel(r.llmModel());
         e.setRequestId(r.requestId());
