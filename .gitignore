@@ -8,6 +8,8 @@ out/
 dist/
 build/
 *.class
+__pycache__/
+*.pyc
 
 # Environment & secrets (do not commit keys or API keys)
 .env
