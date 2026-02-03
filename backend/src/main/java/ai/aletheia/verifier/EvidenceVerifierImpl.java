@@ -3,12 +3,16 @@ package ai.aletheia.verifier;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.DigestInfo;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.pqc.crypto.crystals.dilithium.DilithiumPublicKeyParameters;
+import org.bouncycastle.pqc.crypto.crystals.dilithium.DilithiumSigner;
+import org.bouncycastle.pqc.crypto.util.PublicKeyFactory;
 import org.bouncycastle.tsp.TimeStampToken;
 
 import java.io.IOException;
@@ -179,7 +183,38 @@ public class EvidenceVerifierImpl implements EvidenceVerifier {
                 }
             }
 
-            return VerificationResult.valid(report);
+            // PQC.8: If Evidence Package contains PQC files, verify ML-DSA signature over same hash
+            byte[] signaturePqcFile = readFile(dir, ai.aletheia.evidence.EvidencePackageServiceImpl.SIGNATURE_PQC_SIG);
+            byte[] pqcPublicKeyFile = readFile(dir, ai.aletheia.evidence.EvidencePackageServiceImpl.PQC_PUBLIC_KEY_PEM);
+            Boolean pqcValid = null;
+            if (signaturePqcFile != null && signaturePqcFile.length > 0 && pqcPublicKeyFile != null && pqcPublicKeyFile.length > 0) {
+                String pqcSigBase64 = new String(signaturePqcFile, StandardCharsets.UTF_8).trim().replaceAll("\\s+", "");
+                if (!pqcSigBase64.isEmpty()) {
+                    try {
+                        byte[] pqcSigBytes = Base64.getDecoder().decode(pqcSigBase64);
+                        DilithiumPublicKeyParameters pqcPublicKey = loadPqcPublicKeyFromPem(pqcPublicKeyFile);
+                        if (pqcPublicKey != null) {
+                            DilithiumSigner signer = new DilithiumSigner();
+                            signer.init(false, pqcPublicKey);
+                            boolean ok = signer.verifySignature(hashBytes, pqcSigBytes);
+                            pqcValid = ok;
+                            report.add(ok ? "PQC signature: valid" : "PQC signature: INVALID");
+                        } else {
+                            report.add("PQC signature: INVALID (failed to load PQC public key)");
+                            pqcValid = false;
+                        }
+                    } catch (Exception e) {
+                        report.add("PQC signature: INVALID (" + e.getMessage() + ")");
+                        pqcValid = false;
+                    }
+                } else {
+                    report.add("PQC signature: not present");
+                }
+            } else {
+                report.add("PQC signature: not present");
+            }
+
+            return VerificationResult.valid(report, pqcValid);
         } catch (IOException e) {
             report.add("error: " + e.getMessage());
             return VerificationResult.invalid(report, "failed to read package: " + e.getMessage());
@@ -237,8 +272,25 @@ public class EvidenceVerifierImpl implements EvidenceVerifier {
             if (obj instanceof java.security.cert.X509Certificate cert) {
                 return cert.getPublicKey();
             }
-            if (obj instanceof org.bouncycastle.asn1.x509.SubjectPublicKeyInfo spki) {
+            if (obj instanceof SubjectPublicKeyInfo spki) {
                 return new org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter().setProvider(PROVIDER).getPublicKey(spki);
+            }
+            return null;
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    /** PQC.8: Load ML-DSA (Dilithium) public key from PEM bytes. Returns null if not Dilithium or parse error. */
+    private static DilithiumPublicKeyParameters loadPqcPublicKeyFromPem(byte[] pemBytes) {
+        try (Reader r = new java.io.InputStreamReader(new java.io.ByteArrayInputStream(pemBytes), StandardCharsets.UTF_8);
+             PEMParser parser = new PEMParser(r)) {
+            Object obj = parser.readObject();
+            if (obj instanceof SubjectPublicKeyInfo spki) {
+                org.bouncycastle.crypto.CipherParameters params = PublicKeyFactory.createKey(spki);
+                if (params instanceof DilithiumPublicKeyParameters dilithium) {
+                    return dilithium;
+                }
             }
             return null;
         } catch (IOException e) {

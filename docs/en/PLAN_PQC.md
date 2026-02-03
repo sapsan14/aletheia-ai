@@ -287,7 +287,7 @@ The .aep file is a ZIP archive. To check that it includes PQC:
 
 4. **Frontend**: On the verify page (`/verify?id=<id>`), if the response has a PQC signature, the **Quantum-Resistant** badge is shown. Use **Preview package** to see the list of files including the PQC entries.
 
-The offline verifier JAR currently validates only the classical (RSA) signature and TSA; PQC signature verification in the JAR is planned (PQC.8).
+The offline verifier JAR (PQC.8) now also verifies the PQC signature when `signature_pqc.sig` and `pqc_public_key.pem` are present, and reports "PQC signature: valid", "PQC signature: INVALID", or "PQC signature: not present". The result includes `pqcValid` (Boolean) for scripted use.
 
 ---
 
@@ -362,11 +362,12 @@ The offline verifier JAR currently validates only the classical (RSA) signature 
 
 ## Verifier utility changes
 
-### PQC.8 — Verifier: Read and verify PQC signature from Evidence Package
+### PQC.8 — Verifier: Read and verify PQC signature from Evidence Package ✅
 
 | Field | Value |
 |-------|--------|
 | **Est.** | 2–3 h |
+| **Status** | Implemented: `EvidenceVerifierImpl` verifies ML-DSA when PQC files present; `VerificationResult.pqcValid`; report line "PQC signature: valid/invalid/not present". |
 | **Description** | In the offline verifier (JAR), when an .aep contains `signature_pqc.sig` and `pqc_public_key.pem`, verify the PQC signature over the same hash and report result in the verification report. |
 
 **Coding prompt (LLM-readable):**

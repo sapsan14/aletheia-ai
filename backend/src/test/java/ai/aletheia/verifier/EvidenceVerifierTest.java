@@ -2,9 +2,11 @@ package ai.aletheia.verifier;
 
 import ai.aletheia.crypto.CanonicalizationService;
 import ai.aletheia.crypto.HashService;
+import ai.aletheia.crypto.PqcSignatureService;
 import ai.aletheia.crypto.SignatureService;
 import ai.aletheia.crypto.TimestampService;
 import ai.aletheia.evidence.EvidencePackageService;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -39,6 +41,9 @@ class EvidenceVerifierTest {
     private TimestampService timestampService;
     @Autowired
     private EvidencePackageService evidencePackageService;
+
+    @Autowired(required = false)
+    private PqcSignatureService pqcSignatureService;
 
     private EvidenceVerifier verifier;
 
@@ -82,6 +87,9 @@ class EvidenceVerifierTest {
         assertThat(result.report()).anyMatch(s -> s.startsWith("signature: OK"));
         assertThat(result.report()).anyMatch(s -> s.startsWith("timestamp:"));
         assertThat(result.failureReason()).isNull();
+        // PQC.8: package without PQC reports "not present" and pqcValid is null
+        assertThat(result.report()).anyMatch(s -> s.equals("PQC signature: not present"));
+        assertThat(result.pqcValid()).isNull();
     }
 
     @Test
@@ -150,6 +158,52 @@ class EvidenceVerifierTest {
         assertThat(result.valid()).isFalse();
         assertThat(result.failureReason()).isEqualTo("hash mismatch");
         assertThat(result.report()).anyMatch(s -> s.contains("hash") && s.contains("MISMATCH"));
+    }
+
+    /** PQC.8: When package contains PQC files and PqcSignatureService is available, verifier reports PQC signature status and pqcValid. */
+    @Test
+    void verify_packageWithPqc_reportsPqcValid() throws Exception {
+        Assumptions.assumeTrue(pqcSignatureService != null && pqcSignatureService.isAvailable(),
+                "PqcSignatureService not available (PQC disabled in test); skip");
+
+        String responseText = "2+2 equals 4.\n";
+        byte[] canonical = canonicalizationService.canonicalize(responseText);
+        String hashHex = hashService.hash(canonical);
+        byte[] hashBytes = ai.aletheia.crypto.PqcSignatureServiceImpl.hashHexToBytes(hashHex);
+        byte[] pqcSigBytes = pqcSignatureService.sign(hashBytes);
+        String pqcPublicKeyPem = pqcSignatureService.getPublicKeyPem();
+
+        String sigBase64 = signatureService.sign(hashHex);
+        byte[] sigBytes = Base64.getDecoder().decode(sigBase64);
+        byte[] tsaToken = timestampService.timestamp(sigBytes);
+        String publicKeyPem = signatureService.getPublicKeyPem();
+
+        Map<String, byte[]> files = evidencePackageService.buildPackage(
+                responseText,
+                canonical,
+                hashHex,
+                sigBytes,
+                tsaToken,
+                "test-model",
+                java.time.Instant.now(),
+                1L,
+                publicKeyPem,
+                pqcSigBytes,
+                pqcPublicKeyPem,
+                "ML-DSA (Dilithium3)"
+        );
+
+        Path dir = tempDir.resolve("with-pqc");
+        Files.createDirectories(dir);
+        for (Map.Entry<String, byte[]> e : files.entrySet()) {
+            Files.write(dir.resolve(e.getKey()), e.getValue());
+        }
+
+        VerificationResult result = verifier.verify(dir);
+
+        assertThat(result.valid()).isTrue();
+        assertThat(result.report()).anyMatch(s -> s.equals("PQC signature: valid"));
+        assertThat(result.pqcValid()).isTrue();
     }
 
     @Test
