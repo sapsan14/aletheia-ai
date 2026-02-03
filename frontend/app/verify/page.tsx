@@ -138,6 +138,7 @@ function VerifyContent() {
   const [previewError, setPreviewError] = useState<string | null>(null);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
+  const apiBase = typeof window !== "undefined" ? "" : apiUrl;
 
   useEffect(() => {
     if (!id) {
@@ -145,7 +146,7 @@ function VerifyContent() {
       setIsLoading(false);
       return;
     }
-    fetch(`${apiUrl}/api/ai/verify/${id}`)
+    fetch(`${apiBase}/api/ai/verify/${id}`)
       .then((res) => {
         if (!res.ok) {
           if (res.status === 404) throw new Error("Record not found");
@@ -156,7 +157,7 @@ function VerifyContent() {
       .then(setRecord)
       .catch((err) => setError(err.message))
       .finally(() => setIsLoading(false));
-  }, [id, apiUrl]);
+  }, [id, apiBase]);
 
   async function handleVerifyHash() {
     if (!record) return;
@@ -249,7 +250,7 @@ function VerifyContent() {
     setEvidenceDownloading(true);
     setEvidenceError(null);
     try {
-      const res = await fetch(`${apiUrl}/api/ai/evidence/${record.id}`);
+      const res = await fetch(`${apiBase}/api/ai/evidence/${record.id}`);
       if (!res.ok) {
         const text = await res.text();
         const msg =
@@ -285,7 +286,7 @@ function VerifyContent() {
     setVerifierDownloading(true);
     setVerifierError(null);
     try {
-      const res = await fetch(`${apiUrl}/api/ai/verifier`);
+      const res = await fetch(`${apiBase}/api/ai/verifier`);
       if (!res.ok) {
         const text = await res.text();
         let msg = `Download failed (${res.status})`;
@@ -325,7 +326,7 @@ function VerifyContent() {
     setPreviewKeys(null);
     setPreviewOpen(true);
     try {
-      const res = await fetch(`${apiUrl}/api/ai/evidence/${record.id}?format=json`);
+      const res = await fetch(`${apiBase}/api/ai/evidence/${record.id}?format=json`);
       if (!res.ok) {
         const text = await res.text();
         setPreviewError(

@@ -1071,22 +1071,6 @@ export default function Home() {
               )}
             </div>
           </div>
-
-          <footer className="text-center text-xs text-zinc-500 dark:text-zinc-400">
-            <p>© 2026 Anton Sokolov &amp; Team 3</p>
-            <p>
-              <a
-                href="https://taltech.ee/vanemarendajaks"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline hover:text-zinc-700 dark:hover:text-zinc-300"
-              >
-                Koolitus „Noorem-tarkvaraarendajast vanemarendajaks“
-              </a>
-              {" — "}
-              Tallinna Tehnikaülikool
-            </p>
-          </footer>
         </main>
 
         {/* Right: Trust Panel — min-w-0 so it shrinks on mobile; content wraps */}
@@ -1102,6 +1086,22 @@ export default function Home() {
           />
         </aside>
       </div>
+
+      <footer className="mt-8 text-center text-xs text-zinc-500 dark:text-zinc-400">
+        <p>© 2026 Anton Sokolov &amp; Team 3</p>
+        <p>
+          <a
+            href="https://taltech.ee/vanemarendajaks"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-zinc-700 dark:hover:text-zinc-300"
+          >
+            Koolitus „Noorem-tarkvaraarendajast vanemarendajaks“
+          </a>
+          {" — "}
+          Tallinna Tehnikaülikool
+        </p>
+      </footer>
     </div>
   );
 }
