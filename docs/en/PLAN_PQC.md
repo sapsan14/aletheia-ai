@@ -13,6 +13,7 @@ This document is an **out-of-scope, enthusiast-driven** plan: adding a second, a
 - [Why PQC and why now](#why-pqc-and-why-now)
 - [Standards and references](#standards-and-references)
 - [Design principles](#design-principles)
+- [Simple explanation (for beginners)](#simple-explanation-for-beginners)
 - [Deliverables and tasks (LLM-readable)](#deliverables-and-tasks-llm-readable)
 - [Frontend: PQC badge and marketing](#frontend-pqc-badge-and-marketing)
 - [Backend changes](#backend-changes)
@@ -65,6 +66,28 @@ This document is an **out-of-scope, enthusiast-driven** plan: adding a second, a
 
 4. **Optional at runtime**  
    PQC signing is enabled only if a PQC key is configured (e.g. `ai.aletheia.signing.pqc-key-path`). If not set, behaviour is identical to today (no PQC files in Evidence Package).
+
+---
+
+## Simple explanation (for beginners)
+
+**What is an ML-DSA (Dilithium) key pair?**
+
+A **key pair** is like two matching parts: a **secret key** (only you have it) and a **public key** (you can share it with everyone).
+
+- The **secret key** is like your personal key to a safe. You use it to **sign**: “I wrote this.”
+- The **public key** is like a copy of the lock. Anyone with the public key can **verify** that a signature was made by the owner of the secret key, but they cannot forge your signature.
+
+**ML-DSA (Dilithium)** is the name of the “rules” used to create these keys. These rules are designed so that even future quantum computers cannot forge the signature. **Bouncy Castle** is a Java library that knows how to generate such key pairs and how to sign and verify with them.
+
+**What is the difference between `ai_pqc.key` and `ai_pqc_public.pem`?**
+
+| File | What it is | Who may see it | Used for |
+|------|------------|----------------|----------|
+| **ai_pqc.key** | The **secret** (private) key | Only you / your server. Never share. | **Signing** — creating the PQC signature. |
+| **ai_pqc_public.pem** | The **public** key | Anyone (e.g. in the Evidence Package, or in docs). | **Verifying** — checking that a signature was made with your secret key. |
+
+If someone steals the secret key, they can sign in your name. The public key is safe to share; it only allows others to verify your signatures.
 
 ---
 

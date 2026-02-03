@@ -95,6 +95,8 @@ For details: [Signing](docs/en/SIGNING.md), [Timestamping](docs/en/TIMESTAMPING.
 | `SPRING_DATASOURCE_URL` | DB | `jdbc:h2:file:./data/aletheia` |
 | `AI_ALETHEIA_TSA_MODE` | TSA | `real` (default, DigiCert) or `mock` (tests/offline) |
 | `AI_ALETHEIA_TSA_URL` | when mode=real | `http://timestamp.digicert.com` (default) |
+| `AI_ALETHEIA_PQC_ENABLED` | PQC signing (optional) | `false` (default). Set `true` to add ML-DSA signature. |
+| `AI_ALETHEIA_PQC_KEY_PATH` | PQC signing | Path to ML-DSA private key (e.g. `backend/ai_pqc.key`). See [PQC key generation](#pqc-key-generation-optional). |
 | `NEXT_PUBLIC_API_URL` | frontend | `http://localhost:8080` |
 
 Full list: [.env.example](.env.example). Architecture: [PoC](docs/en/PoC.md), [PLAN](docs/en/PLAN.md).
@@ -141,6 +143,17 @@ Spring Boot loads `.env` from the project root automatically. Default: **H2** fi
 **PostgreSQL (optional):** `docker-compose up -d postgres` or single container: `docker run -d --name aletheia-db -e POSTGRES_DB=aletheia -e POSTGRES_USER=aletheia -e POSTGRES_PASSWORD=local -p 5432:5432 postgres:15-alpine`. Then in `.env`: `SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/aletheia`, `SPRING_DATASOURCE_USERNAME=aletheia`, `SPRING_DATASOURCE_PASSWORD=local`, `SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect`. Flyway runs on startup; see `backend/src/main/resources/db/migration/README.md` and `schema-ai_response-standalone.sql` for manual SQL.
 
 **Signing key:** required for signing/TSA. Generate once (see [Quick start](#quick-start)); set `AI_ALETHEIA_SIGNING_KEY_PATH` in `.env`. Override via CLI: `mvn spring-boot:run -Dspring-boot.run.arguments="--ai.aletheia.signing.key-path=../ai.key"`.
+
+**PQC key generation (optional):** To enable post-quantum (ML-DSA Dilithium3) signing, generate a key pair and set `AI_ALETHEIA_PQC_KEY_PATH` and `AI_ALETHEIA_PQC_ENABLED=true`:
+
+```bash
+cd backend
+mvn -q compile exec:java -Dexec.mainClass="ai.aletheia.crypto.PqcKeyGen" -Dexec.args="."
+# Creates ai_pqc.key (private) and ai_pqc_public.pem (public). Do not commit these.
+# In .env: AI_ALETHEIA_PQC_KEY_PATH=backend/ai_pqc.key  AI_ALETHEIA_PQC_ENABLED=true
+```
+
+See [Plan PQC](docs/en/PLAN_PQC.md).
 
 **TSA:** `AI_ALETHEIA_TSA_MODE=real` (default, DigiCert) or `mock` (tests/offline). See [TIMESTAMPING](docs/en/TIMESTAMPING.md).
 

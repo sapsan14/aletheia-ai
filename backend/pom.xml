@@ -101,6 +101,16 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+			<!-- Run PqcKeyGen: mvn exec:java -Dexec.mainClass="ai.aletheia.crypto.PqcKeyGen" -Dexec.args="." -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>3.5.0</version>
+				<configuration>
+					<mainClass>ai.aletheia.crypto.PqcKeyGen</mainClass>
+					<arguments><argument>.</argument></arguments>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 
