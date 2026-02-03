@@ -701,9 +701,22 @@ function TrustPanel({
               <li>Download the verifier JAR above.</li>
               <li>
                 Run from a terminal:
-                <pre className="mt-1 overflow-x-auto rounded-xl bg-zinc-100 px-2 py-1.5 font-mono text-xs dark:bg-zinc-700">
-                  java -jar aletheia-verifier.jar /path/to/your.evidence.aep
-                </pre>
+                <div className="relative mt-1">
+                  <pre className="overflow-x-auto rounded-xl bg-zinc-100 px-2 py-1.5 pr-10 font-mono text-xs dark:bg-zinc-700">
+                    java -jar aletheia-verifier.jar /path/to/your.evidence.aep
+                  </pre>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      void navigator.clipboard.writeText("java -jar aletheia-verifier.jar /path/to/your.evidence.aep");
+                    }}
+                    title="Copy command"
+                    aria-label="Copy command"
+                    className="absolute right-1.5 top-1.5 rounded-xl p-1.5 text-zinc-500 hover:bg-zinc-200/80 hover:text-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-600 dark:hover:text-zinc-200"
+                  >
+                    <CopyIcon className="h-3.5 w-3.5" />
+                  </button>
+                </div>
                 <span className="text-zinc-500 dark:text-zinc-500">
                   (or path to an extracted Evidence Package folder)
                 </span>

@@ -708,9 +708,25 @@ function VerifyContent() {
             <li>Download the verifier JAR above.</li>
             <li>
               Run from a terminal:
-              <pre className="mt-1 overflow-x-auto rounded-xl bg-zinc-100 px-2 py-1.5 font-mono text-xs dark:bg-zinc-700">
-                java -jar aletheia-verifier.jar /path/to/your.evidence.aep
-              </pre>
+              <div className="relative mt-1">
+                <pre className="overflow-x-auto rounded-xl bg-zinc-100 px-2 py-1.5 pr-10 font-mono text-xs dark:bg-zinc-700">
+                  java -jar aletheia-verifier.jar /path/to/your.evidence.aep
+                </pre>
+                <button
+                  type="button"
+                  onClick={() => {
+                    void navigator.clipboard.writeText("java -jar aletheia-verifier.jar /path/to/your.evidence.aep");
+                  }}
+                  title="Copy command"
+                  aria-label="Copy command"
+                  className="absolute right-1.5 top-1.5 rounded-xl p-1.5 text-zinc-500 hover:bg-zinc-200/80 hover:text-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-600 dark:hover:text-zinc-200"
+                >
+                  <svg className="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+                    <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+                  </svg>
+                </button>
+              </div>
               <span className="text-zinc-500 dark:text-zinc-500">
                 (or path to an extracted Evidence Package folder)
               </span>
