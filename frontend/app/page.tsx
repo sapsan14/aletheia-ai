@@ -328,7 +328,7 @@ function TrustPanel({
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
           Verification Evidence
         </h2>
-        <p className="text-sm italic text-zinc-500 dark:text-zinc-400">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">
           Response and verification data will appear here after you send a prompt.
         </p>
       </section>
@@ -337,13 +337,13 @@ function TrustPanel({
 
   return (
     <section
-      className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-700 dark:bg-zinc-800"
+      className="min-w-0 overflow-hidden rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-700 dark:bg-zinc-800"
       aria-label="Verification Evidence"
     >
-      <div className="space-y-6">
+      <div className="min-w-0 space-y-6">
         {/* Trust Summary */}
         <div
-          className="relative rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-600 dark:bg-zinc-700/30"
+          className="relative min-w-0 rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-600 dark:bg-zinc-700/30"
           aria-label="Trust summary"
         >
           <button
@@ -636,7 +636,7 @@ function TrustPanel({
 
         {/* Evidence Package */}
         <div
-          className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-600 dark:bg-zinc-700/30"
+          className="min-w-0 rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-600 dark:bg-zinc-700/30"
           aria-label="Evidence Package"
         >
           <h2 className="mb-3 text-lg font-semibold text-zinc-900 dark:text-zinc-50">
@@ -671,13 +671,13 @@ function TrustPanel({
 
         {/* Verifier utility */}
         <div
-          className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-600 dark:bg-zinc-700/30"
+          className="min-w-0 rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-600 dark:bg-zinc-700/30"
           aria-label="Verifier utility"
         >
           <h2 className="mb-3 text-lg font-semibold text-zinc-900 dark:text-zinc-50">
             🔧 Verifier utility
           </h2>
-          <p className="mb-3 text-sm text-zinc-700 dark:text-zinc-300">
+          <p className="mb-3 break-words text-sm text-zinc-700 dark:text-zinc-300">
             Verify Evidence Packages without the Aletheia server. Requires Java 21+.
           </p>
           <button
@@ -693,18 +693,18 @@ function TrustPanel({
             <p className="mb-4 text-sm text-red-600 dark:text-red-400">{verifierError}</p>
           )}
           <div
-            className="rounded-xl border border-zinc-200 bg-white p-3 dark:border-zinc-600 dark:bg-zinc-800"
+            className="min-w-0 rounded-xl border border-zinc-200 bg-white p-3 dark:border-zinc-600 dark:bg-zinc-800"
             aria-label="How to use"
           >
             <p className="mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
               How to use
             </p>
-            <ol className="list-decimal list-inside space-y-1.5 text-sm text-zinc-600 dark:text-zinc-400">
+            <ol className="list-decimal list-inside space-y-1.5 break-words text-sm text-zinc-600 dark:text-zinc-400">
               <li>Download the verifier JAR above.</li>
               <li>
                 Run from a terminal:
-                <div className="relative mt-1">
-                  <pre className="overflow-x-auto rounded-xl bg-zinc-100 px-2 py-1.5 pr-10 font-mono text-xs dark:bg-zinc-700">
+                <div className="relative mt-1 min-w-0">
+                  <pre className="break-all rounded-xl bg-zinc-100 px-2 py-1.5 pr-10 font-mono text-xs whitespace-pre-wrap dark:bg-zinc-700">
                     java -jar aletheia-verifier.jar /path/to/your.evidence.aep
                   </pre>
                   <button
@@ -719,7 +719,7 @@ function TrustPanel({
                     <CopyIcon className="h-3.5 w-3.5" />
                   </button>
                 </div>
-                <span className="text-zinc-500 dark:text-zinc-500">
+                <span className="block break-words text-zinc-500 dark:text-zinc-500">
                   (or path to an extracted Evidence Package folder)
                 </span>
               </li>
@@ -930,7 +930,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-zinc-50 p-4 dark:bg-zinc-900 md:p-6">
-      <div className="mx-auto grid w-full max-w-6xl items-start gap-6 lg:grid-cols-[minmax(0,672px)_380px]">
+      <div className="mx-auto grid min-w-0 w-full max-w-6xl items-start gap-6 lg:grid-cols-[minmax(0,672px)_380px]">
         {/* Left: Chat — fixed max width so it doesn't grow when right column content grows */}
         <main className="min-w-0 space-y-6 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-700 dark:bg-zinc-800">
           <div className="flex items-center gap-4">
@@ -1065,7 +1065,7 @@ export default function Home() {
                 </div>
               )}
               {!responseData && !error && !isLoading && (
-                <span className="italic text-zinc-500 dark:text-zinc-400">
+                <span className="text-zinc-500 dark:text-zinc-400">
                   Response will appear here after you send a prompt.
                 </span>
               )}
@@ -1089,8 +1089,8 @@ export default function Home() {
           </footer>
         </main>
 
-        {/* Right: Trust Panel */}
-        <aside className="lg:min-w-0">
+        {/* Right: Trust Panel — min-w-0 so it shrinks on mobile; content wraps */}
+        <aside className="min-w-0 lg:min-w-0">
           <TrustPanel
             verifyRecord={verifyRecord}
             responseData={responseData}
