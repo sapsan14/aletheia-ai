@@ -34,6 +34,10 @@ Same topics exist in **Russian** ([docs/ru/](ru/)) and **Estonian** ([docs/et/](
 | **Plan Phase 2** | Killer demo, Evidence Package, offline verifier | [EN](en/PLAN_PHASE2.md) | [RU](ru/PLAN_PHASE2.md) | [ET](et/PLAN_PHASE2.md) |
 | **Plan Phase 3 UI** | Verify page wireframe, tooltips, UX (audit/compliance) | [PLAN_PHASE3_UI.md](en/PLAN_PHASE3_UI.md) | | |
 | **Plan Phase 4** | Market validation & policy foundation (demo policy, coverage, landing, outreach) | [EN](en/PLAN_PHASE4.md) | [RU](ru/PLAN_PHASE4.md) | [ET](et/PLAN_PHASE4.md) |
+| **Phase 4 demo policy** | Canonical demo policy rules and notes | [EN](en/policy/aletheia-demo-2026-01.md) | — | — |
+| **Phase 4 scenario** | Killer scenario (Phase 4) | [DEMO_SCENARIO_PHASE4.md](DEMO_SCENARIO_PHASE4.md) | — | — |
+| **Phase 4 outreach** | Target list and email template | [PHASE4_OUTREACH.md](outreach/PHASE4_OUTREACH.md) | — | — |
+| **Phase 4 analytics** | Minimal event tracking and counts | [PHASE4_ANALYTICS.md](PHASE4_ANALYTICS.md) | — | — |
 | **Plan Phase 5** | API platform & integrations (OpenAPI, sign-only, SDKs, MCP, SIEM) | [EN](en/PLAN_PHASE5.md) | — | — |
 | **Plan PQC** | Post-quantum crypto (hybrid classical + ML-DSA; optional PoC) | [EN](en/PLAN_PQC.md) | [RU](ru/PLAN_PQC.md) | [ET](et/PLAN_PQC.md) |
 | **Plan EDU** | Education platform: lab scenarios, PQC and AI accountability training | — | [RU](ru/PLAN_EDU.md) | [ET](et/PLAN_EDU.md) |

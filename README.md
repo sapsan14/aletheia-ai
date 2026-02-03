@@ -212,7 +212,8 @@ curl http://localhost:8080/api/ai/verify/1
 
 Each signed response can be exported as an **Evidence Package** (`.aep`) and verified **offline** with the verifier CLI — no Aletheia backend call. See [Plan Phase 2](docs/en/PLAN_PHASE2.md) for the format and [scripts/README.md](scripts/README.md) for verifier usage (JAR, Java+Maven, OpenSSL-only).
 
-**GET /api/ai/evidence/:id** — build and download the Evidence Package (.aep) for a stored response. Returns a ZIP archive containing the seven components required for offline verification (response.txt, canonical.bin, hash.sha256, signature.sig, timestamp.tsr, metadata.json, public_key.pem). Requires a configured signing key. Use `?format=json` to get JSON with base64-encoded file contents instead of ZIP.
+**GET /api/ai/evidence/:id** — build and download the Evidence Package (.aep) for a stored response. Returns a ZIP archive containing the seven components required for offline verification (response.txt, canonical.bin, hash.sha256, signature.sig, timestamp.tsr, metadata.json, public_key.pem). Requires a configured signing key. Use `?format=json` to get JSON with base64-encoded file contents instead of ZIP.  
+`metadata.json` may include `claim`, `confidence`, `policy_version`, and Phase 4 fields `policy_coverage` and `policy_rules_evaluated` when available.
 
 ```bash
 # After POST /api/ai/ask or /api/audit/demo, get the response id (e.g. 1)

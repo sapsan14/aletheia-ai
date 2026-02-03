@@ -1,0 +1,36 @@
+{
+  "policy_id": "aletheia-demo",
+  "policy_version": "2026-01",
+  "name": "Aletheia Demo Policy",
+  "description": "Minimal policy for Phase 4 demos and pilots. Defines what is checked and what is not.",
+  "rules": [
+    {
+      "id": "R1",
+      "description": "Response is signed and timestamped",
+      "type": "technical",
+      "check": "automated",
+      "required": true
+    },
+    {
+      "id": "R2",
+      "description": "Model identity (model_id) is recorded",
+      "type": "technical",
+      "check": "automated",
+      "required": true
+    },
+    {
+      "id": "R3",
+      "description": "No medical or legal advice in response",
+      "type": "content",
+      "check": "not_evaluated",
+      "required": false
+    },
+    {
+      "id": "R4",
+      "description": "Human review performed",
+      "type": "human",
+      "check": "not_evaluated",
+      "required": false
+    }
+  ]
+}
