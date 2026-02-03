@@ -8,8 +8,8 @@
 
 import { TOOLTIPS } from "@/lib/tooltips";
 
-/** Minimal atom-style icon (quantum + long-term). */
-function PqcIcon({ className }: { className?: string }) {
+/** Minimal atom-style icon (quantum + long-term). Exported for use in left-pane Quantum-Proof badge. */
+export function PqcIcon({ className }: { className?: string }) {
   return (
     <svg
       className={className}
@@ -74,7 +74,7 @@ export function PqcBadge({
       title={tooltip}
       tabIndex={0}
       className={`
-        inline-flex items-center gap-1.5 rounded-md font-medium
+        inline-flex items-center gap-1.5 rounded-xl font-medium
         bg-teal-50 text-teal-800 dark:bg-teal-950/60 dark:text-teal-200
         border border-teal-200/80 dark:border-teal-700/80
         ${sizeClass}

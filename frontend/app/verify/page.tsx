@@ -348,7 +348,7 @@ function VerifyContent() {
     <div className="space-y-6">
       {/* P3.2 — Trust Summary Card (Section 1) */}
       <section
-        className="rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-600 dark:bg-zinc-700/30"
+        className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-600 dark:bg-zinc-700/30"
         aria-label="Trust summary"
       >
         <div className="mb-3 flex flex-wrap items-center gap-2">
@@ -391,7 +391,7 @@ function VerifyContent() {
           </div>
         </dl>
         <div className="mt-3 flex flex-wrap gap-2">
-          <details className="rounded border border-zinc-200 bg-white px-3 py-2 dark:border-zinc-600 dark:bg-zinc-800">
+          <details className="rounded-xl border border-zinc-200 bg-white px-3 py-2 dark:border-zinc-600 dark:bg-zinc-800">
             <summary
               className="cursor-pointer list-none text-sm font-medium text-blue-600 dark:text-blue-400"
               title={TOOLTIPS.what_is_verified}
@@ -409,7 +409,7 @@ function VerifyContent() {
             type="button"
             onClick={handleCopySummary}
             title={TOOLTIPS.copy_summary}
-            className="inline-flex items-center gap-1.5 rounded border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
           >
             📋 Copy summary
           </button>
@@ -422,7 +422,7 @@ function VerifyContent() {
           <h2 className="mb-1 text-sm font-medium text-zinc-600 dark:text-zinc-400">
             Prompt
           </h2>
-          <p className="whitespace-pre-wrap rounded bg-zinc-100 px-3 py-2 text-zinc-800 dark:bg-zinc-700 dark:text-zinc-200">
+          <p className="whitespace-pre-wrap rounded-xl bg-zinc-100 px-3 py-2 text-zinc-800 dark:bg-zinc-700 dark:text-zinc-200">
             {record.prompt}
           </p>
         </div>
@@ -430,14 +430,14 @@ function VerifyContent() {
           <h2 className="mb-1 text-sm font-medium text-zinc-600 dark:text-zinc-400">
             Response
           </h2>
-          <p className="whitespace-pre-wrap rounded bg-zinc-100 px-3 py-2 text-zinc-800 dark:bg-zinc-700 dark:text-zinc-200">
+          <p className="whitespace-pre-wrap rounded-xl bg-zinc-100 px-3 py-2 text-zinc-800 dark:bg-zinc-700 dark:text-zinc-200">
             {record.response}
           </p>
           <button
             type="button"
             onClick={handleCopyResponse}
             title={TOOLTIPS.copy_response}
-            className="mt-2 inline-flex items-center gap-1.5 rounded border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+            className="mt-2 inline-flex items-center gap-1.5 rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
           >
             📋 Copy response
           </button>
@@ -448,7 +448,7 @@ function VerifyContent() {
       {(record.claim != null && String(record.claim).trim() !== "") ||
       (record.policyVersion != null && String(record.policyVersion).trim() !== "") ? (
         <section
-          className="rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-600 dark:bg-zinc-700/30"
+          className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-600 dark:bg-zinc-700/30"
           aria-label="AI Claim"
         >
           <h2
@@ -470,7 +470,7 @@ function VerifyContent() {
                   <button
                     type="button"
                     onClick={() => setClaimExpanded(true)}
-                    className="mt-1 text-sm text-blue-600 hover:underline dark:text-blue-400"
+                    className="mt-1 rounded-xl text-sm text-blue-600 hover:underline dark:text-blue-400"
                   >
                     Show more
                   </button>
@@ -513,7 +513,7 @@ function VerifyContent() {
             </div>
           )}
           <p
-            className="inline-flex items-center gap-1.5 rounded bg-zinc-200/80 px-2 py-1 text-xs font-medium text-zinc-700 dark:bg-zinc-600/80 dark:text-zinc-300"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-zinc-200/80 px-2 py-1 text-xs font-medium text-zinc-700 dark:bg-zinc-600/80 dark:text-zinc-300"
             title={TOOLTIPS.included_in_signed_payload}
           >
             🔐 Included in signed payload
@@ -620,7 +620,7 @@ function VerifyContent() {
           type="button"
           onClick={handleVerifyHash}
           disabled={hashChecking}
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60 dark:bg-blue-500 dark:hover:bg-blue-600"
+          className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60 dark:bg-blue-500 dark:hover:bg-blue-600"
         >
           {hashChecking ? "Verifying…" : "Verify hash"}
         </button>
@@ -638,7 +638,7 @@ function VerifyContent() {
 
       {/* P3.6 — Section 5: Evidence Package */}
       <section
-        className="rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-600 dark:bg-zinc-700/30"
+        className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-600 dark:bg-zinc-700/30"
         aria-label="Evidence Package"
       >
         <h2 className="mb-3 text-lg font-semibold text-zinc-900 dark:text-zinc-50">
@@ -656,7 +656,7 @@ function VerifyContent() {
             onClick={handleDownloadEvidence}
             disabled={evidenceDownloading}
             title={TOOLTIPS.download_evidence}
-            className="inline-flex items-center gap-1.5 rounded border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-60 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-60 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
           >
             {evidenceDownloading ? "Downloading…" : "⬇ Download evidence"}
           </button>
@@ -664,7 +664,7 @@ function VerifyContent() {
             type="button"
             onClick={handlePreviewPackage}
             title={TOOLTIPS.preview_package}
-            className="inline-flex items-center gap-1.5 rounded border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
           >
             👀 Preview package
           </button>
@@ -676,7 +676,7 @@ function VerifyContent() {
 
       {/* P3.10 — Section 5b: Verifier utility download and usage box */}
       <section
-        className="rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-600 dark:bg-zinc-700/30"
+        className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-600 dark:bg-zinc-700/30"
         aria-label="Verifier utility"
       >
         <h2 className="mb-3 text-lg font-semibold text-zinc-900 dark:text-zinc-50">
@@ -690,15 +690,15 @@ function VerifyContent() {
           onClick={handleDownloadVerifier}
           disabled={verifierDownloading}
           title={TOOLTIPS.download_verifier}
-          className="mb-4 inline-flex items-center gap-1.5 rounded border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-60 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
-        >
-          {verifierDownloading ? "Downloading…" : "⬇ Download verifier"}
+            className="mb-4 inline-flex items-center gap-1.5 rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-60 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+          >
+            {verifierDownloading ? "Downloading…" : "⬇ Download verifier"}
         </button>
         {verifierError && (
           <p className="mb-4 text-sm text-red-600 dark:text-red-400">{verifierError}</p>
         )}
         <div
-          className="rounded border border-zinc-200 bg-white p-3 dark:border-zinc-600 dark:bg-zinc-800"
+          className="rounded-xl border border-zinc-200 bg-white p-3 dark:border-zinc-600 dark:bg-zinc-800"
           aria-label="How to use"
         >
           <p className="mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
@@ -708,7 +708,7 @@ function VerifyContent() {
             <li>Download the verifier JAR above.</li>
             <li>
               Run from a terminal:
-              <pre className="mt-1 overflow-x-auto rounded bg-zinc-100 px-2 py-1.5 font-mono text-xs dark:bg-zinc-700">
+              <pre className="mt-1 overflow-x-auto rounded-xl bg-zinc-100 px-2 py-1.5 font-mono text-xs dark:bg-zinc-700">
                 java -jar aletheia-verifier.jar /path/to/your.evidence.aep
               </pre>
               <span className="text-zinc-500 dark:text-zinc-500">
@@ -729,7 +729,7 @@ function VerifyContent() {
           aria-modal="true"
           aria-labelledby="preview-modal-title"
         >
-          <div className="max-h-[80vh] w-full max-w-md overflow-auto rounded-lg border border-zinc-200 bg-white p-4 shadow-lg dark:border-zinc-600 dark:bg-zinc-800">
+          <div className="max-h-[80vh] w-full max-w-md overflow-auto rounded-xl border border-zinc-200 bg-white p-4 shadow-lg dark:border-zinc-600 dark:bg-zinc-800">
             <h3 id="preview-modal-title" className="mb-3 text-lg font-semibold text-zinc-900 dark:text-zinc-50">
               Package contents
             </h3>
@@ -781,7 +781,7 @@ function VerifyContent() {
 export default function VerifyPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-50 p-8 dark:bg-zinc-900">
-      <main className="w-full max-w-2xl space-y-6 rounded-lg border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-700 dark:bg-zinc-800">
+      <main className="w-full max-w-2xl space-y-6 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-700 dark:bg-zinc-800">
         <div className="flex items-center gap-4">
           <Link href="/" className="flex shrink-0">
             <Image
@@ -789,7 +789,7 @@ export default function VerifyPage() {
               alt="Aletheia AI"
               width={48}
               height={48}
-              className="rounded-lg bg-white dark:bg-zinc-800"
+              className="rounded-xl bg-white dark:bg-zinc-800"
               unoptimized
             />
           </Link>

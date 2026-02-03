@@ -16,6 +16,7 @@ This document is an **out-of-scope, enthusiast-driven** plan: adding a second, a
 - [Simple explanation (for beginners)](#simple-explanation-for-beginners)
 - [Deliverables and tasks (LLM-readable)](#deliverables-and-tasks-llm-readable)
 - [Frontend: PQC badge and marketing](#frontend-pqc-badge-and-marketing)
+- [PQC.10 — UI: Single-page dashboard and Trust Panel](#pqc10--ui-single-page-dashboard-trust-panel-and-badge-polish-)
 - [Backend changes](#backend-changes)
 - [Verifier utility changes](#verifier-utility-changes)
 - [Deployment (Ansible)](#deployment-ansible)
@@ -360,6 +361,37 @@ The offline verifier JAR (PQC.8) now also verifies the PQC signature when `signa
 
 ---
 
+### PQC.10 — UI: Single-page dashboard, Trust Panel, and badge polish ✅
+
+| Field | Value |
+|-------|--------|
+| **Est.** | 2–3 h |
+| **Status** | **Completed.** Implemented in `frontend/app/page.tsx`, `frontend/app/verify/page.tsx`, `frontend/app/components/PqcBadge.tsx`. |
+| **Description** | Single-page verification dashboard (Plan Phase 3 + PQC): two-column layout, Trust Panel with full verify-page content, left-pane badges, unified button styling, and copy/evidence UX. |
+
+**Implemented UI steps:**
+
+| Step | Description |
+|------|-------------|
+| **Layout** | Two-column grid: left (chat, max width 672px) + right (Trust Panel 380px). `items-start` so left column height matches its content and does not stretch when right column grows. |
+| **Left column** | Tagline: *"Verifiable AI responses with Quantum-resistant signing and timestamps"*. Below it, two badges: (1) **Quantum-Proof Trust Anchor** (indigo/purple) with PqcIcon (atom SVG from PqcBadge), link to NIST FIPS 204, tooltip: *"Secured by ML-DSA algorithm. Your evidence will remain valid even in the era of quantum computing."* (2) **Non-Repudiable Time-Proof** (amber/gold/bronze), link to RFC 3161, tooltip: *"RFC 3161 Trusted Timestamp. External attestation that this response existed at this exact point in time."* |
+| **Response block (left)** | Status badges (Signed, Timestamped, Verifiable) and "Model: … · ID: …" at top of response; small copy icon (tooltip "Copy response") in top-right of response box. Placeholder for prompt: *"Ask anything"*. |
+| **Right pane (Trust Panel)** | Same light card style as left (`rounded-xl`, white/zinc-800). No Response or Prompt block in right pane. Trust Summary with small copy icon (tooltip "Copy summary") in top-right. "What is verified?" expanded text: *Evidence Package* and *Verifier utility* are clickable links that trigger download. PQC badge in right pane: "Quantum-Resistant" only (variant `landing`), no "— Post-quantum signature included" subtext. |
+| **Backend verification (right)** | Hash match, Signature, PQC signature, and **Time-stamped: ✓ trusted** (or "—" when no TSA) with tooltip for timestamp. |
+| **Buttons and corners** | All buttons and interactive elements use `rounded-xl` across the project (page, verify page, PqcBadge). Preview package button and all others aligned. |
+| **PqcIcon export** | Atom icon from PqcBadge exported for reuse in left-pane Quantum-Proof Trust Anchor badge. |
+
+**Acceptance criteria:**
+
+| Test type | What to test | Acceptance criteria |
+|-----------|--------------|---------------------|
+| Manual | Dashboard | Send & Verify shows response in left column and full Trust Panel in right; left column does not grow in height with right. |
+| Manual | Badges | Left pane shows Quantum-Proof (atom icon) and Non-Repudiable Time-Proof (gold); tooltips in English. Right pane shows "Quantum-Resistant" badge without subtext when PQC present. |
+| Manual | Backend verification | Right pane shows Hash match, Signature, PQC signature, Time-stamped with check when applicable. |
+| Manual | Buttons | All buttons (including Preview package) use same rounded corners (`rounded-xl`). |
+
+---
+
 ## Verifier utility changes
 
 ### PQC.8 — Verifier: Read and verify PQC signature from Evidence Package ✅
@@ -420,9 +452,10 @@ The offline verifier JAR (PQC.8) now also verifies the PQC signature when `signa
 | 3 | PqcSignatureService implemented; dual-signing in pipeline; signature_pqc stored in DB | [ ] |
 | 4 | Evidence Package includes signature_pqc.sig, pqc_public_key.pem, pqc_algorithm.json when PQC enabled | [ ] |
 | 5 | GET /api/ai/verify/:id exposes signaturePqc and pqcAlgorithm when present | [ ] |
-| 6 | Verify page shows "Quantum-Resistant" / "PQC Verified" badge when PQC signature present | [ ] |
-| 7 | Offline verifier reads and verifies PQC signature; report includes PQC status | [ ] |
+| 6 | Verify page shows "Quantum-Resistant" / "PQC Verified" badge when PQC signature present | [x] |
+| 7 | Offline verifier reads and verifies PQC signature; report includes PQC status | [x] |
 | 8 | Ansible (or deployment) supports optional PQC key and env | [ ] |
+| 9 | Single-page dashboard: Trust Panel, left-pane badges, Time-stamped in Backend verification, unified rounded-xl (PQC.10) | [x] |
 
 ---
 

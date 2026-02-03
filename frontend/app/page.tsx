@@ -1,13 +1,14 @@
 /**
- * Task 1.3 + 6.1 + 6.2 — Frontend (Next.js)
+ * Single Page Verification Dashboard (Plan Phase 3 + PQC).
  *
- * Main page: prompt input, Send button, loading indicator,
- * response display with status (signed, timestamped, verifiable),
- * link to verify page.
+ * Two-column layout: Chat (left) + Trust Panel (right). On "Send & Verify",
+ * response and verification evidence appear on the same page; no redirect to /verify.
  */
 
 "use client";
 
+import { PqcBadge, PqcIcon } from "@/app/components/PqcBadge";
+import { TOOLTIPS } from "@/lib/tooltips";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -22,6 +23,123 @@ interface AiAskResponse {
   model: string;
 }
 
+/** Full record from GET /api/ai/verify/:id — same shape as verify page */
+interface VerifyRecord {
+  id: number;
+  prompt: string;
+  response: string;
+  responseHash: string;
+  signature: string | null;
+  tsaToken: string | null;
+  llmModel: string;
+  createdAt: string;
+  hashMatch?: boolean;
+  signatureValid?: string;
+  claim?: string | null;
+  confidence?: number | null;
+  policyVersion?: string | null;
+  signaturePqc?: string | null;
+  pqcAlgorithm?: string | null;
+}
+
+function truncateMiddle(str: string, head = 20, tail = 20): string {
+  if (!str || str.length <= head + tail) return str;
+  return `${str.slice(0, head)}...${str.slice(-tail)}`;
+}
+
+function formatPolicyVersion(value: string | null | undefined): string {
+  if (value == null || value === "") return "";
+  return value.split("-").map((p) => p.toUpperCase()).join("-");
+}
+
+/** Canonicalize text (same rules as backend). */
+function canonicalize(text: string): string {
+  if (!text) return "";
+  const nfc = text.normalize("NFC");
+  const linesOnly = nfc.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+  const parts = linesOnly.split("\n");
+  const out: string[] = [];
+  let lastWasBlank = false;
+  for (const part of parts) {
+    const trimmed = part.trim();
+    const blank = trimmed === "";
+    if (blank) {
+      if (!lastWasBlank) out.push("");
+      lastWasBlank = true;
+    } else {
+      out.push(trimmed);
+      lastWasBlank = false;
+    }
+  }
+  if (out.length > 0 && out[out.length - 1] === "") out.pop();
+  let joined = out.join("\n");
+  if (joined !== "") joined += "\n";
+  return joined;
+}
+
+async function sha256Hex(text: string): Promise<string> {
+  const bytes = new TextEncoder().encode(text);
+  const buf = await crypto.subtle.digest("SHA-256", bytes);
+  return Array.from(new Uint8Array(buf))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+function claimCanonicalJson(
+  claim: string | null | undefined,
+  confidence: number | null | undefined,
+  model: string | null | undefined,
+  policyVersion: string | null | undefined
+): string {
+  const escapeJson = (s: string) =>
+    (s ?? "")
+      .replace(/\\/g, "\\\\")
+      .replace(/"/g, '\\"')
+      .replace(/\n/g, "\\n")
+      .replace(/\r/g, "\\r")
+      .replace(/\t/g, "\\t");
+  const c = escapeJson(claim ?? "");
+  const m = escapeJson(model ?? "");
+  const p = escapeJson(policyVersion ?? "");
+  const conf = confidence != null ? Number(confidence) : 0;
+  return `{"claim":"${c}","confidence":${conf},"model":"${m}","policy_version":"${p}"}`;
+}
+
+const EVIDENCE_FILE_DESCRIPTIONS: Record<string, string> = {
+  "response.txt": "Response text",
+  "canonical.bin": "Canonical bytes",
+  "hash.sha256": "SHA-256 hash",
+  "signature.sig": "Digital signature",
+  "timestamp.tsr": "Timestamp token",
+  "metadata.json": "Claim metadata",
+  "public_key.pem": "Public key",
+  "signature_pqc.sig": "Post-quantum (ML-DSA) signature",
+  "pqc_public_key.pem": "PQC public key",
+  "pqc_algorithm.json": "PQC algorithm (e.g. ML-DSA Dilithium3)",
+};
+
+/** Small copy icon for copy summary / copy response buttons */
+function CopyIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+      <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+    </svg>
+  );
+}
+
 function StatusItem({
   label,
   ok,
@@ -31,7 +149,7 @@ function StatusItem({
 }) {
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded px-2 py-0.5 text-sm ${
+      className={`inline-flex items-center gap-1.5 rounded-xl px-2 py-0.5 text-sm ${
         ok
           ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400"
           : "bg-zinc-100 text-zinc-500 dark:bg-zinc-700 dark:text-zinc-400"
@@ -47,9 +165,622 @@ function StatusItem({
   );
 }
 
+function TrustPanel({
+  verifyRecord,
+  responseData,
+  apiUrl,
+  onDownloadEvidence,
+  downloading,
+  downloadError,
+}: {
+  verifyRecord: VerifyRecord | null;
+  responseData: AiAskResponse | null;
+  apiUrl: string;
+  onDownloadEvidence: () => void;
+  downloading: boolean;
+  downloadError: string | null;
+}) {
+  const [hashMatch, setHashMatch] = useState<boolean | null>(null);
+  const [hashChecking, setHashChecking] = useState(false);
+  const [claimExpanded, setClaimExpanded] = useState(false);
+  const [verifierDownloading, setVerifierDownloading] = useState(false);
+  const [verifierError, setVerifierError] = useState<string | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewKeys, setPreviewKeys] = useState<string[] | null>(null);
+  const [previewError, setPreviewError] = useState<string | null>(null);
+
+  const record = verifyRecord;
+  const hasSignature = !!(record?.signature?.trim());
+  const hasTsaToken = !!(record?.tsaToken?.trim());
+  const isVerified = hasSignature && hasTsaToken;
+  const hasPqc = !!(record?.signaturePqc?.trim());
+
+  const createdUtc =
+    record?.createdAt &&
+    `${new Date(record.createdAt).toISOString().slice(0, 19).replace("T", " ")} UTC`;
+
+  const integrityLabel =
+    record?.hashMatch === true
+      ? "Not altered"
+      : record?.hashMatch === false
+        ? "Altered or unknown"
+        : "—";
+
+  const timestampLabel = hasTsaToken ? "Trusted (RFC 3161)" : "—";
+
+  const summaryLine =
+    record &&
+    [
+      isVerified ? "Verified AI Response" : "AI Response",
+      createdUtc && `Created: ${createdUtc}`,
+      record.llmModel && `Model: ${record.llmModel}`,
+      `Integrity: ${integrityLabel}`,
+      `Timestamp: ${timestampLabel}`,
+    ]
+      .filter(Boolean)
+      .join(" — ");
+
+  function handleCopySummary() {
+    if (summaryLine) void navigator.clipboard.writeText(summaryLine);
+  }
+
+  async function handleVerifyHash() {
+    const responseText = record?.response ?? responseData?.response ?? "";
+    const storedHash = record?.responseHash ?? responseData?.responseHash ?? "";
+    if (!responseText || !storedHash) return;
+    setHashChecking(true);
+    setHashMatch(null);
+    try {
+      const responseCanonical = canonicalize(responseText);
+      const hasClaim =
+        (record?.claim != null && String(record.claim).trim() !== "") ||
+        (record?.policyVersion != null && String(record.policyVersion).trim() !== "");
+      const toHash = hasClaim && record
+        ? responseCanonical +
+          "\n" +
+          claimCanonicalJson(
+            record.claim,
+            record.confidence,
+            record.llmModel,
+            record.policyVersion
+          )
+        : responseCanonical;
+      const computed = await sha256Hex(toHash);
+      setHashMatch(computed === storedHash.toLowerCase());
+    } catch {
+      setHashMatch(false);
+    } finally {
+      setHashChecking(false);
+    }
+  }
+
+  async function handleDownloadVerifier() {
+    setVerifierDownloading(true);
+    setVerifierError(null);
+    try {
+      const res = await fetch(`${apiUrl}/api/ai/verifier`);
+      if (!res.ok) {
+        const text = await res.text();
+        let msg = `Download failed (${res.status})`;
+        try {
+          const json = JSON.parse(text);
+          if (json.message) msg = json.message;
+          else if (json.error) msg = json.error;
+        } catch {
+          if (text) msg = text;
+        }
+        setVerifierError(msg);
+        return;
+      }
+      const blob = await res.blob();
+      const disposition = res.headers.get("Content-Disposition");
+      let filename = "aletheia-verifier.jar";
+      if (disposition) {
+        const match = /filename[*]?=(?:UTF-8'')?"?([^";\n]+)"?/i.exec(disposition);
+        if (match) filename = match[1].trim();
+      }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setVerifierError(err instanceof Error ? err.message : "Download failed");
+    } finally {
+      setVerifierDownloading(false);
+    }
+  }
+
+  async function handlePreviewPackage() {
+    if (!record) return;
+    setPreviewError(null);
+    setPreviewKeys(null);
+    setPreviewOpen(true);
+    try {
+      const res = await fetch(`${apiUrl}/api/ai/evidence/${record.id}?format=json`);
+      if (!res.ok) {
+        const text = await res.text();
+        setPreviewError(
+          res.status === 404
+            ? "Response not found"
+            : res.status === 503
+              ? "Signing key not configured"
+              : text || `Request failed (${res.status})`
+        );
+        return;
+      }
+      const data = (await res.json()) as Record<string, string>;
+      setPreviewKeys(Object.keys(data).sort());
+    } catch (err) {
+      setPreviewError(err instanceof Error ? err.message : "Failed to load preview");
+    }
+  }
+
+  if (!verifyRecord && !responseData) {
+    return (
+      <section
+        className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-700 dark:bg-zinc-800"
+        aria-label="Verification Evidence"
+      >
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+          Verification Evidence
+        </h2>
+        <p className="text-sm italic text-zinc-500 dark:text-zinc-400">
+          Response and verification data will appear here after you send a prompt.
+        </p>
+      </section>
+    );
+  }
+
+  return (
+    <section
+      className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-700 dark:bg-zinc-800"
+      aria-label="Verification Evidence"
+    >
+      <div className="space-y-6">
+        {/* Trust Summary */}
+        <div
+          className="relative rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-600 dark:bg-zinc-700/30"
+          aria-label="Trust summary"
+        >
+          <button
+            type="button"
+            onClick={handleCopySummary}
+            title={TOOLTIPS.copy_summary}
+            aria-label="Copy summary"
+            className="absolute right-3 top-3 rounded-xl p-1.5 text-zinc-500 hover:bg-zinc-200/80 hover:text-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-600 dark:hover:text-zinc-200"
+          >
+            <CopyIcon className="h-4 w-4" />
+          </button>
+          <div className="mb-3 flex flex-wrap items-center gap-2 pr-8">
+            <h2
+              className="text-lg font-semibold text-zinc-900 dark:text-zinc-50"
+              title={TOOLTIPS.verified_ai_response}
+            >
+              {isVerified ? "✅ Verified AI Response" : "AI Response"}
+            </h2>
+            {hasPqc && <PqcBadge variant="landing" />}
+          </div>
+          <dl className="space-y-1.5 text-sm">
+            <div className="flex flex-wrap gap-x-2">
+              <dt className="text-zinc-500 dark:text-zinc-400">🕒 Created:</dt>
+              <dd className="text-zinc-700 dark:text-zinc-300">{createdUtc || "—"}</dd>
+            </div>
+            <div className="flex flex-wrap gap-x-2">
+              <dt className="text-zinc-500 dark:text-zinc-400">🤖 Model:</dt>
+              <dd className="text-zinc-700 dark:text-zinc-300">{record?.llmModel || "—"}</dd>
+            </div>
+            <div className="flex flex-wrap gap-x-2">
+              <dt className="text-zinc-500 dark:text-zinc-400">🛡️ Integrity:</dt>
+              <dd className="text-zinc-700 dark:text-zinc-300" title={TOOLTIPS.integrity_not_altered}>
+                {integrityLabel}
+              </dd>
+            </div>
+            <div className="flex flex-wrap gap-x-2">
+              <dt className="text-zinc-500 dark:text-zinc-400">⏱️ Timestamp:</dt>
+              <dd className="text-zinc-700 dark:text-zinc-300" title={TOOLTIPS.timestamp_trusted}>
+                {timestampLabel}
+              </dd>
+            </div>
+          </dl>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <details className="rounded-xl border border-zinc-200 bg-white px-3 py-2 dark:border-zinc-600 dark:bg-zinc-800">
+              <summary
+                className="cursor-pointer list-none text-sm font-medium text-blue-600 dark:text-blue-400"
+                title={TOOLTIPS.what_is_verified}
+              >
+                🔎 What is verified?
+              </summary>
+              <p className="mt-2 text-xs text-zinc-600 dark:text-zinc-400">
+                The signature covers the response text in canonical form. If this response
+                includes an AI claim (claim, confidence, policy version), those are also
+                part of the signed payload. You can verify the response offline using the{" "}
+                <button
+                  type="button"
+                  onClick={onDownloadEvidence}
+                  className="font-medium text-blue-600 underline hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                >
+                  Evidence Package
+                </button>
+                {" "}and{" "}
+                <button
+                  type="button"
+                  onClick={handleDownloadVerifier}
+                  className="font-medium text-blue-600 underline hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                >
+                  Verifier utility
+                </button>
+                .
+              </p>
+            </details>
+          </div>
+        </div>
+
+        {/* AI Claim */}
+        {(record?.claim != null && String(record.claim).trim() !== "") ||
+        (record?.policyVersion != null && String(record.policyVersion).trim() !== "") ? (
+          <div
+            className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-600 dark:bg-zinc-700/30"
+            aria-label="AI Claim"
+          >
+            <h2
+              className="mb-3 text-lg font-semibold text-zinc-900 dark:text-zinc-50"
+              title={TOOLTIPS.ai_claim_heading}
+            >
+              🧠 AI Claim
+            </h2>
+            {record?.claim != null && String(record.claim).trim() !== "" && (
+              <div className="mb-3">
+                <p className="mb-1 text-sm font-medium text-zinc-600 dark:text-zinc-400">
+                  Claim:
+                </p>
+                {record.claim.length > 200 && !claimExpanded ? (
+                  <>
+                    <blockquote className="border-l-2 border-zinc-300 pl-3 text-zinc-700 dark:border-zinc-500 dark:text-zinc-300">
+                      &ldquo;{record.claim.slice(0, 200)}…&rdquo;
+                    </blockquote>
+                    <button
+                      type="button"
+                      onClick={() => setClaimExpanded(true)}
+                      className="mt-1 rounded-xl text-sm text-blue-600 hover:underline dark:text-blue-400"
+                    >
+                      Show more
+                    </button>
+                  </>
+                ) : (
+                  <blockquote className="border-l-2 border-zinc-300 pl-3 text-zinc-700 dark:border-zinc-500 dark:text-zinc-300">
+                    &ldquo;{record.claim}&rdquo;
+                  </blockquote>
+                )}
+              </div>
+            )}
+            {record?.confidence != null && (
+              <div className="mb-3 flex flex-wrap gap-x-2">
+                <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
+                  Confidence:
+                </span>
+                <span className="text-sm text-zinc-700 dark:text-zinc-300" title={TOOLTIPS.confidence}>
+                  {typeof record.confidence === "number"
+                    ? record.confidence >= 0 && record.confidence <= 1
+                      ? `${Math.round(record.confidence * 100)}%`
+                      : String(record.confidence)
+                    : String(record.confidence)}
+                </span>
+              </div>
+            )}
+            {record?.policyVersion != null && String(record.policyVersion).trim() !== "" && (
+              <div className="mb-3 flex flex-wrap gap-x-2">
+                <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
+                  Policy version:
+                </span>
+                <span className="text-sm text-zinc-700 dark:text-zinc-300" title={TOOLTIPS.policy_version}>
+                  {formatPolicyVersion(record.policyVersion) || record.policyVersion}
+                </span>
+              </div>
+            )}
+            <p
+              className="inline-flex items-center gap-1.5 rounded-xl bg-zinc-200/80 px-2 py-1 text-xs font-medium text-zinc-700 dark:bg-zinc-600/80 dark:text-zinc-300"
+              title={TOOLTIPS.included_in_signed_payload}
+            >
+              🔐 Included in signed payload
+            </p>
+          </div>
+        ) : null}
+
+        {/* Backend verification */}
+        <div>
+          <h2 className="mb-1 text-sm font-medium text-zinc-600 dark:text-zinc-400">
+            Backend verification
+          </h2>
+          <div className="flex flex-wrap gap-3">
+            <span
+              className={
+                record?.hashMatch === true
+                  ? "text-emerald-600 dark:text-emerald-400"
+                  : record?.hashMatch === false
+                    ? "text-red-600 dark:text-red-400"
+                    : "text-zinc-500"
+              }
+            >
+              Hash match:{" "}
+              {record?.hashMatch === true ? "✓ yes" : record?.hashMatch === false ? "✗ no" : "—"}
+            </span>
+            <span
+              className={
+                record?.signatureValid === "valid"
+                  ? "text-emerald-600 dark:text-emerald-400"
+                  : record?.signatureValid === "invalid"
+                    ? "text-red-600 dark:text-red-400"
+                    : "text-zinc-500"
+              }
+            >
+              Signature:{" "}
+              {record?.signatureValid === "valid"
+                ? "✓ valid"
+                : record?.signatureValid === "invalid"
+                  ? "✗ invalid"
+                  : "n/a"}
+            </span>
+            {hasPqc ? (
+              <span className="text-emerald-600 dark:text-emerald-400" title={TOOLTIPS.pqc_badge}>
+                PQC signature: ✓ present
+              </span>
+            ) : (
+              <span className="text-zinc-500">PQC signature: — not included</span>
+            )}
+            <span
+              className={
+                hasTsaToken
+                  ? "text-emerald-600 dark:text-emerald-400"
+                  : "text-zinc-500"
+              }
+              title={TOOLTIPS.timestamp_trusted}
+            >
+              Time-stamped: {hasTsaToken ? "✓ trusted" : "—"}
+            </span>
+          </div>
+        </div>
+
+        {/* Response hash */}
+        {(record?.responseHash ?? responseData?.responseHash) && (
+          <div>
+            <h2 className="mb-1 text-sm font-medium text-zinc-600 dark:text-zinc-400">
+              Response hash (SHA-256)
+            </h2>
+            <p className="break-all font-mono text-sm text-zinc-700 dark:text-zinc-300">
+              {record?.responseHash ?? responseData?.responseHash}
+            </p>
+          </div>
+        )}
+
+        {/* Signature */}
+        {record?.signature && (
+          <div>
+            <h2 className="mb-1 text-sm font-medium text-zinc-600 dark:text-zinc-400">
+              Signature (Base64)
+            </h2>
+            <p className="break-all font-mono text-sm text-zinc-700 dark:text-zinc-300">
+              {truncateMiddle(record.signature)}
+            </p>
+          </div>
+        )}
+
+        {/* TSA token */}
+        {record?.tsaToken && (
+          <div>
+            <h2 className="mb-1 text-sm font-medium text-zinc-600 dark:text-zinc-400">
+              TSA token (Base64)
+            </h2>
+            <p className="break-all font-mono text-sm text-zinc-700 dark:text-zinc-300">
+              {truncateMiddle(record.tsaToken)}
+            </p>
+          </div>
+        )}
+
+        {/* PQC */}
+        {hasPqc && record?.signaturePqc && (
+          <>
+            <div>
+              <h2 className="mb-1 text-sm font-medium text-zinc-600 dark:text-zinc-400">
+                PQC signature (Base64)
+              </h2>
+              <p
+                className="break-all font-mono text-sm text-zinc-700 dark:text-zinc-300"
+                title={TOOLTIPS.pqc_badge}
+              >
+                {truncateMiddle(record.signaturePqc)}
+              </p>
+            </div>
+            {record.pqcAlgorithm && (
+              <div>
+                <h2 className="mb-1 text-sm font-medium text-zinc-600 dark:text-zinc-400">
+                  PQC algorithm
+                </h2>
+                <p className="font-mono text-sm text-zinc-700 dark:text-zinc-300">
+                  {record.pqcAlgorithm}
+                </p>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Verify hash button */}
+        <div className="border-t border-zinc-200 pt-4 dark:border-zinc-600">
+          <button
+            type="button"
+            onClick={handleVerifyHash}
+            title={TOOLTIPS.verify_hash}
+            disabled={
+              hashChecking ||
+              !(record?.responseHash ?? responseData?.responseHash) ||
+              !(record?.response ?? responseData?.response)
+            }
+            className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60 dark:bg-blue-500 dark:hover:bg-blue-600"
+          >
+            {hashChecking ? "Verifying…" : "Verify hash"}
+          </button>
+          {hashMatch === true && (
+            <p className="mt-2 text-emerald-600 dark:text-emerald-400">
+              ✓ Hash match — response was not altered
+            </p>
+          )}
+          {hashMatch === false && (
+            <p className="mt-2 text-red-600 dark:text-red-400">
+              ✗ Hash mismatch — response may have been altered
+            </p>
+          )}
+        </div>
+
+        {/* Evidence Package */}
+        <div
+          className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-600 dark:bg-zinc-700/30"
+          aria-label="Evidence Package"
+        >
+          <h2 className="mb-3 text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+            📦 Evidence Package
+          </h2>
+          <p className="mb-3 text-sm text-zinc-700 dark:text-zinc-300" title={TOOLTIPS.verified_offline}>
+            This response can be verified offline.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={onDownloadEvidence}
+              disabled={downloading}
+              title={TOOLTIPS.download_evidence}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-60 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+            >
+              {downloading ? "Downloading…" : "⬇ Download evidence"}
+            </button>
+            <button
+              type="button"
+              onClick={handlePreviewPackage}
+              title={TOOLTIPS.preview_package}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+            >
+              👀 Preview package
+            </button>
+          </div>
+          {downloadError && (
+            <p className="mt-2 text-sm text-red-600 dark:text-red-400">{downloadError}</p>
+          )}
+        </div>
+
+        {/* Verifier utility */}
+        <div
+          className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-600 dark:bg-zinc-700/30"
+          aria-label="Verifier utility"
+        >
+          <h2 className="mb-3 text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+            🔧 Verifier utility
+          </h2>
+          <p className="mb-3 text-sm text-zinc-700 dark:text-zinc-300">
+            Verify Evidence Packages without the Aletheia server. Requires Java 21+.
+          </p>
+          <button
+            type="button"
+            onClick={handleDownloadVerifier}
+            disabled={verifierDownloading}
+            title={TOOLTIPS.download_verifier}
+            className="mb-4 inline-flex items-center gap-1.5 rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-60 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+          >
+            {verifierDownloading ? "Downloading…" : "⬇ Download verifier"}
+          </button>
+          {verifierError && (
+            <p className="mb-4 text-sm text-red-600 dark:text-red-400">{verifierError}</p>
+          )}
+          <div
+            className="rounded-xl border border-zinc-200 bg-white p-3 dark:border-zinc-600 dark:bg-zinc-800"
+            aria-label="How to use"
+          >
+            <p className="mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              How to use
+            </p>
+            <ol className="list-decimal list-inside space-y-1.5 text-sm text-zinc-600 dark:text-zinc-400">
+              <li>Download the verifier JAR above.</li>
+              <li>
+                Run from a terminal:
+                <pre className="mt-1 overflow-x-auto rounded-xl bg-zinc-100 px-2 py-1.5 font-mono text-xs dark:bg-zinc-700">
+                  java -jar aletheia-verifier.jar /path/to/your.evidence.aep
+                </pre>
+                <span className="text-zinc-500 dark:text-zinc-500">
+                  (or path to an extracted Evidence Package folder)
+                </span>
+              </li>
+              <li>No network or backend required.</li>
+              <li>Exit code 0 = VALID, 1 = INVALID.</li>
+            </ol>
+          </div>
+        </div>
+
+        {responseData && (
+          <Link
+            href={`/verify?id=${responseData.id}`}
+            className="block text-center text-sm text-blue-600 hover:underline dark:text-blue-400"
+          >
+            Full verification page →
+          </Link>
+        )}
+      </div>
+
+      {/* Preview package modal */}
+      {previewOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="preview-modal-title"
+        >
+          <div className="max-h-[80vh] w-full max-w-md overflow-auto rounded-xl border border-zinc-200 bg-white p-4 shadow-lg dark:border-zinc-600 dark:bg-zinc-800">
+            <h3
+              id="preview-modal-title"
+              className="mb-3 text-lg font-semibold text-zinc-900 dark:text-zinc-50"
+            >
+              Package contents
+            </h3>
+            {previewError && (
+              <p className="mb-3 text-sm text-red-600 dark:text-red-400">{previewError}</p>
+            )}
+            {previewKeys && previewKeys.length > 0 && (
+              <ul className="mb-4 space-y-2 text-sm text-zinc-700 dark:text-zinc-300">
+                {previewKeys.map((key) => (
+                  <li key={key} className="flex flex-wrap items-baseline gap-2">
+                    <span className="font-mono text-zinc-800 dark:text-zinc-200">{key}</span>
+                    {EVIDENCE_FILE_DESCRIPTIONS[key] && (
+                      <span className="text-zinc-500 dark:text-zinc-400">
+                        — {EVIDENCE_FILE_DESCRIPTIONS[key]}
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {previewKeys && previewKeys.length === 0 && !previewError && (
+              <p className="mb-4 text-sm text-zinc-500">No files in package.</p>
+            )}
+            <button
+              type="button"
+              onClick={() => {
+                setPreviewOpen(false);
+                setPreviewKeys(null);
+                setPreviewError(null);
+              }}
+              className="rounded-xl border border-zinc-200 bg-zinc-100 px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-200 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-600"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
 export default function Home() {
   const [prompt, setPrompt] = useState("");
   const [responseData, setResponseData] = useState<AiAskResponse | null>(null);
+  const [verifyRecord, setVerifyRecord] = useState<VerifyRecord | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [downloading, setDownloading] = useState(false);
@@ -65,6 +796,7 @@ export default function Home() {
     setError(null);
     setDownloadError(null);
     setResponseData(null);
+    setVerifyRecord(null);
 
     try {
       const res = await fetch(`${apiUrl}/api/ai/ask`, {
@@ -73,7 +805,6 @@ export default function Home() {
         body: JSON.stringify({ prompt: trimmed }),
       });
 
-      // Backend may return 500/502/503 with plain text or HTML; avoid res.json() throwing.
       const contentType = res.headers.get("content-type") ?? "";
       let data: unknown;
       try {
@@ -109,7 +840,24 @@ export default function Home() {
         return;
       }
 
-      setResponseData(data as AiAskResponse);
+      const askData = data as AiAskResponse;
+      setResponseData(askData);
+
+      // Fetch full verification data for Trust Panel (same as verify page)
+      try {
+        const verifyRes = await fetch(`${apiUrl}/api/ai/verify/${askData.id}`);
+        if (verifyRes.ok) {
+          const verifyData = (await verifyRes.json()) as VerifyRecord;
+          setVerifyRecord(verifyData);
+        }
+      } catch {
+        // Trust Panel will show response hash from ask if verify fetch fails
+        setVerifyRecord({
+          id: askData.id,
+          responseHash: askData.responseHash,
+          llmModel: askData.model,
+        });
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Network error");
     } finally {
@@ -126,9 +874,7 @@ export default function Home() {
     setDownloading(true);
     setDownloadError(null);
     try {
-      const res = await fetch(
-        `${apiUrl}/api/ai/evidence/${responseData.id}`
-      );
+      const res = await fetch(`${apiUrl}/api/ai/evidence/${responseData.id}`);
       if (!res.ok) {
         const text = await res.text();
         const msg =
@@ -144,9 +890,7 @@ export default function Home() {
       const disposition = res.headers.get("Content-Disposition");
       let filename = `aletheia-evidence-${responseData.id}.aep`;
       if (disposition) {
-        const match = /filename[*]?=(?:UTF-8'')?"?([^";\n]+)"?/i.exec(
-          disposition
-        );
+        const match = /filename[*]?=(?:UTF-8'')?"?([^";\n]+)"?/i.exec(disposition);
         if (match) filename = match[1].trim();
       }
       const url = URL.createObjectURL(blob);
@@ -156,169 +900,185 @@ export default function Home() {
       a.click();
       URL.revokeObjectURL(url);
     } catch (err) {
-      setDownloadError(
-        err instanceof Error ? err.message : "Download failed"
-      );
+      setDownloadError(err instanceof Error ? err.message : "Download failed");
     } finally {
       setDownloading(false);
     }
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-50 p-8 dark:bg-zinc-900">
-      <main className="w-full max-w-2xl space-y-6 rounded-lg border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-700 dark:bg-zinc-800">
-        <div className="flex items-center gap-4">
-          <div className="flex shrink-0 rounded-xl bg-white dark:bg-zinc-800 p-1">
-            <Image
-              src="/logo.png"
-              alt="Aletheia AI"
-              width={144}
-              height={144}
-              className="rounded-lg bg-white dark:bg-zinc-800"
-              unoptimized
+    <div className="min-h-screen bg-zinc-50 p-4 dark:bg-zinc-900 md:p-6">
+      <div className="mx-auto grid w-full max-w-6xl items-start gap-6 lg:grid-cols-[minmax(0,672px)_380px]">
+        {/* Left: Chat — fixed max width so it doesn't grow when right column content grows */}
+        <main className="min-w-0 space-y-6 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-700 dark:bg-zinc-800">
+          <div className="flex items-center gap-4">
+            <div className="flex shrink-0 rounded-xl bg-white p-1 dark:bg-zinc-800">
+              <Image
+                src="/logo.png"
+                alt="Aletheia AI"
+                width={80}
+                height={80}
+                className="rounded-xl dark:bg-zinc-800"
+                unoptimized
+              />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
+                Aletheia AI
+              </h1>
+              <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                Verifiable AI responses with Quantum-resistant signing and timestamps
+              </p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                <a
+                  href="https://csrc.nist.gov/pubs/fips/204/final"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Secured by ML-DSA algorithm. Your evidence will remain valid even in the era of quantum computing."
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-indigo-400/60 bg-indigo-50 px-2.5 py-1 text-sm font-medium text-indigo-800 hover:bg-indigo-100 dark:border-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-200 dark:hover:bg-indigo-900/50"
+                >
+                  <PqcIcon className="h-4 w-4 shrink-0 text-indigo-600 dark:text-indigo-400" />
+                  Quantum-Proof Trust Anchor
+                </a>
+                <a
+                  href="https://www.rfc-editor.org/rfc/rfc3161"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="RFC 3161 Trusted Timestamp. External attestation that this response existed at this exact point in time."
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-amber-400/60 bg-amber-50 px-2.5 py-1 text-sm font-medium text-amber-800 hover:bg-amber-100 dark:border-amber-600 dark:bg-amber-950/50 dark:text-amber-200 dark:hover:bg-amber-900/50"
+                >
+                  <span aria-hidden>⏳</span>
+                  Non-Repudiable Time-Proof
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label
+              htmlFor="prompt"
+              className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+            >
+              Prompt
+            </label>
+            <textarea
+              id="prompt"
+              rows={4}
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              placeholder="Ask anything"
+              disabled={isLoading}
+              className="w-full rounded-xl border border-zinc-300 px-3 py-2 text-zinc-900 placeholder-zinc-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-60 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100 dark:placeholder-zinc-500"
             />
           </div>
-          <div>
-            <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
-              Aletheia AI
-            </h1>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">
-              Verifiable AI responses with signing and timestamps
-            </p>
-            <p className="mt-1.5 flex flex-wrap items-center gap-2 text-xs">
-              <a
-                href="https://csrc.nist.gov/pubs/fips/204/final"
-                target="_blank"
-                rel="noopener noreferrer"
-                title="Защищено алгоритмом ML-DSA. Ваши доказательства останутся валидными даже в эпоху квантовых вычислений."
-                className="inline-flex items-center gap-1.5 rounded-md border px-2 py-1 font-medium bg-indigo-50 text-indigo-800 border-indigo-200 hover:bg-indigo-100 dark:bg-indigo-950/50 dark:text-indigo-200 dark:border-indigo-700 dark:hover:bg-indigo-900/50"
-              >
-                <span aria-hidden>⚛️</span>
-                Quantum-Proof Trust Anchor
-              </a>
-              <a
-                href="https://www.rfc-editor.org/rfc/rfc3161"
-                target="_blank"
-                rel="noopener noreferrer"
-                title="RFC 3161 Trusted Timestamp. Внешнее подтверждение того, что этот ответ существовал именно в этот момент времени."
-                className="inline-flex items-center gap-1.5 rounded-md border px-2 py-1 font-medium bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100 dark:bg-amber-950/50 dark:text-amber-200 dark:border-amber-700 dark:hover:bg-amber-900/50"
-              >
-                <span aria-hidden>⏳</span>
-                Non-Repudiable Time-Proof
-              </a>
-            </p>
-          </div>
-        </div>
 
-        <div>
-          <label
-            htmlFor="prompt"
-            className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+          <button
+            type="button"
+            onClick={handleSend}
+            disabled={isLoading || !prompt.trim()}
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:bg-zinc-400 disabled:cursor-not-allowed dark:disabled:bg-zinc-600"
+            aria-label="Send prompt and verify"
           >
-            Prompt
-          </label>
-          <textarea
-            id="prompt"
-            rows={4}
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Enter your question here..."
-            disabled={isLoading}
-            className="w-full rounded-md border border-zinc-300 px-3 py-2 text-zinc-900 placeholder-zinc-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-60 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100 dark:placeholder-zinc-500"
-          />
-        </div>
-
-        <button
-          type="button"
-          onClick={handleSend}
-          disabled={isLoading || !prompt.trim()}
-          className="w-full rounded-md bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-zinc-400 disabled:cursor-not-allowed dark:disabled:bg-zinc-600"
-          aria-label="Send prompt"
-        >
-          {isLoading ? "Sending…" : "Send"}
-        </button>
-
-        <div>
-          <label className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-            Response
-          </label>
-          <div
-            className="min-h-[120px] rounded-md border border-zinc-200 bg-zinc-50 px-3 py-4 dark:border-zinc-600 dark:bg-zinc-700/50"
-            aria-live="polite"
-          >
-            {isLoading && (
-              <p className="flex items-center gap-2 text-zinc-600 dark:text-zinc-400">
+            {isLoading ? (
+              <>
                 <span
-                  className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-zinc-400 border-t-transparent"
+                  className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"
                   aria-hidden
                 />
-                Working on it…
-              </p>
+                Attesting…
+              </>
+            ) : (
+              <>Send & Verify</>
             )}
-            {error && !isLoading && (
-              <p className="text-red-600 dark:text-red-400">{error}</p>
-            )}
-            {responseData && !error && !isLoading && (
-              <div className="space-y-3">
-                <p className="whitespace-pre-wrap text-zinc-700 dark:text-zinc-300">
-                  {responseData.response}
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  <StatusItem label="Signed" ok={signed} />
-                  <StatusItem label="Timestamped" ok={timestamped} />
-                  <StatusItem label="Verifiable" ok={verifiable} />
-                </div>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                  Model: {responseData.model} · ID: {responseData.id}
-                </p>
-                <div className="flex flex-wrap items-center gap-3">
-                  <Link
-                    href={`/verify?id=${responseData.id}`}
-                    className="inline-flex items-center text-sm font-medium text-blue-600 hover:underline dark:text-blue-400"
-                  >
-                    Verify this response →
-                  </Link>
-                  <button
-                    type="button"
-                    onClick={handleDownloadEvidence}
-                    disabled={downloading}
-                    className="inline-flex items-center text-sm font-medium text-blue-600 hover:underline disabled:opacity-60 dark:text-blue-400"
-                    aria-label="Download Evidence Package (.aep)"
-                  >
-                    {downloading ? "Downloading…" : "Download evidence"}
-                  </button>
-                </div>
-                {downloadError && (
-                  <p className="text-xs text-red-600 dark:text-red-400">
-                    {downloadError}
-                  </p>
-                )}
-              </div>
-            )}
-            {!responseData && !error && !isLoading && (
-              <span className="italic text-zinc-500 dark:text-zinc-400">
-                Response will appear here after you send a prompt.
-              </span>
-            )}
-          </div>
-        </div>
+          </button>
 
-        <footer className="mt-8 text-center text-xs text-zinc-500 dark:text-zinc-400">
-          <p>© 2026 Anton Sokolov &amp; Team 3</p>
-          <p>
-            <a
-              href="https://taltech.ee/vanemarendajaks"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline hover:text-zinc-700 dark:hover:text-zinc-300"
+          <div>
+            <label className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              Response
+            </label>
+            <div
+              className="relative min-h-[120px] rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-4 dark:border-zinc-600 dark:bg-zinc-700/50"
+              aria-live="polite"
             >
-              Koolitus „Noorem-tarkvaraarendajast vanemarendajaks“
-            </a>
-            {" — "}
-            Tallinna Tehnikaülikool
-          </p>
-        </footer>
-      </main>
+              {responseData && !error && !isLoading && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (responseData.response) void navigator.clipboard.writeText(responseData.response);
+                  }}
+                  title={TOOLTIPS.copy_response}
+                  aria-label="Copy response"
+                  className="absolute right-2 top-2 rounded-xl p-1.5 text-zinc-500 hover:bg-zinc-200/80 hover:text-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-600 dark:hover:text-zinc-200"
+                >
+                  <CopyIcon className="h-4 w-4" />
+                </button>
+              )}
+              {isLoading && (
+                <p className="flex items-center gap-2 text-zinc-600 dark:text-zinc-400">
+                  <span
+                    className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-zinc-400 border-t-transparent"
+                    aria-hidden
+                  />
+                  Working on it…
+                </p>
+              )}
+              {error && !isLoading && (
+                <p className="text-red-600 dark:text-red-400">{error}</p>
+              )}
+              {responseData && !error && !isLoading && (
+                <div className="space-y-3 pr-8">
+                  <div className="border-b border-zinc-200 pb-3 dark:border-zinc-600">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <StatusItem label="Signed" ok={signed} />
+                      <StatusItem label="Timestamped" ok={timestamped} />
+                      <StatusItem label="Verifiable" ok={verifiable} />
+                    </div>
+                    <p className="mt-1.5 text-xs text-zinc-500 dark:text-zinc-400">
+                      Model: {responseData.model} · ID: {responseData.id}
+                    </p>
+                  </div>
+                  <p className="whitespace-pre-wrap text-zinc-700 dark:text-zinc-300">
+                    {responseData.response}
+                  </p>
+                </div>
+              )}
+              {!responseData && !error && !isLoading && (
+                <span className="italic text-zinc-500 dark:text-zinc-400">
+                  Response will appear here after you send a prompt.
+                </span>
+              )}
+            </div>
+          </div>
+
+          <footer className="text-center text-xs text-zinc-500 dark:text-zinc-400">
+            <p>© 2026 Anton Sokolov &amp; Team 3</p>
+            <p>
+              <a
+                href="https://taltech.ee/vanemarendajaks"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-zinc-700 dark:hover:text-zinc-300"
+              >
+                Koolitus „Noorem-tarkvaraarendajast vanemarendajaks“
+              </a>
+              {" — "}
+              Tallinna Tehnikaülikool
+            </p>
+          </footer>
+        </main>
+
+        {/* Right: Trust Panel */}
+        <aside className="lg:min-w-0">
+          <TrustPanel
+            verifyRecord={verifyRecord}
+            responseData={responseData}
+            apiUrl={apiUrl}
+            onDownloadEvidence={handleDownloadEvidence}
+            downloading={downloading}
+            downloadError={downloadError}
+          />
+        </aside>
+      </div>
     </div>
   );
 }
