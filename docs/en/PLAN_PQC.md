@@ -92,6 +92,8 @@ This document is an **out-of-scope, enthusiast-driven** plan: adding a second, a
 | Build | Maven | `mvn compile` succeeds with new dependency. |
 | Config | Application | Application starts with `pqc-enabled=false` and no PQC key path; no PQC signing attempted. |
 
+**Note:** `pqc-enabled` and `pqc-key-path` are **Spring Boot application properties** (used at runtime). Do not pass them to Maven: use `mvn compile` for build; set `AI_ALETHEIA_PQC_ENABLED` and `AI_ALETHEIA_PQC_KEY_PATH` when running the app (e.g. `mvn spring-boot:run` or `java -jar`).
+
 ---
 
 ### PQC.2 — Backend: Generate and store ML-DSA (Dilithium) key pair
