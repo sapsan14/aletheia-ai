@@ -168,6 +168,7 @@ function StatusItem({
 function TrustPanel({
   verifyRecord,
   responseData,
+  apiBase,
   apiUrl,
   onDownloadEvidence,
   downloading,
@@ -175,6 +176,7 @@ function TrustPanel({
 }: {
   verifyRecord: VerifyRecord | null;
   responseData: AiAskResponse | null;
+  apiBase: string;
   apiUrl: string;
   onDownloadEvidence: () => void;
   downloading: boolean;
@@ -258,7 +260,7 @@ function TrustPanel({
     setVerifierDownloading(true);
     setVerifierError(null);
     try {
-      const res = await fetch(`${apiUrl}/api/ai/verifier`);
+      const res = await fetch(`${apiBase}/api/ai/verifier`);
       if (!res.ok) {
         const text = await res.text();
         let msg = `Download failed (${res.status})`;
@@ -298,7 +300,7 @@ function TrustPanel({
     setPreviewKeys(null);
     setPreviewOpen(true);
     try {
-      const res = await fetch(`${apiUrl}/api/ai/evidence/${record.id}?format=json`);
+      const res = await fetch(`${apiBase}/api/ai/evidence/${record.id}?format=json`);
       if (!res.ok) {
         const text = await res.text();
         setPreviewError(
@@ -799,7 +801,9 @@ export default function Home() {
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState<string | null>(null);
 
+  // Use relative /api so requests go to same origin (ngrok or VM:3000); Next.js proxies to backend.
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
+  const apiBase = typeof window !== "undefined" ? "" : apiUrl;
 
   async function handleSend() {
     const trimmed = prompt.trim();
@@ -812,7 +816,7 @@ export default function Home() {
     setVerifyRecord(null);
 
     try {
-      const res = await fetch(`${apiUrl}/api/ai/ask`, {
+      const res = await fetch(`${apiBase}/api/ai/ask`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt: trimmed }),
@@ -858,7 +862,7 @@ export default function Home() {
 
       // Fetch full verification data for Trust Panel (same as verify page)
       try {
-        const verifyRes = await fetch(`${apiUrl}/api/ai/verify/${askData.id}`);
+        const verifyRes = await fetch(`${apiBase}/api/ai/verify/${askData.id}`);
         if (verifyRes.ok) {
           const verifyData = (await verifyRes.json()) as VerifyRecord;
           setVerifyRecord(verifyData);
@@ -892,7 +896,7 @@ export default function Home() {
     setDownloading(true);
     setDownloadError(null);
     try {
-      const res = await fetch(`${apiUrl}/api/ai/evidence/${responseData.id}`);
+      const res = await fetch(`${apiBase}/api/ai/evidence/${responseData.id}`);
       if (!res.ok) {
         const text = await res.text();
         const msg =
@@ -1090,6 +1094,7 @@ export default function Home() {
           <TrustPanel
             verifyRecord={verifyRecord}
             responseData={responseData}
+            apiBase={apiBase}
             apiUrl={apiUrl}
             onDownloadEvidence={handleDownloadEvidence}
             downloading={downloading}

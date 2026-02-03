@@ -91,6 +91,7 @@
         owner: ubuntu
         group: ubuntu
         mode: "0755"
+      tags: [frontend]
 
     - name: Clone or update repository
       ansible.builtin.git:
@@ -100,6 +101,7 @@
         force: true
         update: true
       become_user: ubuntu
+      tags: [frontend]
 
     - name: Set CORS and API URL for ngrok mode
       ansible.builtin.set_fact:
@@ -268,6 +270,13 @@
         path: "{{ app_dir }}/docker-compose.override.yml"
         state: absent
       when: pqc_key_on_server_path | default('') | length == 0
+
+    - name: Build and restart frontend only (use with --tags frontend)
+      ansible.builtin.shell: |
+        cd {{ app_dir }} && docker compose build frontend && docker compose up -d frontend
+      args:
+        executable: /bin/bash
+      tags: [frontend]
 
     - name: Build and start containers with docker compose
       ansible.builtin.shell: |

@@ -22,6 +22,16 @@ ansible-playbook -i deploy/ansible/inventory.yml deploy/ansible/playbook.yml
 
 **Result:** Postgres, backend, frontend run at `/opt/aletheia-ai`. Frontend: `http://VM:3000`, Backend: `http://VM:8080`.
 
+## Update frontend only
+
+To update only the frontend on the remote (pull latest code, rebuild and restart the frontend container; no .env, keys, or backend changes):
+
+```bash
+ansible-playbook -i deploy/ansible/inventory.yml deploy/ansible/playbook.yml --tags frontend
+```
+
+Requires the app to be already deployed (Docker and repo at `/opt/aletheia-ai`).
+
 ## With secrets
 
 ```bash
