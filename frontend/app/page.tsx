@@ -8,10 +8,11 @@
 "use client";
 
 import { PqcBadge, PqcIcon } from "@/app/components/PqcBadge";
+import { trackEvent } from "@/lib/analytics";
 import { TOOLTIPS } from "@/lib/tooltips";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 /** Response from POST /api/ai/ask */
 interface AiAskResponse {
@@ -38,8 +39,15 @@ interface VerifyRecord {
   claim?: string | null;
   confidence?: number | null;
   policyVersion?: string | null;
+  policyCoverage?: number | null;
+  policyRulesEvaluated?: PolicyRuleResult[] | null;
   signaturePqc?: string | null;
   pqcAlgorithm?: string | null;
+}
+
+interface PolicyRuleResult {
+  ruleId: string;
+  status: "pass" | "not_evaluated";
 }
 
 function truncateMiddle(str: string, head = 20, tail = 20): string {
@@ -805,6 +813,11 @@ export default function Home() {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
   const apiBase = typeof window !== "undefined" ? "" : apiUrl;
 
+  useEffect(() => {
+    void trackEvent("landing_view");
+    void trackEvent("demo_view");
+  }, []);
+
   async function handleSend() {
     const trimmed = prompt.trim();
     if (!trimmed) return;
@@ -893,6 +906,7 @@ export default function Home() {
 
   async function handleDownloadEvidence() {
     if (!responseData) return;
+    void trackEvent("download_evidence_click", { responseId: responseData.id });
     setDownloading(true);
     setDownloadError(null);
     try {
@@ -930,9 +944,47 @@ export default function Home() {
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-zinc-50 p-4 dark:bg-zinc-900 md:p-6">
+      <header className="mx-auto mb-6 w-full max-w-6xl rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-700 dark:bg-zinc-800">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+              Aletheia AI
+            </p>
+            <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 md:text-3xl">
+              AI said that. But under which rules?
+            </h1>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">
+              We don&apos;t certify truth. We certify responsibility.
+            </p>
+          </div>
+          <div className="flex flex-col items-start gap-2">
+            <Link
+              href="#demo"
+              onClick={() => {
+                void trackEvent("cta_click");
+              }}
+              className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+            >
+              Verify a response — Demo
+            </Link>
+            <span className="text-xs text-zinc-500 dark:text-zinc-400">
+              No crypto wallet. Just transparency.
+            </span>
+            <Link
+              href="/use-cases"
+              className="text-xs font-medium text-blue-600 hover:underline dark:text-blue-400"
+            >
+              Explore use cases →
+            </Link>
+          </div>
+        </div>
+      </header>
       <div className="mx-auto grid min-w-0 w-full max-w-6xl items-start gap-6 lg:grid-cols-[minmax(0,672px)_380px]">
         {/* Left: Chat — fixed max width so it doesn't grow when right column content grows */}
-        <main className="min-w-0 space-y-6 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-700 dark:bg-zinc-800">
+        <main
+          id="demo"
+          className="min-w-0 space-y-6 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-700 dark:bg-zinc-800"
+        >
           <div className="flex items-center gap-4">
             <div className="flex shrink-0 rounded-xl bg-white p-1 dark:bg-zinc-800">
               <Image
@@ -1089,6 +1141,11 @@ export default function Home() {
 
       <footer className="mt-8 text-center text-xs text-zinc-500 dark:text-zinc-400">
         <p>© 2026 Anton Sokolov &amp; Team 3</p>
+        <p className="mt-1">
+          <Link href="/use-cases" className="underline hover:text-zinc-700 dark:hover:text-zinc-300">
+            Use cases
+          </Link>
+        </p>
         <p>
           <a
             href="https://taltech.ee/vanemarendajaks"

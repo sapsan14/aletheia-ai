@@ -8,6 +8,7 @@
 "use client";
 
 import { PqcBadge } from "@/app/components/PqcBadge";
+import { trackEvent } from "@/lib/analytics";
 import { TOOLTIPS } from "@/lib/tooltips";
 import Image from "next/image";
 import Link from "next/link";
@@ -28,10 +29,17 @@ interface VerifyRecord {
   claim?: string | null;
   confidence?: number | null;
   policyVersion?: string | null;
+  policyCoverage?: number | null;
+  policyRulesEvaluated?: PolicyRuleResult[] | null;
   /** PQC.5/PQC.6: Base64 ML-DSA signature when PQC enabled */
   signaturePqc?: string | null;
   /** e.g. "ML-DSA (Dilithium3)" */
   pqcAlgorithm?: string | null;
+}
+
+interface PolicyRuleResult {
+  ruleId: string;
+  status: "pass" | "not_evaluated";
 }
 
 /** Canonicalize text (same rules as backend). */
@@ -120,6 +128,15 @@ const EVIDENCE_FILE_DESCRIPTIONS: Record<string, string> = {
   "pqc_algorithm.json": "PQC algorithm (e.g. ML-DSA Dilithium3)",
 };
 
+const DEMO_POLICY_RULES: Record<string, string> = {
+  R1: "Response is signed and timestamped",
+  R2: "Model identity is recorded",
+  R3: "No medical or legal advice in response",
+  R4: "Human review performed",
+};
+
+const DEMO_POLICY_TOTAL_RULES = 4;
+
 function VerifyContent() {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
@@ -136,6 +153,7 @@ function VerifyContent() {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewKeys, setPreviewKeys] = useState<string[] | null>(null);
   const [previewError, setPreviewError] = useState<string | null>(null);
+  const [whyNotExpanded, setWhyNotExpanded] = useState(false);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
   const apiBase = typeof window !== "undefined" ? "" : apiUrl;
@@ -158,6 +176,10 @@ function VerifyContent() {
       .catch((err) => setError(err.message))
       .finally(() => setIsLoading(false));
   }, [id, apiBase]);
+
+  useEffect(() => {
+    void trackEvent("demo_view");
+  }, []);
 
   async function handleVerifyHash() {
     if (!record) return;
@@ -236,6 +258,26 @@ function VerifyContent() {
     .filter(Boolean)
     .join(" — ");
 
+  const policyRules = record.policyRulesEvaluated ?? [];
+  const hasPolicyCoverage =
+    record.policyCoverage != null || policyRules.length > 0;
+  const passRules = policyRules.filter((rule) => rule.status === "pass");
+  const notEvaluatedRules = policyRules.filter(
+    (rule) => rule.status !== "pass"
+  );
+  const coveragePercent =
+    record.policyCoverage != null
+      ? Math.round(record.policyCoverage * 100)
+      : policyRules.length > 0
+        ? Math.round((passRules.length / DEMO_POLICY_TOTAL_RULES) * 100)
+        : null;
+  const rulesChecked =
+    policyRules.length > 0
+      ? passRules.length
+      : record.policyCoverage != null
+        ? Math.round(record.policyCoverage * DEMO_POLICY_TOTAL_RULES)
+        : 0;
+
   function handleCopySummary() {
     if (summaryLine) void navigator.clipboard.writeText(summaryLine);
   }
@@ -247,6 +289,7 @@ function VerifyContent() {
 
   async function handleDownloadEvidence() {
     if (!record) return;
+    void trackEvent("download_evidence_click", { responseId: record.id });
     setEvidenceDownloading(true);
     setEvidenceError(null);
     try {
@@ -521,6 +564,122 @@ function VerifyContent() {
           </p>
         </section>
       ) : null}
+
+      {/* Phase 4 — Policy coverage */}
+      {hasPolicyCoverage && (
+        <section
+          className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-600 dark:bg-zinc-700/30"
+          aria-label="Policy coverage"
+        >
+          <div className="mb-3 flex flex-wrap items-center gap-2">
+            <h2
+              className="text-lg font-semibold text-zinc-900 dark:text-zinc-50"
+              title={TOOLTIPS.policy_coverage}
+            >
+              📘 Policy coverage (demo)
+            </h2>
+            <span className="text-sm text-zinc-600 dark:text-zinc-400">
+              {coveragePercent != null
+                ? `${coveragePercent}% — ${rulesChecked} of ${DEMO_POLICY_TOTAL_RULES} rules checked`
+                : "Coverage not available"}
+            </span>
+          </div>
+
+          {policyRules.length > 0 ? (
+            <ul className="space-y-2 text-sm text-zinc-700 dark:text-zinc-300">
+              {policyRules.map((rule) => {
+                const statusOk = rule.status === "pass";
+                return (
+                  <li key={rule.ruleId} className="flex flex-wrap items-center gap-2">
+                    <span className="font-mono text-zinc-800 dark:text-zinc-200">
+                      {rule.ruleId}
+                    </span>
+                    <span className="text-zinc-500 dark:text-zinc-400">
+                      {DEMO_POLICY_RULES[rule.ruleId] || "Policy rule"}
+                    </span>
+                    <span
+                      className={
+                        statusOk
+                          ? "ml-auto text-emerald-600 dark:text-emerald-400"
+                          : "ml-auto text-zinc-500 dark:text-zinc-400"
+                      }
+                    >
+                      {statusOk ? "✓ Passed" : "Not checked"}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+              Policy rule details are not available for this record.
+            </p>
+          )}
+
+          <div className="mt-3">
+            <button
+              type="button"
+              onClick={() => setWhyNotExpanded((prev) => !prev)}
+              aria-expanded={whyNotExpanded}
+              aria-controls="why-not-100"
+              className="text-sm font-medium text-blue-600 hover:underline dark:text-blue-400"
+            >
+              Why is confidence not 100%?
+            </button>
+            {whyNotExpanded && (
+              <div
+                id="why-not-100"
+                className="mt-3 rounded-xl border border-zinc-200 bg-white p-3 text-sm text-zinc-700 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300"
+              >
+                <p className="mb-2">
+                  Confidence reflects how many of the declared policy checks were
+                  performed for this response.
+                </p>
+                {policyRules.length > 0 ? (
+                  <>
+                    <p className="mb-1 font-medium text-zinc-600 dark:text-zinc-400">
+                      Checked:
+                    </p>
+                    <ul className="mb-2 list-disc pl-5">
+                      {passRules.length > 0 ? (
+                        passRules.map((rule) => (
+                          <li key={`checked-${rule.ruleId}`}>
+                            {rule.ruleId}: {DEMO_POLICY_RULES[rule.ruleId] || "Policy rule"}
+                          </li>
+                        ))
+                      ) : (
+                        <li>None</li>
+                      )}
+                    </ul>
+                    <p className="mb-1 font-medium text-zinc-600 dark:text-zinc-400">
+                      Not checked:
+                    </p>
+                    <ul className="mb-2 list-disc pl-5">
+                      {notEvaluatedRules.length > 0 ? (
+                        notEvaluatedRules.map((rule) => (
+                          <li key={`unchecked-${rule.ruleId}`}>
+                            {rule.ruleId}: {DEMO_POLICY_RULES[rule.ruleId] || "Policy rule"}
+                          </li>
+                        ))
+                      ) : (
+                        <li>None</li>
+                      )}
+                    </ul>
+                  </>
+                ) : (
+                  <p className="mb-2">
+                    Rule-level details were not provided, but coverage indicates that
+                    not all policy checks were run.
+                  </p>
+                )}
+                <p className="text-zinc-500 dark:text-zinc-400">
+                  We do not certify truth; we show what was checked.
+                </p>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
 
       <div>
         <h2 className="mb-1 text-sm font-medium text-zinc-600 dark:text-zinc-400">
@@ -826,6 +985,14 @@ export default function VerifyPage() {
 
         <footer className="mt-8 border-t border-zinc-200 pt-4 text-center text-xs text-zinc-500 dark:border-zinc-600 dark:text-zinc-400">
           <p>© 2026 Anton Sokolov &amp; Team 3</p>
+          <p className="mt-1">
+            <Link
+              href="/use-cases"
+              className="underline hover:text-zinc-700 dark:hover:text-zinc-300"
+            >
+              Use cases
+            </Link>
+          </p>
           <p>
             <a
               href="https://taltech.ee/vanemarendajaks"
