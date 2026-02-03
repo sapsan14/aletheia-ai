@@ -70,7 +70,14 @@ ansible-playbook -i 'aletheia ansible_host=YOUR_VM_IP,' deploy/ansible/playbook.
 | `ai_aletheia_pqc_enabled` | (set when PQC key copied) | Set automatically when `pqc_key_src` exists; or override with `-e ai_aletheia_pqc_enabled=true` |
 | `ai_aletheia_pqc_key_path` | (set when PQC key copied) | Set to `/app/ai_pqc.key` in container when PQC key is copied |
 
-**PQC (post-quantum) on the server:** To enable ML-DSA signing on deploy, either (1) **copy key from your machine:** generate locally (`cd backend && mvn -q exec:java -Dexec.mainClass="ai.aletheia.crypto.PqcKeyGen" -Dexec.args="."`), then run the playbook with `-e pqc_key_src=/path/to/backend/ai_pqc.key` (or leave default `backend/ai_pqc.key` if that file exists); or (2) **generate on the server after deploy:** SSH to the VM, then run the key generator inside the backend container or install Java+Maven on the VM and run `PqcKeyGen`, then add to `/opt/aletheia-ai/.env`: `AI_ALETHEIA_PQC_ENABLED=true` and `AI_ALETHEIA_PQC_KEY_PATH=/app/ai_pqc.key`, create `docker-compose.override.yml` with backend volume `./ai_pqc.key:/app/ai_pqc.key:ro`, and `docker compose up -d --force-recreate backend`. See [docs/en/PLAN_PQC.md](../../docs/en/PLAN_PQC.md) for key generation and configuration.
+**PQC (post-quantum) on the server:** To enable ML-DSA signing on deploy, either (1) **copy key from your machine:** generate locally (`cd backend && mvn -q exec:java -Dexec.mainClass="ai.aletheia.crypto.PqcKeyGen" -Dexec.args="."`), then run the playbook with `-e pqc_key_src=/path/to/backend/ai_pqc.key` (or leave default `backend/ai_pqc.key` if that file exists); or (2) **generate on the server after deploy (no Maven needed):** SSH to the VM, then from `/opt/aletheia-ai` run the key generator inside the backend container:
+
+```bash
+cd /opt/aletheia-ai
+docker compose run --rm -v /opt/aletheia-ai:/out backend java -cp /app/app.jar ai.aletheia.crypto.PqcKeyGen /out
+```
+
+This creates `ai_pqc.key` and `ai_pqc_public.pem` in `/opt/aletheia-ai`. Then add to `.env`: `AI_ALETHEIA_PQC_ENABLED=true` and `AI_ALETHEIA_PQC_KEY_PATH=/app/ai_pqc.key`, create `docker-compose.override.yml` with backend volume `./ai_pqc.key:/app/ai_pqc.key:ro`, and run `docker compose up -d --force-recreate backend`. See [docs/en/PLAN_PQC.md](../../docs/en/PLAN_PQC.md) for key generation and configuration.
 
 All `.env.j2` template variables can be overridden via `-e`.
 

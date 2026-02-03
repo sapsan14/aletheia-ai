@@ -23,6 +23,8 @@
     signing_key_path: "{{ signing_key_src | default(playbook_dir ~ '/../../ai.key') }}"
     # Path to PQC key on control node; override with -e pqc_key_src=/path/to/ai_pqc.key (optional)
     pqc_key_path: "{{ pqc_key_src | default(playbook_dir ~ '/../../backend/ai_pqc.key') }}"
+    # When true and no PQC key copied, generate ai_pqc.key on server via backend container (no Maven on server)
+    pqc_auto_generate: "{{ pqc_auto_generate | default(true) }}"
     # ngrok: single-port (3000) via tunnel; API proxied by Next.js. Override with -e ngrok_enabled=false to expose VM:3000 + VM:8080.
     # Free tier only: ngrok http PORT --domain=DOMAIN (no --oauth; OAuth is paid-only).
     ngrok_enabled: true
@@ -130,25 +132,6 @@
         ai_aletheia_pqc_key_path: "/app/ai_pqc.key"
       when: pqc_key_stat.stat.exists | default(false)
 
-    - name: Create docker-compose override for PQC key mount
-      ansible.builtin.copy:
-        content: |
-          services:
-            backend:
-              volumes:
-                - ./ai_pqc.key:/app/ai_pqc.key:ro
-        dest: "{{ app_dir }}/docker-compose.override.yml"
-        owner: ubuntu
-        group: ubuntu
-        mode: "0644"
-      when: pqc_key_stat.stat.exists | default(false)
-
-    - name: Remove docker-compose override when PQC key not used
-      ansible.builtin.file:
-        path: "{{ app_dir }}/docker-compose.override.yml"
-        state: absent
-      when: not (pqc_key_stat.stat.exists | default(false))
-
     - name: Create .env from template
       ansible.builtin.template:
         src: templates/.env.j2
@@ -180,6 +163,67 @@
       ansible.builtin.fail:
         msg: "ai.key not found on server at {{ app_dir }}/ai.key. Ensure signing_key_src exists locally and playbook copied it, or manually copy ai.key to server. Create key with: openssl genpkey -algorithm RSA -out ai.key -pkeyopt rsa_keygen_bits:2048"
       when: not (server_key_stat.stat.exists | default(false))
+
+    - name: Build backend image (for PQC keygen when auto-generating)
+      ansible.builtin.shell: docker compose build backend
+      args:
+        chdir: "{{ app_dir }}"
+        executable: /bin/bash
+      become_user: ubuntu
+      when: (pqc_auto_generate | default(true)) and not (pqc_key_stat.stat.exists | default(false))
+
+    - name: Generate PQC key on server (no Maven needed)
+      ansible.builtin.shell: docker compose run --rm -v "{{ app_dir }}:/out" backend java -cp /app/app.jar ai.aletheia.crypto.PqcKeyGen /out
+      args:
+        chdir: "{{ app_dir }}"
+        executable: /bin/bash
+      become_user: ubuntu
+      register: pqc_keygen_result
+      when: (pqc_auto_generate | default(true)) and not (pqc_key_stat.stat.exists | default(false))
+
+    - name: Enable PQC in .env after key generation
+      ansible.builtin.lineinfile:
+        path: "{{ app_dir }}/.env"
+        regexp: "^AI_ALETHEIA_PQC_ENABLED="
+        line: "AI_ALETHEIA_PQC_ENABLED=true"
+      when: pqc_keygen_result is changed
+
+    - name: Set PQC key path in .env after key generation
+      ansible.builtin.lineinfile:
+        path: "{{ app_dir }}/.env"
+        regexp: "^AI_ALETHEIA_PQC_KEY_PATH="
+        line: "AI_ALETHEIA_PQC_KEY_PATH=/app/ai_pqc.key"
+      when: pqc_keygen_result is changed
+
+    - name: Ensure .env has PQC key path line when we just generated
+      ansible.builtin.lineinfile:
+        path: "{{ app_dir }}/.env"
+        line: "AI_ALETHEIA_PQC_KEY_PATH=/app/ai_pqc.key"
+      when: pqc_keygen_result is changed
+
+    - name: Check if PQC key exists on server (after copy or generate)
+      ansible.builtin.stat:
+        path: "{{ app_dir }}/ai_pqc.key"
+      register: pqc_key_server_stat
+
+    - name: Create docker-compose override for PQC key mount
+      ansible.builtin.copy:
+        content: |
+          services:
+            backend:
+              volumes:
+                - ./ai_pqc.key:/app/ai_pqc.key:ro
+        dest: "{{ app_dir }}/docker-compose.override.yml"
+        owner: ubuntu
+        group: ubuntu
+        mode: "0644"
+      when: pqc_key_server_stat.stat.exists | default(false)
+
+    - name: Remove docker-compose override when no PQC key on server
+      ansible.builtin.file:
+        path: "{{ app_dir }}/docker-compose.override.yml"
+        state: absent
+      when: not (pqc_key_server_stat.stat.exists | default(false))
 
     - name: Build and start containers with docker compose
       ansible.builtin.shell: |

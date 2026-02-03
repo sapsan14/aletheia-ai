@@ -867,8 +867,13 @@ export default function Home() {
         // Trust Panel will show response hash from ask if verify fetch fails
         setVerifyRecord({
           id: askData.id,
+          prompt: "",
+          response: askData.response,
           responseHash: askData.responseHash,
+          signature: askData.signature ?? null,
+          tsaToken: askData.tsaToken ?? null,
           llmModel: askData.model,
+          createdAt: "",
         });
       }
     } catch (err) {
