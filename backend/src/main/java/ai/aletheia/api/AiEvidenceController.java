@@ -8,6 +8,7 @@ import ai.aletheia.crypto.SignatureService;
 import ai.aletheia.db.AiResponseRepository;
 import ai.aletheia.db.entity.AiResponse;
 import ai.aletheia.evidence.EvidencePackageService;
+import ai.aletheia.siem.SiemEventService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.slf4j.Logger;
@@ -45,17 +46,20 @@ public class AiEvidenceController {
     private final SignatureService signatureService;
     private final EvidencePackageService evidencePackageService;
     private final PqcSignatureService pqcSignatureService;
+    private final SiemEventService siemEventService;
 
     public AiEvidenceController(
             AiResponseRepository repository,
             CanonicalizationService canonicalizationService,
             SignatureService signatureService,
             EvidencePackageService evidencePackageService,
+            SiemEventService siemEventService,
             @org.springframework.beans.factory.annotation.Autowired(required = false) PqcSignatureService pqcSignatureService) {
         this.repository = repository;
         this.canonicalizationService = canonicalizationService;
         this.signatureService = signatureService;
         this.evidencePackageService = evidencePackageService;
+        this.siemEventService = siemEventService;
         this.pqcSignatureService = pqcSignatureService;
     }
 
@@ -162,6 +166,12 @@ public class AiEvidenceController {
         if (wantJson) {
             Map<String, String> json = new LinkedHashMap<>();
             files.forEach((name, content) -> json.put(name, Base64.getEncoder().encodeToString(content)));
+            siemEventService.emitEvidenceCreated(
+                    entity.getId(),
+                    entity.getResponseHash(),
+                    entity.getPolicyVersion(),
+                    entity.getLlmModel()
+            );
             return ResponseEntity.ok()
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(json);
@@ -169,6 +179,12 @@ public class AiEvidenceController {
 
         byte[] zip = evidencePackageService.toZip(files);
         String filename = "aletheia-evidence-" + id + ".aep";
+        siemEventService.emitEvidenceCreated(
+                entity.getId(),
+                entity.getResponseHash(),
+                entity.getPolicyVersion(),
+                entity.getLlmModel()
+        );
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("application/zip"))
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")

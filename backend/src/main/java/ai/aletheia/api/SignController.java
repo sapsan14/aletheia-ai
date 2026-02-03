@@ -1,7 +1,8 @@
 package ai.aletheia.api;
 
-import ai.aletheia.api.dto.AiAskRequest;
-import ai.aletheia.api.dto.AiAskResponse;
+import ai.aletheia.api.dto.ApiErrorResponse;
+import ai.aletheia.api.dto.SignRequest;
+import ai.aletheia.api.dto.SignResponse;
 import ai.aletheia.audit.AuditRecordService;
 import ai.aletheia.audit.dto.AuditRecordRequest;
 import ai.aletheia.claim.ClaimCanonical;
@@ -14,15 +15,12 @@ import ai.aletheia.crypto.PqcSignatureServiceImpl;
 import ai.aletheia.crypto.SignatureService;
 import ai.aletheia.crypto.TimestampException;
 import ai.aletheia.crypto.TimestampService;
-import ai.aletheia.llm.LLMClient;
-import ai.aletheia.llm.LLMException;
-import ai.aletheia.llm.LLMResult;
+import ai.aletheia.db.entity.AiResponse;
 import ai.aletheia.siem.SiemEventService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,22 +30,17 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.Map;
 
 /**
- * Main AI endpoint: prompt → LLM → canonicalize → hash → sign → timestamp → store.
- *
- * <p>Requires {@link LLMClient} bean (e.g. OPENAI_API_KEY set).
- * Returns verifiable response with id for GET /api/ai/verify/:id.
+ * Sign-only endpoint: accepts an external LLM response and signs it without calling any LLM.
  */
 @RestController
-@RequestMapping("/api/ai")
-@ConditionalOnBean(LLMClient.class)
-public class AiAskController {
+@RequestMapping("/api")
+public class SignController {
 
-    private static final Logger log = LoggerFactory.getLogger(AiAskController.class);
+    private static final Logger log = LoggerFactory.getLogger(SignController.class);
+    private static final String DEFAULT_MODEL_ID = "external";
 
-    private final LLMClient llmClient;
     private final CanonicalizationService canonicalizationService;
     private final HashService hashService;
     private final SignatureService signatureService;
@@ -57,8 +50,7 @@ public class AiAskController {
     private final PqcSignatureService pqcSignatureService;
     private final SiemEventService siemEventService;
 
-    public AiAskController(
-            LLMClient llmClient,
+    public SignController(
             CanonicalizationService canonicalizationService,
             HashService hashService,
             SignatureService signatureService,
@@ -67,7 +59,6 @@ public class AiAskController {
             ComplianceInferenceService complianceInferenceService,
             SiemEventService siemEventService,
             @org.springframework.beans.factory.annotation.Autowired(required = false) PqcSignatureService pqcSignatureService) {
-        this.llmClient = llmClient;
         this.canonicalizationService = canonicalizationService;
         this.hashService = hashService;
         this.signatureService = signatureService;
@@ -78,70 +69,85 @@ public class AiAskController {
         this.pqcSignatureService = pqcSignatureService;
     }
 
-    @Operation(summary = "Ask AI", description = "Full flow: prompt → LLM → canonicalize → hash → sign → timestamp → save. Requires OPENAI_API_KEY.")
-    @ApiResponse(responseCode = "200", description = "Verifiable response with id, hash, signature, tsaToken")
-    @ApiResponse(responseCode = "400", description = "Missing or empty prompt")
-    @ApiResponse(responseCode = "502", description = "LLM failed")
-    @ApiResponse(responseCode = "503", description = "Processing failed")
-    @PostMapping(value = "/ask", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> ask(@RequestBody AiAskRequest request) {
-        if (request == null || request.prompt() == null || request.prompt().isBlank()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Missing or empty 'prompt'"));
+    @Operation(
+            summary = "Sign-only API",
+            description = "Sign a pre-generated LLM response without calling any LLM.")
+    @ApiResponse(responseCode = "200", description = "Signed response metadata with id, signature, tsaToken")
+    @ApiResponse(responseCode = "400", description = "Missing or empty response")
+    @ApiResponse(responseCode = "502", description = "Timestamp service unavailable")
+    @ApiResponse(responseCode = "503", description = "Signing failed or key not configured")
+    @PostMapping(value = "/sign", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> sign(@RequestBody SignRequest request) {
+        if (request == null || request.response() == null || request.response().isBlank()) {
+            return ResponseEntity.badRequest()
+                    .body(ApiErrorResponse.of("VALIDATION_ERROR", "Missing or empty 'response'"));
         }
 
-        try {
-            LLMResult llmResult = llmClient.complete(request.prompt());
-            String responseText = llmResult.responseText();
-            String modelId = llmResult.modelId();
+        String responseText = request.response();
+        String prompt = request.prompt() != null ? request.prompt() : "";
+        String modelId = request.modelId() != null && !request.modelId().isBlank()
+                ? request.modelId().trim()
+                : DEFAULT_MODEL_ID;
 
+        try {
             byte[] canonical = canonicalizationService.canonicalize(responseText);
             String canonicalResponse = new String(canonical, StandardCharsets.UTF_8);
 
-            ComplianceClaim compliance = complianceInferenceService.infer(request.prompt(), responseText);
-            String responseHash;
+            ComplianceClaim compliance = null;
+            if (!prompt.isBlank()) {
+                compliance = complianceInferenceService.infer(prompt, responseText);
+            }
+
             String claim = null;
             Double confidence = null;
             String policyVersion = null;
 
             if (compliance != null) {
-                byte[] claimBytes = ClaimCanonical.toCanonicalBytes(
-                        compliance.claim(), compliance.confidence(), modelId, compliance.policyVersion());
+                claim = compliance.claim();
+                confidence = compliance.confidence();
+                policyVersion = compliance.policyVersion();
+            }
+
+            if (request.policyId() != null && !request.policyId().isBlank()) {
+                policyVersion = request.policyId().trim();
+            }
+
+            boolean hasClaimMetadata = (claim != null && !claim.isBlank())
+                    || (policyVersion != null && !policyVersion.isBlank());
+
+            String responseHash;
+            if (hasClaimMetadata) {
+                byte[] claimBytes = ClaimCanonical.toCanonicalBytes(claim, confidence, modelId, policyVersion);
                 byte[] bytesToSign = new byte[canonical.length + 1 + claimBytes.length];
                 System.arraycopy(canonical, 0, bytesToSign, 0, canonical.length);
                 bytesToSign[canonical.length] = '\n';
                 System.arraycopy(claimBytes, 0, bytesToSign, canonical.length + 1, claimBytes.length);
                 responseHash = hashService.hash(bytesToSign);
-                claim = compliance.claim();
-                confidence = compliance.confidence();
-                policyVersion = compliance.policyVersion();
             } else {
                 responseHash = hashService.hash(canonical);
             }
 
-            String signature = null;
+            String signature;
             try {
                 signature = signatureService.sign(responseHash);
             } catch (IllegalStateException e) {
-                if (e.getMessage() == null || !e.getMessage().contains("Signing key not configured")) {
-                    throw e;
-                }
-                log.debug("Signing key not configured, proceeding without signature");
+                return ResponseEntity.status(503)
+                        .body(ApiErrorResponse.of("SIGNING_ERROR", e.getMessage()));
             }
 
-            String tsaToken = null;
-            if (signature != null) {
-                try {
-                    byte[] signatureBytes = Base64.getDecoder().decode(signature);
-                    byte[] token = timestampService.timestamp(signatureBytes);
-                    tsaToken = Base64.getEncoder().encodeToString(token);
-                } catch (TimestampException e) {
-                    log.warn("TSA failed, saving without tsaToken: {}", e.getMessage());
-                }
+            String tsaToken;
+            try {
+                byte[] signatureBytes = Base64.getDecoder().decode(signature);
+                byte[] token = timestampService.timestamp(signatureBytes);
+                tsaToken = Base64.getEncoder().encodeToString(token);
+            } catch (TimestampException e) {
+                return ResponseEntity.status(502)
+                        .body(ApiErrorResponse.of("TIMESTAMP_UNAVAILABLE", e.getMessage()));
             }
 
             String signaturePqcBase64 = null;
             String pqcPublicKeyPem = null;
-            if (signature != null && pqcSignatureService != null && pqcSignatureService.isAvailable()) {
+            if (pqcSignatureService != null && pqcSignatureService.isAvailable()) {
                 try {
                     byte[] hashBytes = PqcSignatureServiceImpl.hashHexToBytes(responseHash);
                     byte[] pqcSig = pqcSignatureService.sign(hashBytes);
@@ -151,8 +157,9 @@ public class AiAskController {
                     log.warn("PQC signing failed, continuing without PQC signature: {}", e.getMessage());
                 }
             }
+
             AuditRecordRequest auditRequest = new AuditRecordRequest(
-                    request.prompt(),
+                    prompt,
                     canonicalResponse,
                     responseHash,
                     signature,
@@ -160,42 +167,38 @@ public class AiAskController {
                     pqcPublicKeyPem,
                     tsaToken,
                     modelId,
+                    request.requestId(),
                     null,
-                    llmResult.temperature(),
                     null,
                     1,
                     claim,
                     confidence,
                     policyVersion
             );
-            Long id = auditRecordService.save(auditRequest);
+            AiResponse saved = auditRecordService.saveAndReturn(auditRequest);
 
-            log.info("AI ask: id={}, model={}, promptLen={}, responseLen={}, temperature={}",
-                    id, modelId, request.prompt().length(), responseText.length(), llmResult.temperature());
+            siemEventService.emitResponseSigned(
+                    saved.getId(),
+                    responseHash,
+                    policyVersion,
+                    modelId
+            );
 
-            siemEventService.emitResponseGenerated(id, responseHash, policyVersion, modelId);
-            siemEventService.emitResponseSigned(id, responseHash, policyVersion, modelId);
-
-            return ResponseEntity.ok(new AiAskResponse(
-                    canonicalResponse,
+            return ResponseEntity.ok(new SignResponse(
+                    saved.getId(),
                     responseHash,
                     signature,
                     tsaToken,
-                    id,
-                    modelId
-            ));
-        } catch (LLMException e) {
-            log.warn("LLM failed: {}", e.getMessage());
-            return ResponseEntity.status(502).body(Map.of(
-                    "error", "LLM failed",
-                    "message", e.getMessage()
+                    claim,
+                    confidence,
+                    policyVersion,
+                    modelId,
+                    saved.getCreatedAt()
             ));
         } catch (Exception e) {
-            log.error("AI ask failed", e);
-            return ResponseEntity.status(503).body(Map.of(
-                    "error", "Processing failed",
-                    "message", e.getMessage()
-            ));
+            log.error("Sign-only failed", e);
+            return ResponseEntity.status(500)
+                    .body(ApiErrorResponse.of("INTERNAL_ERROR", "Sign-only processing failed"));
         }
     }
 }

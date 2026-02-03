@@ -28,9 +28,18 @@ public class AuditRecordService {
      * @return the saved entity's id
      */
     public Long save(AuditRecordRequest request) {
+        return saveAndReturn(request).getId();
+    }
+
+    /**
+     * Saves the audit record and returns the full entity (including createdAt).
+     *
+     * @param request audit data (prompt, response, hash, signature, tsaToken, etc.)
+     * @return the saved entity
+     */
+    public AiResponse saveAndReturn(AuditRecordRequest request) {
         AiResponse entity = mapToEntity(request);
-        AiResponse saved = repository.save(entity);
-        return saved.getId();
+        return repository.save(entity);
     }
 
     private AiResponse mapToEntity(AuditRecordRequest r) {
