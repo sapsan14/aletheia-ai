@@ -120,5 +120,6 @@ The **architecture** is designed so that the same pipeline can later be wired to
 - [Crypto Reference](CRYPTO_REFERENCE.md) — algorithms, keys, key generation (noob-friendly).
 - [Timestamping](TIMESTAMPING.md) — what we timestamp (signature bytes), TSA, storage.
 - [Trust model](TRUST_MODEL.md) — trust chain, who attests what, eIDAS mapping.
+- [Plan PQC](PLAN_PQC.md) — optional post-quantum (ML-DSA) hybrid signing; dual-signing pipeline and Evidence Package extension.
 - [Architecture diagrams](../../diagrams/architecture.md) — pipeline and crypto layer.
 - [README](../../README.md) — design overview, run instructions.

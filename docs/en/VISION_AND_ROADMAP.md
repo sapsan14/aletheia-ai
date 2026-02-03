@@ -66,19 +66,20 @@ Trust in **what was done** (who did what, when) is complemented by other layers.
 
 Single prioritized plan (phases by impact and dependency):
 
-| Phase | Focus | Purpose |
-|-------|-------|---------|
-| **1** | Evidence Package + offline verification | Trust infrastructure; verification without our server |
-| **2** | Killer demo (legal/compliance) | Product-market fit; investor story; choose primary domain |
-| **3** | AI Claim (structured attestation) | Audit-grade assertions with context and confidence |
-| **4** | Key and trust model | PKI for AI; key_id, registry, rotation |
-| **5** | Trusted time anchoring | Multi-TSA, public anchors (Bitcoin, Ethereum, Roughtime) |
-| **6** | Production: Cloud + HSM path | Scalability, SLA, enterprise readiness |
+| Phase | Focus | Status | Purpose |
+|-------|-------|--------|---------|
+| **1** | Evidence Package + offline verification | ✅ Done | Trust infrastructure; verification without our server |
+| **2** | Killer demo (legal/compliance) | ✅ Done | Product-market fit; investor story; choose primary domain |
+| **3** | AI Claim (structured attestation) + Verify UI | ✅ Done | Audit-grade assertions with context and confidence |
+| **4** | Key and trust model | Next | PKI for AI; key_id, registry, rotation |
+| **5** | Trusted time anchoring | — | Multi-TSA, public anchors (Bitcoin, Ethereum, Roughtime) |
+| **6** | Production: Cloud + HSM path | — | Scalability, SLA, enterprise readiness |
 
 **Future perspectives:**
 
 - **AI vs AI verification** — one AI asserts, another AI verifies; multi-agent trust (aligns with MCP / extended vision)
 - **EU-style roadmap** — PoC → Pilot → Regulation alignment
+- **Post-quantum (PQC)** — optional hybrid classical + ML-DSA signatures over the same evidence hash for long-term verification; see [Plan PQC](PLAN_PQC.md) (out-of-scope PoC / enthusiast track).
 
 ---
 

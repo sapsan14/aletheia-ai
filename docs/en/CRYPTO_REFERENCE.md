@@ -256,12 +256,19 @@ See [mock-tsa/README](../../backend/src/main/resources/mock-tsa/README.md).
 
 ---
 
+## Post-quantum (PQC)
+
+Aletheia can optionally add a **post-quantum signature** (ML-DSA / Dilithium) alongside the classical RSA signature over the same hash — for long-term evidence verification in a future where large-scale quantum computers might threaten classical public-key crypto. This is **additive only**: the existing trust chain stays primary. See [Plan PQC](PLAN_PQC.md) for the full manifest (backend, frontend, verifier, deployment) and links to NIST PQC standards.
+
+---
+
 ## Where to learn more
 
 - [SIGNING](SIGNING.md) — what we sign, key management
 - [TIMESTAMPING](TIMESTAMPING.md) — TSA modes, switching mock/real
 - [MOCK_TSA](MOCK_TSA.md) — deterministic TSA for tests
 - [TRUST_MODEL](TRUST_MODEL.md) — who attests what
+- [Plan PQC](PLAN_PQC.md) — post-quantum hybrid signing (optional PoC)
 - [Architecture diagrams](../../diagrams/architecture.md) — pipeline, crypto layer, trust chain
 - [README](../../README.md) — project overview, run instructions
 - [KINDERGARDEN](../../KINDERGARDEN.md) — analogies and concepts (Russian)
