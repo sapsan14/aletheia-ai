@@ -39,6 +39,8 @@ This document is an **out-of-scope, enthusiast-driven** plan: adding a second, a
 
 ## Standards and references
 
+**Full list with significance and official links:** [Legal & Regulatory References — Post-Quantum Cryptography](../legal/README.md#post-quantum-cryptography-nist-and-related). That section indexes NIST FIPS 203, 204, 205, the NIST PQC project, FAQs, migration guidance, ETSI Technical Reports, and CRYSTALS-Dilithium, with short explanations of each document’s contents and why it matters for Aletheia.
+
 | Resource | Description | URL / Reference |
 |----------|-------------|-----------------|
 | **NIST PQC standardization** | NIST selected ML-DSA (Dilithium), ML-KEM (Kyber), SLH-DSA (SPHINCS+), etc. | [NIST PQC Project](https://csrc.nist.gov/projects/post-quantum-cryptography) |
@@ -47,7 +49,7 @@ This document is an **out-of-scope, enthusiast-driven** plan: adding a second, a
 | **CRYSTALS-Dilithium** | Original algorithm name; NIST standardised as ML-DSA | [CRYSTALS-Dilithium](https://pq-crystals.org/dilithium/) |
 | **Bouncy Castle PQC** | Java implementation of PQC algorithms (Dilithium, Kyber, etc.) | [Bouncy Castle PQC](https://www.bouncycastle.org/pqc_jce.html) · Maven: `org.bouncycastle:bcpkix-jdk18on` + PQC provider |
 | **ETSI / long-term archiving** | ETSI TS 101 733, PAdES; PQC for long-term signature validity | [ETSI](https://www.etsi.org/) |
-| **NIST PQC migration** | NIST guidance on hybrid and migration | [NIST PQC FAQ](https://csrc.nist.gov/projects/post-quantum-cryptography/post-quantum-cryptography-standardization) |
+| **NIST PQC migration** | NIST guidance on hybrid and migration | [NIST PQC FAQ](https://csrc.nist.gov/projects/post-quantum-cryptography/faqs) |
 
 **Algorithm choice for PoC:** **ML-DSA (Dilithium)** — NIST standard, well-documented, available in Bouncy Castle; Falcon can be added later if needed.
 
@@ -113,6 +115,17 @@ This creates `ai_pqc.key` and `ai_pqc_public.pem` in `backend/`. Do not commit t
 - `AI_ALETHEIA_PQC_KEY_PATH=./ai_pqc.key`
 
 Then run the backend from `backend/` so the path resolves. Frontend needs `NEXT_PUBLIC_API_URL=http://localhost:8080` in `frontend/.env.local` to call the API.
+
+---
+
+## Marketing copy and badge asset (PQC.7)
+
+**Tagline (README, Vision doc):**  
+*PQC layer: hybrid classical + post-quantum (ML-DSA) signatures for long-term evidence verification.*
+
+**Quantum-Resistant** — Evidence is also signed with a post-quantum (ML-DSA) signature so it remains verifiable even if classical cryptography is broken by future quantum computers.
+
+**Badge asset:** Reusable SVG at [frontend/public/pqc-badge.svg](../../frontend/public/pqc-badge.svg): rounded rectangle, teal accent, atom icon, text “Quantum-Resistant”. Use on the landing page, verify page, README, or docs. The SVG includes `role="img"` and `aria-label="Quantum-Resistant: post-quantum signature for long-term verification"` for accessibility.
 
 ---
 

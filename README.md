@@ -12,6 +12,12 @@ PoC for cryptographically signed and timestamped LLM answers so that responses c
 
 Stack (PoC): Next.js, Java Spring Boot, PostgreSQL, OpenSSL/BouncyCastle, RFC 3161 TSA, one LLM (OpenAI/Gemini/Mistral).
 
+**PQC layer:** Hybrid classical + post-quantum (ML-DSA) signatures for long-term evidence verification. See [Plan PQC](docs/en/PLAN_PQC.md).
+
+**Quantum-Resistant** — When enabled, evidence is also signed with a post-quantum (ML-DSA) signature so it remains verifiable even if classical cryptography is broken by future quantum computers. Optional; can be turned on via [PQC key generation](#pqc-key-generation-optional).
+
+![Quantum-Resistant](frontend/public/pqc-badge.svg)
+
 ---
 
 ## Documentation
@@ -33,6 +39,7 @@ Docs are grouped by language in `docs/<lang>/` (en, ru, et). **Overview and wher
 | **Testing Strategy** | [Testing Strategy](docs/en/TESTING_STRATEGY.md) | [Стратегия тестирования](docs/ru/TESTING_STRATEGY.md) | [Testimise strateegia](docs/et/TESTING_STRATEGY.md) |
 | **Future ideas** (PKI for AI agents, OpenClaw, MCP) | — | [Будущие идеи](docs/ru/ideas/README.md) | [Tuleviku ideed](docs/et/ideas/README.md) |
 | **Crypto reference** (algorithms, keys, why tsaToken) | [Crypto reference](docs/en/CRYPTO_REFERENCE.md) | — | — |
+| **Plan PQC** (post-quantum, ML-DSA, quantum-resistant) | [Plan PQC](docs/en/PLAN_PQC.md) | [RU](docs/ru/PLAN_PQC.md) | [ET](docs/et/PLAN_PQC.md) |
 | **Legal & regulatory** (eIDAS, EU AI Act, GDPR, ETSI) | [Legal docs](docs/legal/README.md) | | |
 | **Architecture diagrams** | [Architecture diagrams](diagrams/architecture.md) (Mermaid: pipeline, trust chain, stack) | | |
 

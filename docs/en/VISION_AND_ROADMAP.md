@@ -28,6 +28,7 @@ Product vision and next steps: from cryptographically verifiable AI responses to
 | **RFC 3161 TSA** | ✅ Implemented (rare in AI projects) |
 | **Trust chain** | ✅ Signed response + TSA token; verifiable on our backend |
 | **Deploy** | ✅ Docker, docker-compose, Ansible |
+| **PQC (optional)** | ✅ Hybrid classical + post-quantum (ML-DSA) signatures for long-term evidence verification ([Plan PQC](PLAN_PQC.md)) |
 
 The hardest part is done: a **cryptographically strict trust chain for AI**. The next level is turning “signed AI response” into **audit-grade AI attestation** and **verification without our server**.
 
