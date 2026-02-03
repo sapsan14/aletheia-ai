@@ -59,7 +59,7 @@ ansible-playbook -i 'aletheia ansible_host=YOUR_VM_IP,' deploy/ansible/playbook.
 | `deploy_repo_url` | https://github.com/sapsan14/aletheia-ai.git | Repo to clone |
 | `deploy_repo_version` | main | Branch or tag |
 | `postgres_password` | local | DB password |
-| `openai_api_key` | (empty) | OpenAI API key |
+| `openai_api_key` | (empty) | OpenAI API key. **Redeploy:** if you don't pass `-e openai_api_key`, the playbook keeps the existing value from server `.env` (no overwrite). |
 | `cors_allowed_origins` | http://localhost:3000 | CORS allowed origins (comma-separated). **ngrok:** add `https://your-subdomain.ngrok-free.dev` |
 | `next_public_api_url` | http://localhost:8080 | **ngrok:** leave empty (playbook sets it); frontend uses relative `/api`, proxied by Next.js. **Production (no ngrok):** `http://YOUR_VM_IP:8080` |
 | `ngrok_enabled` | **true** | Single-port (3000) via ngrok; API proxied by Next.js. Set `false` to expose VM:3000 + VM:8080 directly. |
@@ -281,6 +281,8 @@ ansible-playbook -i deploy/ansible/inventory.yml deploy/ansible/playbook.yml -e 
 Add `NGROK_AUTHTOKEN` to `.env`. The playbook starts one tunnel (frontend on port 3000), sets `NEXT_PUBLIC_API_URL=` and rebuilds so the client uses relative `/api` URLs. The [Next.js runtime proxy](frontend/app/api/[...path]/route.ts) forwards `/api/*` to the backend at `BACKEND_INTERNAL_URL` (set to `http://backend:8080` in docker-compose). No second tunnel or CORS needed.
 
 ### Changing OPENAI_API_KEY (or other .env) on the server
+
+**Redeploy and .env:** The playbook rewrites `.env` from a template on each run. If you do **not** pass `-e openai_api_key=...`, the playbook now **preserves** the existing `OPENAI_API_KEY` from the server's current `.env` (so redeploy no longer wipes it). Pass `-e openai_api_key=sk-...` only when you want to set or change it.
 
 **Symptom:** You set `OPENAI_API_KEY=sk-...` in `/opt/aletheia-ai/.env` and ran `docker compose restart backend`, but the app still shows "Set OPENAI_API_KEY on the server...".
 

@@ -143,13 +143,37 @@
       ansible.builtin.set_fact:
         pqc_key_on_server_path: "{{ 'ai_pqc.key' if (pqc_key_server_early.results[0].stat.exists | default(false)) else ('backend/ai_pqc.key' if (pqc_key_server_early.results[1].stat.exists | default(false)) else '') }}"
 
-    - name: Create .env from template
+    - name: Check if .env already exists on server
+      ansible.builtin.stat:
+        path: "{{ app_dir }}/.env"
+      register: env_file_stat
+
+    - name: Read existing OPENAI_API_KEY from server .env (preserve when not passing -e openai_api_key)
+      ansible.builtin.slurp:
+        src: "{{ app_dir }}/.env"
+      register: env_slurp
+      when: env_file_stat.stat.exists | default(false)
+
+    - name: Set existing OPENAI_API_KEY fact from server .env
+      ansible.builtin.set_fact:
+        existing_openai_api_key: "{{ ((env_slurp.content | b64decode) | regex_search('OPENAI_API_KEY=(.+)', '\\1')) | default('') | trim }}"
+      when: env_file_stat.stat.exists | default(false) and env_slurp is defined and env_slurp.content is defined
+
+    - name: Set existing OPENAI_API_KEY to empty when .env missing or before slurp
+      ansible.builtin.set_fact:
+        existing_openai_api_key: ""
+      when: not (env_file_stat.stat.exists | default(false))
+
+    - name: Create .env from template (preserves existing OPENAI_API_KEY when -e openai_api_key not passed)
       ansible.builtin.template:
         src: templates/.env.j2
         dest: "{{ app_dir }}/.env"
         owner: ubuntu
         group: ubuntu
         mode: "0600"
+      vars:
+        # Use existing key from server when openai_api_key not passed, so redeploy doesn't wipe it
+        openai_api_key: "{{ openai_api_key | default(existing_openai_api_key | default('')) }}"
 
     - name: Check if signing key exists locally
       ansible.builtin.stat:
