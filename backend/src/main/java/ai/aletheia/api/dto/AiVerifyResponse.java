@@ -19,6 +19,7 @@ import java.util.List;
  * @param policyRulesEvaluated Phase 4: list of rule results (ruleId + status)
  * @param signaturePqc    PQC.5: Base64 ML-DSA signature (null when PQC disabled)
  * @param pqcAlgorithm    PQC.5: e.g. "ML-DSA (Dilithium3)" (null when no PQC)
+ * @param computedHash    Backend-recomputed hash (for debugging mismatch; same algorithm as at save time)
  */
 @JsonInclude(JsonInclude.Include.ALWAYS)
 public record AiVerifyResponse(
@@ -26,6 +27,7 @@ public record AiVerifyResponse(
         String prompt,
         String response,
         String responseHash,
+        String computedHash,
         String signature,
         String tsaToken,
         String llmModel,

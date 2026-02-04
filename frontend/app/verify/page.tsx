@@ -20,6 +20,8 @@ interface VerifyRecord {
   prompt: string;
   response: string;
   responseHash: string;
+  /** Backend-recomputed hash (for debugging mismatch) */
+  computedHash?: string | null;
   signature: string | null;
   tsaToken: string | null;
   llmModel: string;
@@ -101,6 +103,27 @@ function claimCanonicalJson(
   return `{"claim":"${c}","confidence":${confStr},"model":"${m}","policy_version":"${p}"}`;
 }
 
+/** Legacy format (no toFixed) for verifying records saved before %.6f. */
+function claimCanonicalJsonLegacy(
+  claim: string | null | undefined,
+  confidence: number | null | undefined,
+  model: string | null | undefined,
+  policyVersion: string | null | undefined
+): string {
+  const escapeJson = (s: string) =>
+    (s ?? "")
+      .replace(/\\/g, "\\\\")
+      .replace(/"/g, '\\"')
+      .replace(/\n/g, "\\n")
+      .replace(/\r/g, "\\r")
+      .replace(/\t/g, "\\t");
+  const c = escapeJson(claim ?? "");
+  const m = escapeJson(model ?? "");
+  const p = escapeJson(policyVersion ?? "");
+  const conf = confidence != null ? Number(confidence) : 0;
+  return `{"claim":"${c}","confidence":${conf},"model":"${m}","policy_version":"${p}"}`;
+}
+
 function truncateMiddle(str: string, head = 20, tail = 20): string {
   if (!str || str.length <= head + tail) return str;
   return `${str.slice(0, head)}...${str.slice(-tail)}`;
@@ -145,6 +168,7 @@ function VerifyContent() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hashMatch, setHashMatch] = useState<boolean | null>(null);
+  const [frontendComputedHash, setFrontendComputedHash] = useState<string | null>(null);
   const [hashChecking, setHashChecking] = useState(false);
   const [claimExpanded, setClaimExpanded] = useState(false);
   const [evidenceDownloading, setEvidenceDownloading] = useState(false);
@@ -186,6 +210,7 @@ function VerifyContent() {
     if (!record) return;
     setHashChecking(true);
     setHashMatch(null);
+    setFrontendComputedHash(null);
     try {
       const responseCanonical = canonicalize(record.response);
       const hasClaim =
@@ -195,8 +220,20 @@ function VerifyContent() {
         ? responseCanonical + "\n" + claimCanonicalJson(record.claim, record.confidence, record.llmModel, record.policyVersion)
         : responseCanonical;
       const computed = await sha256Hex(toHash);
+      setFrontendComputedHash(computed);
       const stored = (record.responseHash || "").toLowerCase();
-      setHashMatch(computed === stored);
+      let match = computed === stored;
+      if (!match && hasClaim) {
+        const toHashLegacy =
+          responseCanonical + "\n" + claimCanonicalJsonLegacy(record.claim, record.confidence, record.llmModel, record.policyVersion);
+        const computedLegacy = await sha256Hex(toHashLegacy);
+        match = computedLegacy === stored;
+      }
+      if (!match) {
+        const responseOnlyHash = await sha256Hex(responseCanonical);
+        match = responseOnlyHash === stored;
+      }
+      setHashMatch(match);
     } catch {
       setHashMatch(false);
     } finally {
@@ -800,9 +837,32 @@ function VerifyContent() {
           </p>
         )}
         {hashMatch === false && (
-          <p className="mt-2 text-red-600 dark:text-red-400">
-            ✗ Hash mismatch — response may have been altered
-          </p>
+          <div className="mt-2 space-y-1 text-sm">
+            <p className="text-red-600 dark:text-red-400">
+              ✗ Hash mismatch — response may have been altered
+            </p>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+              Compare: Stored (saved at ask time) vs Backend (recomputed from DB) vs Frontend (recomputed in browser).
+            </p>
+            <dl className="mt-2 space-y-0.5 font-mono text-xs">
+              <div>
+                <dt className="text-zinc-500">Stored:</dt>
+                <dd className="break-all text-zinc-700 dark:text-zinc-300">{record.responseHash ?? "—"}</dd>
+              </div>
+              {record.computedHash != null && (
+                <div>
+                  <dt className="text-zinc-500">Backend computed:</dt>
+                  <dd className="break-all text-zinc-700 dark:text-zinc-300">{record.computedHash}</dd>
+                </div>
+              )}
+              {frontendComputedHash != null && (
+                <div>
+                  <dt className="text-zinc-500">Frontend computed:</dt>
+                  <dd className="break-all text-zinc-700 dark:text-zinc-300">{frontendComputedHash}</dd>
+                </div>
+              )}
+            </dl>
+          </div>
         )}
       </div>
 

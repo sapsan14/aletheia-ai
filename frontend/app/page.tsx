@@ -30,6 +30,7 @@ interface VerifyRecord {
   prompt: string;
   response: string;
   responseHash: string;
+  computedHash?: string | null;
   signature: string | null;
   tsaToken: string | null;
   llmModel: string;
@@ -114,6 +115,27 @@ function claimCanonicalJson(
   return `{"claim":"${c}","confidence":${confStr},"model":"${m}","policy_version":"${p}"}`;
 }
 
+/** Legacy format (no toFixed) for verifying records saved before %.6f was introduced. */
+function claimCanonicalJsonLegacy(
+  claim: string | null | undefined,
+  confidence: number | null | undefined,
+  model: string | null | undefined,
+  policyVersion: string | null | undefined
+): string {
+  const escapeJson = (s: string) =>
+    (s ?? "")
+      .replace(/\\/g, "\\\\")
+      .replace(/"/g, '\\"')
+      .replace(/\n/g, "\\n")
+      .replace(/\r/g, "\\r")
+      .replace(/\t/g, "\\t");
+  const c = escapeJson(claim ?? "");
+  const m = escapeJson(model ?? "");
+  const p = escapeJson(policyVersion ?? "");
+  const conf = confidence != null ? Number(confidence) : 0;
+  return `{"claim":"${c}","confidence":${conf},"model":"${m}","policy_version":"${p}"}`;
+}
+
 const EVIDENCE_FILE_DESCRIPTIONS: Record<string, string> = {
   "response.txt": "Response text",
   "canonical.bin": "Canonical bytes",
@@ -190,6 +212,7 @@ function TrustPanel({
   downloadError: string | null;
 }) {
   const [hashMatch, setHashMatch] = useState<boolean | null>(null);
+  const [frontendComputedHash, setFrontendComputedHash] = useState<string | null>(null);
   const [hashChecking, setHashChecking] = useState(false);
   const [claimExpanded, setClaimExpanded] = useState(false);
   const [verifierDownloading, setVerifierDownloading] = useState(false);
@@ -253,6 +276,7 @@ function TrustPanel({
     if (!responseText || !storedHash) return;
     setHashChecking(true);
     setHashMatch(null);
+    setFrontendComputedHash(null);
     try {
       const responseCanonical = canonicalize(responseText);
       const hasClaim =
@@ -268,8 +292,27 @@ function TrustPanel({
             dataToUse.policyVersion
           )
         : responseCanonical;
-      const computed = await sha256Hex(toHash);
-      setHashMatch(computed === storedHash.toLowerCase());
+      let computed = await sha256Hex(toHash);
+      setFrontendComputedHash(computed);
+      let match = computed === storedHash.toLowerCase();
+      if (!match && hasClaim && dataToUse) {
+        const toHashLegacy =
+          responseCanonical +
+          "\n" +
+          claimCanonicalJsonLegacy(
+            dataToUse.claim,
+            dataToUse.confidence,
+            dataToUse.llmModel,
+            dataToUse.policyVersion
+          );
+        const computedLegacy = await sha256Hex(toHashLegacy);
+        match = computedLegacy === storedHash.toLowerCase();
+      }
+      if (!match) {
+        const responseOnlyHash = await sha256Hex(responseCanonical);
+        match = responseOnlyHash === storedHash.toLowerCase();
+      }
+      setHashMatch(match);
     } catch {
       setHashMatch(false);
     } finally {
@@ -655,9 +698,34 @@ function TrustPanel({
             </p>
           )}
           {hashMatch === false && (
-            <p className="mt-2 text-red-600 dark:text-red-400">
-              ✗ Hash mismatch — response may have been altered
-            </p>
+            <div className="mt-2 space-y-1 text-sm">
+              <p className="text-red-600 dark:text-red-400">
+                ✗ Hash mismatch — response may have been altered
+              </p>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                Compare to find the cause: Stored (saved at ask time) vs Backend (recomputed from DB) vs Frontend (recomputed in browser).
+              </p>
+              <dl className="mt-2 space-y-0.5 font-mono text-xs">
+                <div>
+                  <dt className="text-zinc-500">Stored:</dt>
+                  <dd className="break-all text-zinc-700 dark:text-zinc-300">
+                    {record?.responseHash ?? responseData?.responseHash ?? "—"}
+                  </dd>
+                </div>
+                {record?.computedHash != null && (
+                  <div>
+                    <dt className="text-zinc-500">Backend computed:</dt>
+                    <dd className="break-all text-zinc-700 dark:text-zinc-300">{record.computedHash}</dd>
+                  </div>
+                )}
+                {frontendComputedHash != null && (
+                  <div>
+                    <dt className="text-zinc-500">Frontend computed:</dt>
+                    <dd className="break-all text-zinc-700 dark:text-zinc-300">{frontendComputedHash}</dd>
+                  </div>
+                )}
+              </dl>
+            </div>
           )}
         </div>
 

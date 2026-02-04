@@ -69,7 +69,22 @@ public class AiVerifyController {
     private static final String PQC_ALGORITHM = "ML-DSA (Dilithium3)";
 
     private AiVerifyResponse toResponse(AiResponse e) {
-        boolean hashMatch = computeHashMatch(e);
+        String computedHash = computeHashValue(e);
+        String stored = e.getResponseHash();
+        boolean hashMatch = computedHash != null && computedHash.equalsIgnoreCase(stored);
+        if (!hashMatch && stored != null && !stored.isBlank()) {
+            String legacyHash = computeHashValueLegacy(e);
+            if (legacyHash != null && legacyHash.equalsIgnoreCase(stored)) {
+                hashMatch = true;
+            }
+        }
+        if (!hashMatch && stored != null && !stored.isBlank()) {
+            String responseOnlyHash = computeHashResponseOnly(e);
+            if (responseOnlyHash != null && responseOnlyHash.equalsIgnoreCase(stored)) {
+                hashMatch = true;
+                log.debug("Record id={} verified with response-only hash (claim present but was not included at save time)", e.getId());
+            }
+        }
         String signatureValid = computeSignatureValid(e);
         String signaturePqc = e.getSignaturePqc() != null && !e.getSignaturePqc().isBlank() ? e.getSignaturePqc() : null;
         String pqcAlgorithm = signaturePqc != null ? PQC_ALGORITHM : null;
@@ -80,6 +95,7 @@ public class AiVerifyController {
                 e.getPrompt(),
                 e.getResponse(),
                 e.getResponseHash(),
+                computedHash,
                 e.getSignature(),
                 e.getTsaToken(),
                 e.getLlmModel(),
@@ -100,29 +116,49 @@ public class AiVerifyController {
         );
     }
 
-    private boolean computeHashMatch(AiResponse e) {
-        String stored = e.getResponseHash();
-        if (stored == null || stored.isBlank()) return false;
+    /** Returns the hash recomputed from stored response (and claim if present), or null on error. Uses current format (%.6f for confidence). */
+    private String computeHashValue(AiResponse e) {
+        return computeHashValueWithClaimFormat(e, true);
+    }
+
+    /** Same as computeHashValue but with legacy confidence format (for records saved before %.6f). */
+    private String computeHashValueLegacy(AiResponse e) {
+        return computeHashValueWithClaimFormat(e, false);
+    }
+
+    /** Hash of response only (no claim). For records that were saved with response-only hash but have claim data. */
+    private String computeHashResponseOnly(AiResponse e) {
+        if (e.getResponseHash() == null || e.getResponseHash().isBlank()) return null;
         try {
             byte[] canonical = canonicalizationService.canonicalize(e.getResponse());
-            String computed;
+            return hashService.hash(canonical);
+        } catch (Exception ex) {
+            log.warn("Hash (response-only) computation failed for id={}: {}", e.getId(), ex.getMessage());
+            return null;
+        }
+    }
+
+    private String computeHashValueWithClaimFormat(AiResponse e, boolean useFixedFormat) {
+        String stored = e.getResponseHash();
+        if (stored == null || stored.isBlank()) return null;
+        try {
+            byte[] canonical = canonicalizationService.canonicalize(e.getResponse());
             boolean hasClaim = (e.getClaim() != null && !e.getClaim().isBlank())
                     || (e.getPolicyVersion() != null && !e.getPolicyVersion().isBlank());
             if (hasClaim) {
-                byte[] claimBytes = ClaimCanonical.toCanonicalBytes(
-                        e.getClaim(), e.getConfidence(), e.getLlmModel(), e.getPolicyVersion());
+                byte[] claimBytes = useFixedFormat
+                        ? ClaimCanonical.toCanonicalBytes(e.getClaim(), e.getConfidence(), e.getLlmModel(), e.getPolicyVersion())
+                        : ClaimCanonical.toCanonicalBytesLegacy(e.getClaim(), e.getConfidence(), e.getLlmModel(), e.getPolicyVersion());
                 byte[] bytesToSign = new byte[canonical.length + 1 + claimBytes.length];
                 System.arraycopy(canonical, 0, bytesToSign, 0, canonical.length);
                 bytesToSign[canonical.length] = '\n';
                 System.arraycopy(claimBytes, 0, bytesToSign, canonical.length + 1, claimBytes.length);
-                computed = hashService.hash(bytesToSign);
-            } else {
-                computed = hashService.hash(canonical);
+                return hashService.hash(bytesToSign);
             }
-            return computed.equalsIgnoreCase(stored);
+            return hashService.hash(canonical);
         } catch (Exception ex) {
-            log.warn("Hash verification failed for id={}: {}", e.getId(), ex.getMessage());
-            return false;
+            log.warn("Hash computation failed for id={}: {}", e.getId(), ex.getMessage());
+            return null;
         }
     }
 
