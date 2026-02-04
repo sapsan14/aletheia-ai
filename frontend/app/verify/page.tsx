@@ -1007,6 +1007,21 @@ function VerifyContent() {
         </div>
       </section>
 
+      <p className="text-center text-sm text-zinc-500 dark:text-zinc-400">
+        <a
+          href={`${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080").replace(/\/$/, "")}/swagger-ui.html`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:underline"
+        >
+          View API spec
+        </a>
+        {" · "}
+        <Link href="/developers" className="hover:underline">
+          Integrate with your stack
+        </Link>
+      </p>
+
       {/* Preview package modal */}
       {previewOpen && (
         <div
