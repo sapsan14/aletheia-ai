@@ -40,6 +40,18 @@ Checklist for **§4.2** of [PHASE4_5_TRANSITION](en/PHASE4_5_TRANSITION.md). Run
 
 ---
 
+## Automated API run (optional)
+
+The following were verified via API (backend + frontend running):
+
+- **POST /api/ai/ask** — returns `id`, `response`, `responseHash`, `signature`; LLM response received.
+- **GET /api/ai/verify/:id** — returns `policyCoverage` (e.g. 0.5), `policyRulesEvaluated` (4 rules), `policyVersion` (e.g. gdpr-2024).
+- **GET /api/ai/evidence/:id?format=json** — `metadata.json` (base64) contains `policy_coverage`, `policy_rules_evaluated`.
+
+UI steps (1.1–1.7, 2.1–2.2, 3.1–3.3) require manual run in browser (MCP snapshot does not expose element refs for click/fill).
+
+---
+
 ## Sign-off
 
 - **Date:** _______________

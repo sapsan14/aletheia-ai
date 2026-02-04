@@ -46,3 +46,17 @@ Best regards,
 {{Your Name}}  
 {{Role}}  
 {{Contact}}
+
+---
+
+## Outcomes & insights (update as outreach progresses)
+
+- **Contacts / outcomes:**  
+  _Log here: sent date, target, response (e.g. no reply, call scheduled, LOI, pass)._
+
+- **Key insights (3–5):**  
+  1. _What resonated (e.g. “offline verification”, “policy coverage”)?_  
+  2. _What confused people?_  
+  3. _Objections or “not now” reasons._  
+  4. _Best channel (email vs LinkedIn vs referral)._  
+  5. _One-liner that got the most interest._
