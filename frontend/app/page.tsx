@@ -224,6 +224,7 @@ function TrustPanel({
       record.llmModel && `Model: ${record.llmModel}`,
       `Integrity: ${integrityLabel}`,
       `Timestamp: ${timestampLabel}`,
+      "Coverage-policy: aletheia-demo (2026-01)",
     ]
       .filter(Boolean)
       .join(" — ");
@@ -402,7 +403,7 @@ function TrustPanel({
               </summary>
               <p className="mt-2 text-xs text-zinc-600 dark:text-zinc-400">
                 The signature covers the response text in canonical form. If this response
-                includes an AI claim (claim, confidence, policy version), those are also
+                includes an AI claim (claim, confidence, Claim-policy), those are also
                 part of the signed payload. You can verify the response offline using the{" "}
                 <button
                   type="button"
@@ -480,7 +481,7 @@ function TrustPanel({
             {record?.policyVersion != null && String(record.policyVersion).trim() !== "" && (
               <div className="mb-3 flex flex-wrap gap-x-2">
                 <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
-                  Policy version:
+                  Claim-policy:
                 </span>
                 <span className="text-sm text-zinc-700 dark:text-zinc-300" title={TOOLTIPS.policy_version}>
                   {formatPolicyVersion(record.policyVersion) || record.policyVersion}

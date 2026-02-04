@@ -140,9 +140,10 @@ Sign a structured **claim** plus context instead of raw text:
 
 | Aspect | Benefit |
 |--------|---------|
-| **Signed content** | Claim + context (model, policy version) |
+| **Signed content** | Claim + context (model, Claim-policy) |
 | **Confidence** | Explicit uncertainty for legal/compliance |
-| **Policy version** | Audit trail: which rules were in effect |
+| **Claim-policy** | Audit trail: which policy/standard the AI used when forming the claim |
+| **Coverage-policy** | Which rules Aletheia evaluated (e.g. aletheia-demo 2026-01) |
 
 ---
 

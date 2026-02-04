@@ -22,9 +22,9 @@ export const TOOLTIPS: Record<string, string> = {
   confidence:
     "A subjective confidence score provided by the AI for this claim. This is not a legal guarantee.",
   policy_version:
-    "The policy or regulatory framework used when forming the claim.",
+    "Claim-policy: the policy or regulatory framework the AI used when forming this claim (e.g. AI-ACT-2024, GDPR).",
   policy_coverage:
-    "Share of demo policy rules that were evaluated for this response.",
+    "Coverage-policy: share of rules (e.g. aletheia-demo 2026-01) that were evaluated for this response.",
   included_in_signed_payload:
     "This claim is cryptographically protected and cannot be changed without breaking verification.",
   response_hash: "A cryptographic fingerprint of the response content.",

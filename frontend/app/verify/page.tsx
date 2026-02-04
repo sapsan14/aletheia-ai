@@ -446,7 +446,7 @@ function VerifyContent() {
             </summary>
             <p className="mt-2 text-xs text-zinc-600 dark:text-zinc-400">
               The signature covers the response text in canonical form. If this response
-              includes an AI claim (claim, confidence, policy version), those are also
+              includes an AI claim (claim, confidence, Claim-policy), those are also
               part of the signed payload. You can verify the response offline using the
               Evidence Package.
             </p>
@@ -548,7 +548,7 @@ function VerifyContent() {
           {record.policyVersion != null && String(record.policyVersion).trim() !== "" && (
             <div className="mb-3 flex flex-wrap gap-x-2">
               <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
-                Policy version:
+                Claim-policy:
               </span>
               <span
                 className="text-sm text-zinc-700 dark:text-zinc-300"
@@ -571,19 +571,22 @@ function VerifyContent() {
       {showPolicyCoverageBlock && (
         <section
           className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-600 dark:bg-zinc-700/30"
-          aria-label="Policy coverage"
+          aria-label="Coverage-policy"
         >
           <div className="mb-3 flex flex-wrap items-center gap-2">
             <h2
               className="text-lg font-semibold text-zinc-900 dark:text-zinc-50"
               title={TOOLTIPS.policy_coverage}
             >
-              📘 Policy coverage (demo)
+              📘 Coverage-policy (demo)
             </h2>
             <span className="text-sm text-zinc-600 dark:text-zinc-400">
               {hasPolicyData && coveragePercent != null
                 ? `${coveragePercent}% — ${rulesChecked} of ${DEMO_POLICY_TOTAL_RULES} rules checked`
-                : "Policy coverage not available"}
+                : "Coverage-policy not available"}
+            </span>
+            <span className="text-xs text-zinc-500 dark:text-zinc-400">
+              Coverage-policy: aletheia-demo (2026-01)
             </span>
           </div>
 

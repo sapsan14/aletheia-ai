@@ -6,7 +6,7 @@ const USE_CASES = [
     pain:
       "Candidates dispute AI-driven decisions; you need to show which criteria and policy applied.",
     solution:
-      "Aletheia fixes the exact wording, policy version, and confidence so you can prove due diligence.",
+      "Aletheia fixes the exact wording, Claim-policy, and confidence so you can prove due diligence.",
   },
   {
     title: "Legal / compliance",

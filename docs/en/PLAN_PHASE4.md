@@ -5,6 +5,8 @@ This document describes **Phase 4** of the roadmap: market validation (landing, 
 **Status:** Draft for review  
 **Related:** [Vision & roadmap](VISION_AND_ROADMAP.md) · [Plan Phase 2](PLAN_PHASE2.md) · [Plan Phase 3 UI](PLAN_PHASE3_UI.md) · [NEXT.md](../tmp/NEXT.md)
 
+**Terminology (UI and docs):** We use **Coverage-policy** for the rules Aletheia checks (e.g. aletheia-demo 2026-01) and **Claim-policy** for the policy/standard the AI used when forming the claim. See [PHASE4_5_TRANSITION.md](PHASE4_5_TRANSITION.md) §2.1.
+
 ---
 
 ## Table of contents
@@ -40,6 +42,27 @@ Phase 4 is **market validation + policy foundation**, without heavy engineering.
 - Use cases page (B.4).
 - Outreach and pilots (B.5).
 - Minimal analytics (B.6).
+
+### Implementation status (2026‑02 snapshot)
+
+Phase 4 implementation across code and docs (branches `cursor/plan-phase-4-c95d` and successors):
+
+- [x] **A.1 Demo policy**  
+  `docs/en/policy/aletheia-demo-2026-01.json` and `.md` exist and are used as the canonical demo policy (rules R1–R4).
+- [x] **A.2 Policy coverage**  
+  Backend computes and stores `policy_coverage` and rule results; verify API and Evidence Package expose these fields; verify UI renders a Coverage-policy block.
+- [x] **A.3 UI: “Why is confidence not 100%?”**  
+  `/verify` page shows a dedicated block explaining which rules are checked vs not evaluated and ties this to confidence.
+- [x] **B.1 Landing hero + CTA**  
+  Main page hero uses the “AI said that. But under which rules?” narrative, with CTA “Verify a response — Demo”.
+- [x] **B.4 Use cases page**  
+  `/use-cases` page lists several concrete scenarios (HR, legal/compliance, support, education, governance).
+- [~] **B.3 Killer scenario (text + video)**  
+  Textual scenario is documented; video/screencast can be added later.
+- [~] **B.5 Outreach and pilots**  
+  `docs/outreach/PHASE4_OUTREACH.md` is created; it should be kept up to date with real outreach results.
+- [~] **B.6 Minimal analytics**  
+  Basic frontend analytics hooks exist; Phase 4.5 will tighten event naming and documentation (see `PHASE4_5_TRANSITION.md`).
 
 **Out of scope for Phase 4:** Full Policy Registry (A.5), Policy Evaluation Pipeline (A.6), time-travel verify (A.7), human/hybrid review (A.8), public API/OpenAPI (C.1), sign-only API (C.2), SDK (C.3), MCP attestation (C.4), SIEM/blockchain integrations (C.5), partner scenarios (C.6).
 

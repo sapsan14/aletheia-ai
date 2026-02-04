@@ -134,7 +134,7 @@ Response
 │ “The clause is not relevant to GDPR.”        │
 │                                             │
 │ Confidence: 0.85                             │
-│ Policy version: GDPR-2024                    │
+│ Claim-policy: GDPR-2024                      │
 │                                             │
 │ 🔐 Included in signed payload                │
 └─────────────────────────────────────────────┘
@@ -144,7 +144,7 @@ Response
 
 - **Claim** — `record.claim`. Display in quotes or blockquote. If long, truncate with “…” and “Show more” or full text on expand.
 - **Confidence** — `record.confidence` (e.g. `0.85`). Display as number or percentage (e.g. 85%). Tooltip clarifies it is not a legal guarantee.
-- **Policy version** — `record.policyVersion` (e.g. `gdpr-2024`). Display as-is or formatted (e.g. “GDPR-2024”).
+- **Claim-policy** — `record.policyVersion` (e.g. `gdpr-2024`). Display as-is or formatted (e.g. “GDPR-2024”).
 - **Included in signed payload** — Short label or badge. Tooltip: this claim is cryptographically protected and cannot be changed without breaking verification.
 
 **Component suggestion:** `AIClaimCard`. All fields that have tooltips in the table must get `title` or `aria-describedby` from the tooltip text.
@@ -321,7 +321,7 @@ When adding new tooltips, check that they answer “Why should I care?” rather
 If implementing in stages, prioritize in this order:
 
 1. **Trust Summary Card** (Section 1) — Visible immediately; sets “verified” and “integrity / timestamp” in plain language.
-2. **AI Claim block** (Section 3) — Differentiator; shows claim, confidence, policy version, and “included in signed payload”.
+2. **AI Claim block** (Section 3) — Differentiator; shows claim, confidence, Claim-policy, and “included in signed payload”.
 3. **Evidence Package block** (Section 5) — Download + optional preview; reinforces “offline verification” and compliance.
 
 Then add Prompt & Response refinements (Section 2), collapsible Verification Details (Section 4), and footer line (Section 6).
@@ -420,7 +420,7 @@ Every step that requires code changes has a number and a **Coding prompt (LLM-re
 
 **Coding prompt (LLM-readable):**
 
-- On the verify page, add an **AI Claim** card (or block) that is **rendered only when** `record.claim != null` or `record.policyVersion != null` (or both). The block must show: (1) Heading “AI Claim” with tooltip TOOLTIPS.ai_claim_heading. (2) Label “Claim:” and the value `record.claim` in quotes or blockquote; if length > ~200 chars, truncate with “…” and optionally “Show more” to expand. (3) Label “Confidence:” and `record.confidence` (e.g. 0.85 or 85%) with tooltip TOOLTIPS.confidence. (4) Label “Policy version:” and `record.policyVersion` (e.g. format “GDPR-2024” if value is “gdpr-2024”) with tooltip TOOLTIPS.policy_version. (5) A short label or badge “Included in signed payload” with tooltip TOOLTIPS.included_in_signed_payload. Use the TOOLTIPS map from Step P3.1. Do not render this block at all when `claim` and `policyVersion` are both null/undefined.
+- On the verify page, add an **AI Claim** card (or block) that is **rendered only when** `record.claim != null` or `record.policyVersion != null` (or both). The block must show: (1) Heading “AI Claim” with tooltip TOOLTIPS.ai_claim_heading. (2) Label “Claim:” and the value `record.claim` in quotes or blockquote; if length > ~200 chars, truncate with “…” and optionally “Show more” to expand. (3) Label “Confidence:” and `record.confidence` (e.g. 0.85 or 85%) with tooltip TOOLTIPS.confidence. (4) Label “Claim-policy:” and `record.policyVersion` (e.g. format “GDPR-2024” if value is “gdpr-2024”) with tooltip TOOLTIPS.policy_version. (5) A short label or badge “Included in signed payload” with tooltip TOOLTIPS.included_in_signed_payload. Use the TOOLTIPS map from Step P3.1. Do not render this block at all when `claim` and `policyVersion` are both null/undefined.
 
 **Acceptance:** AI Claim block appears only when record has claim or policyVersion; all fields and tooltips present; “Included in signed payload” visible with tooltip.
 
@@ -484,7 +484,7 @@ Every step that requires code changes has a number and a **Coding prompt (LLM-re
 
 **Coding prompt (LLM-readable):**
 
-- Implement the content for the “What is verified?” button from Step P3.2. When the user clicks it, show a short explanation (inline expandable or modal) that states: the signature covers the response text in canonical form; if the record has a claim (claim, confidence, policy version), those are also part of the signed payload; verification can be done offline with the Evidence Package. Use plain language (no algorithm names unless necessary). No new tooltips required; the button already has TOOLTIPS.what_is_verified.
+- Implement the content for the “What is verified?” button from Step P3.2. When the user clicks it, show a short explanation (inline expandable or modal) that states: the signature covers the response text in canonical form; if the record has a claim (claim, confidence, Claim-policy), those are also part of the signed payload; verification can be done offline with the Evidence Package. Use plain language (no algorithm names unless necessary). No new tooltips required; the button already has TOOLTIPS.what_is_verified.
 
 **Acceptance:** Clicking “What is verified?” reveals explanation that mentions response text and (when applicable) claim as part of signed payload and offline verification.
 
