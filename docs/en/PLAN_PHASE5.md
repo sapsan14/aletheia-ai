@@ -12,6 +12,7 @@ This document describes **Phase 5** of the roadmap: turning Aletheia from a demo
 ## Table of contents
 
 - [Phase 5 goal and scope](#phase-5-goal-and-scope)
+- [Product tiers (packaging)](#product-tiers-packaging)
 - [Deliverables and development steps](#deliverables-and-development-steps)
 - [Out of scope (Phase 6+)](#out-of-scope-phase-6)
 - [Completion criteria](#completion-criteria)
@@ -59,6 +60,20 @@ Phase 5 is **not started as implementation** yet. Some groundwork has already be
   No live partner integrations yet; pilots from Phase 4 will inform which scenarios to implement first.
 
 **Out of scope for Phase 5:** Full Policy Registry (versioning), Policy Evaluation Pipeline, time-travel verify, human/hybrid review, enterprise dashboards, multi-tenant deployments (deferred to Phase 6+).
+
+---
+
+## Product tiers (packaging)
+
+The following tiers are **positioning only**; no actual prices or quotas are set. They describe target audiences and what each tier offers.
+
+| Tier | Positioning | Target audience |
+|------|-------------|------------------|
+| **Free** | Offline verifier and basic Evidence Package. Evaluate Aletheia without signing: download the verifier JAR and Evidence Packages from the demo, verify locally. Limited or no API access; intended for evaluation and proof-of-concept. | Developers, auditors, teams evaluating verifiable AI before adoption. |
+| **Standard (Paid signer)** | API access to sign and store AI outputs. Full signing pipeline, policy coverage evaluation, and simple analytics. Evidence Package and verification API for every signed response. | Product teams integrating Aletheia into internal tools, HR/legal workflows, or agent pipelines that need attestation and audit trail. |
+| **Compliance bundle** | Everything in Standard plus tailored Coverage-policies and reporting for HR/legal/compliance. Optional consulting and policy design (e.g. human-review rules, content checks) to align with EU AI Act or internal governance. | Compliance officers, legal teams, and organisations that need documented policies and custom reporting for regulators or auditors. |
+
+No prices are committed here; focus is on clear positioning and a path from evaluation (Free) to production signing (Standard) to compliance-focused deployment (Compliance bundle).
 
 ---
 

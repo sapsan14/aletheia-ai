@@ -48,4 +48,10 @@ export const TOOLTIPS: Record<string, string> = {
   // Phase 4.5 — Ambiguity / scope (3.2.1)
   ambiguity_scope_warning:
     "Coverage applies to this response only. Other conversation context (e.g. earlier turns, external tools) is not signed or checked. We don't certify truth; we certify responsibility.",
+  // Phase 4.5 — Trust summary badges (3.4.1)
+  trust_badge_signed: "Response is digitally signed; integrity can be verified.",
+  trust_badge_timestamped: "Creation time certified by a trusted Time Stamping Authority.",
+  trust_badge_policy: "Share of policy rules evaluated for this response.",
+  trust_badge_claim: "AI claim (and Claim-policy) included in signed payload.",
+  trust_badge_offline: "Evidence Package can be verified without the Aletheia server.",
 };

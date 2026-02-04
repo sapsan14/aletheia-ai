@@ -429,6 +429,39 @@ function TrustPanel({
             </h2>
             {hasPqc && <PqcBadge variant="landing" />}
           </div>
+          {/* Trust summary badges — screenshot-friendly for investor decks (3.4.1) */}
+          <div className="mb-3 flex flex-wrap gap-2" role="group" aria-label="Trust summary badges">
+            <span
+              className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${hasSignature ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200" : "bg-zinc-100 text-zinc-500 dark:bg-zinc-700 dark:text-zinc-400"}`}
+              title={TOOLTIPS.trust_badge_signed}
+            >
+              Signed {hasSignature ? "✓" : "—"}
+            </span>
+            <span
+              className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${hasTsaToken ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200" : "bg-zinc-100 text-zinc-500 dark:bg-zinc-700 dark:text-zinc-400"}`}
+              title={TOOLTIPS.trust_badge_timestamped}
+            >
+              Timestamped {hasTsaToken ? "✓" : "—"}
+            </span>
+            <span
+              className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${record?.policyCoverage != null ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200" : "bg-zinc-100 text-zinc-500 dark:bg-zinc-700 dark:text-zinc-400"}`}
+              title={TOOLTIPS.trust_badge_policy}
+            >
+              Policy {record?.policyCoverage != null ? `${Math.round(record.policyCoverage * 100)}%` : "—"}
+            </span>
+            <span
+              className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${(record?.claim != null && String(record.claim).trim() !== "") || (record?.policyVersion != null && String(record.policyVersion).trim() !== "") ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200" : "bg-zinc-100 text-zinc-500 dark:bg-zinc-700 dark:text-zinc-400"}`}
+              title={TOOLTIPS.trust_badge_claim}
+            >
+              Claim {(record?.claim != null && String(record.claim).trim() !== "") || (record?.policyVersion != null && String(record.policyVersion).trim() !== "") ? "Yes" : "No"}
+            </span>
+            <span
+              className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200"
+              title={TOOLTIPS.trust_badge_offline}
+            >
+              Offline ✓
+            </span>
+          </div>
           <dl className="space-y-1.5 text-sm">
             <div className="flex flex-wrap gap-x-2">
               <dt className="text-zinc-500 dark:text-zinc-400">🕒 Created:</dt>
