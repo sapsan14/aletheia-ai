@@ -29,7 +29,7 @@ Phase 5 assumes the following Phase 4 items are **real and stable**, not drafts.
 
 ### 1.1 Policy engine & coverage
 
-- [ ] **Demo policy is finalized**
+- [x] **Demo policy is finalized**
   - `docs/en/policy/aletheia-demo-2026-01.json` and `.md` exist and are considered canonical.
   - Rule IDs `R1`–`R4` are **stable** and referenced in:
     - backend policy evaluation,
@@ -37,13 +37,13 @@ Phase 5 assumes the following Phase 4 items are **real and stable**, not drafts.
     - Evidence Package metadata,
     - UI (verify page).
 
-- [ ] **Backend policy evaluation is on by default**
+- [x] **Backend policy evaluation is on by default**
   - Each new AI response gets:
     - `policy_coverage` stored in DB.
     - `policy_rules_evaluated` (array of ruleId + status) stored in DB.
   - No hidden flags that silently disable policy evaluation in production.
 
-- [ ] **Verify API & Evidence Packages expose policy coverage**
+- [x] **Verify API & Evidence Packages expose policy coverage**
   - `GET /api/ai/verify/:id` includes:
     - `policyCoverage` (0.0–1.0),
     - `policyRulesEvaluated` (array).
@@ -51,43 +51,43 @@ Phase 5 assumes the following Phase 4 items are **real and stable**, not drafts.
     - `policy_coverage`,
     - `policy_rules_evaluated`.
 
-- [ ] **Verify page renders coverage correctly**
+- [x] **Verify page renders coverage correctly**
   - Shows percentage, “N of 4 rules checked”, and rules R1–R4 with status.
 
 ### 1.2 Compliance narrative & disclaimers
 
-- [ ] The message **“We don’t certify truth. We certify responsibility.”** is consistent:
+- [x] The message **“We don’t certify truth. We certify responsibility.”** is consistent:
   - On the hero section of the main page.
   - In the Trust / Verify UI (copy around Policy coverage).
   - In documentation (Trust Model, Phase 4 plan, policy docs).
 
-- [ ] **“Why is confidence not 100%?”**:
+- [x] **“Why is confidence not 100%?”**:
   - Explains in **plain language**:
     - which checks ran and passed,
     - which checks are not evaluated in this demo policy.
   - Includes a short line like: “We do not certify truth; we show what was checked.”
 
-- [ ] *(Recommended)* **Ambiguity warning exists**
+- [x] *(Recommended)* **Ambiguity warning exists**
   - At least one scenario where the UI explicitly hints that:
     - policy coverage or claim does **not** apply to the whole conversation or context,
     - or the request is outside the scope of the demo policy.
 
-- [ ] *(Recommended)* **AI Act-friendly wording**
+- [x] *(Recommended)* **AI Act-friendly wording**
   - At least one paragraph in docs explaining:
     - what is logged / signed,
     - how this helps with audit / accountability duties (without overclaiming compliance).
 
 ### 1.3 Market validation
 
-- [ ] **Demo scenario is written down**
+- [x] **Demo scenario is written down**
   - A single “hero” use case (e.g. HR or Legal/compliance) is clearly described in Phase 4 docs (e.g. `DEMO_SCENARIO_PHASE4.md`).
 
-- [ ] **Outreach log is non-empty**
+- [x] **Outreach log is non-empty**
   - `docs/outreach/PHASE4_OUTREACH.md` contains:
     - at least a few **real contacts / outcomes** (even “no interest” is data),
     - 3–5 key insights (what resonated / what confused people).
 
-- [ ] **Default integration target selected**
+- [x] **Default integration target selected**
   - One main direction is explicitly chosen for Phase 5, e.g.:
     > “Aletheia signs external AI outputs for regulated workflows (HR / legal / governance).”
   - Other directions (MCP, SIEM, blockchain) are marked as **future tracks**.

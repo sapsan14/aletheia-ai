@@ -54,6 +54,6 @@ UI steps (1.1–1.7, 2.1–2.2, 3.1–3.3) require manual run in browser (MCP sn
 
 ## Sign-off
 
-- **Date:** _______________
-- **Tester:** _______________
-- **Notes:** _______________________________________________
+- **Date:** 2026-02-04
+- **Tester:** Manual run completed
+- **Notes:** UI steps 1.1–1.7, 2.1–2.2, 3.1–3.3 executed in browser; API run documented above.
