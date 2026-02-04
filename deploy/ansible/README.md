@@ -20,7 +20,7 @@ openssl genpkey -algorithm RSA -out ai.key -pkeyopt rsa_keygen_bits:2048
 ansible-playbook -i deploy/ansible/inventory.yml deploy/ansible/playbook.yml
 ```
 
-**Result:** Postgres, backend, frontend run at `/opt/aletheia-ai`. Frontend: `http://VM:3000`, Backend: `http://VM:8080`.
+**Result:** Postgres, backend, frontend run at `/opt/aletheia-ai`. Frontend is bound to host port **3001** (to avoid conflicts with other users on the same machine). With ngrok: `https://<ngrok_domain>`; locally: `http://VM:3001`. Backend is not exposed on the host (only via frontend proxy).
 
 ## Update frontend only
 
@@ -72,7 +72,9 @@ ansible-playbook -i 'aletheia ansible_host=YOUR_VM_IP,' deploy/ansible/playbook.
 | `openai_api_key` | (empty) | OpenAI API key. **Redeploy:** if you don't pass `-e openai_api_key`, the playbook keeps the existing value from server `.env` (no overwrite). |
 | `cors_allowed_origins` | http://localhost:3000 | CORS allowed origins (comma-separated). **ngrok:** add `https://your-subdomain.ngrok-free.dev` |
 | `next_public_api_url` | http://localhost:8080 | **ngrok:** leave empty (playbook sets it); frontend uses relative `/api`, proxied by Next.js. **Production (no ngrok):** `http://YOUR_VM_IP:8080` |
-| `ngrok_enabled` | **true** | Single-port (3000) via ngrok; API proxied by Next.js. Set `false` to expose VM:3000 + VM:8080 directly. |
+| `deploy_app_host_port` | **3001** | Host port for frontend (avoids 3000 so other users can use it). ngrok tunnels this port. |
+| `deploy_compose_project` | **aletheia-ai** | Docker Compose project name (isolates our stack from other users' containers). |
+| `ngrok_enabled` | **true** | Single-port via ngrok; API proxied by Next.js. Set `false` to expose VM directly. |
 | `ngrok_authtoken` | — | **Required** when ngrok_enabled. From https://dashboard.ngrok.com/get-started/your-authtoken |
 | `ngrok_domain` | kaia-uncharacterized-unorbitally.ngrok-free.dev | ngrok free domain for tunnel |
 | `signing_key_src` | `{{ playbook_dir }}/../../ai.key` | Override path to PEM key (`-e signing_key_src=/path/to/ai.key`) |
@@ -84,10 +86,10 @@ ansible-playbook -i 'aletheia ansible_host=YOUR_VM_IP,' deploy/ansible/playbook.
 
 ```bash
 cd /opt/aletheia-ai
-docker compose run --rm -v /opt/aletheia-ai:/out backend java -cp /app/app.jar ai.aletheia.crypto.PqcKeyGen /out
+docker compose -p aletheia-ai run --rm -v /opt/aletheia-ai:/out backend java -cp /app/app.jar ai.aletheia.crypto.PqcKeyGen /out
 ```
 
-This creates `ai_pqc.key` and `ai_pqc_public.pem` in `/opt/aletheia-ai`. Then add to `.env`: `AI_ALETHEIA_PQC_ENABLED=true` and `AI_ALETHEIA_PQC_KEY_PATH=/app/ai_pqc.key`, create `docker-compose.override.yml` with backend volume `./ai_pqc.key:/app/ai_pqc.key:ro`, and run `docker compose up -d --force-recreate backend`. See [docs/internal/en/plan-pqc.md](../../docs/internal/en/plan-pqc.md) for key generation and configuration.
+This creates `ai_pqc.key` and `ai_pqc_public.pem` in `/opt/aletheia-ai`. Then add to `.env`: `AI_ALETHEIA_PQC_ENABLED=true` and `AI_ALETHEIA_PQC_KEY_PATH=/app/ai_pqc.key`, ensure `docker-compose.override.yml` has backend volume `./ai_pqc.key:/app/ai_pqc.key:ro` (playbook does this when PQC key exists), and run `docker compose -p aletheia-ai up -d --force-recreate backend`. See [docs/internal/en/plan-pqc.md](../../docs/internal/en/plan-pqc.md) for key generation and configuration.
 
 All `.env.j2` template variables can be overridden via `-e`.
 
@@ -125,9 +127,9 @@ Get your authtoken at https://dashboard.ngrok.com/get-started/your-authtoken
 | `ngrok_enabled` | **true** | Install and run ngrok as systemd service (port 3000). Set `-e ngrok_enabled=false` to disable. |
 | `ngrok_authtoken` | — | **Required** when ngrok_enabled. From ngrok dashboard |
 | `ngrok_domain` | kaia-uncharacterized-unorbitally.ngrok-free.dev | Your ngrok free domain |
-| `ngrok_port` | 3000 | Local port to tunnel (frontend) |
+| `ngrok_port` | same as `app_host_port` (default 3001) | Local port to tunnel (our frontend). |
 
-The service runs `ngrok http 3000 --domain=<ngrok_domain>` (direct CLI, not config file) and restarts on failure. Authtoken from `NGROK_AUTHTOKEN` in `.env` or `/etc/ngrok/ngrok.env`. Ensure CORS includes your ngrok URL (see above).
+The service runs `ngrok http <app_host_port> --domain=<ngrok_domain>` (direct CLI). Default port is **3001** so our app does not conflict with other users' apps on port 3000. Authtoken from `NGROK_AUTHTOKEN` in `.env` or `/etc/ngrok/ngrok.env`. Ensure CORS includes your ngrok URL (see above).
 
 **Full ngrok (one command):** Exposes app via single tunnel (free plan = 1 endpoint). API calls go through the [Next.js runtime proxy](frontend/app/api/[...path]/route.ts) (same origin → no CORS).
 
@@ -136,9 +138,21 @@ ansible-playbook -i deploy/ansible/inventory.yml deploy/ansible/playbook.yml -e 
 ```
 
 Add `NGROK_AUTHTOKEN` to `.env` (project root). The playbook will:
-- Start ngrok tunnel for frontend (port 3000, your free domain)
+- Bind **only port 3001** on the host for our frontend (postgres and backend stay internal; no 3000/8080/5432 conflict with other users)
+- Use Docker Compose project name `aletheia-ai` so our stack is isolated from other users' containers
+- Start ngrok tunnel for frontend (port 3001, your free domain)
 - Set `NEXT_PUBLIC_API_URL=` so the client uses relative `/api` URLs (proxied to backend by [frontend/app/api/[...path]/route.ts](frontend/app/api/[...path]/route.ts))
 - Rebuild frontend with empty API URL, set CORS on backend
+
+### Shared machine (multiple users / no port conflicts)
+
+If several people run apps on the same VM (e.g. university server), use the default settings: our app uses **port 3001** and project name **aletheia-ai**. Others can use 3000 and their own compose project. To use a different port:
+
+```bash
+ansible-playbook -i deploy/ansible/inventory.yml deploy/ansible/playbook.yml -e deploy_app_host_port=3002
+```
+
+Then on the VM, fix ngrok to point to 3002: edit `/etc/systemd/system/ngrok.service`, set `ExecStart=... http 3002 --domain=...`, then `sudo systemctl daemon-reload && sudo systemctl restart ngrok`.
 
 ## API proxy (Docker)
 
@@ -168,16 +182,34 @@ The playbook has been tested end-to-end. Typical run time: ~30 s (no rebuild) to
 
 ## Troubleshooting
 
+### 500 when sending a request (e.g. Send & Verify)
+
+The frontend proxies `/api/*` to the backend. A **500** usually means the backend threw an exception. **On the VM:**
+
+```bash
+cd /opt/aletheia-ai
+docker compose -p aletheia-ai logs --tail=100 backend
+```
+
+**Typical causes:**
+
+1. **Missing or invalid OPENAI_API_KEY** — Backend needs it for `/api/ai/ask`. Set in `/opt/aletheia-ai/.env` and recreate backend: `docker compose -p aletheia-ai up -d --force-recreate backend`.
+2. **Signing key** — If you see "Signing key file not found" or "Could not load private key", fix `ai.key` (see [ai.key: "Is a directory"](#aikey-is-a-directory-or-signing-key-file-not-found)).
+3. **Database** — If Postgres was down or schema failed, check `docker compose -p aletheia-ai logs postgres` and ensure backend can reach `postgres:5432` (internal network).
+4. **TSA / timestamping** — Real TSA may be unreachable; try `AI_ALETHEIA_TSA_MODE=mock` in `.env` for testing.
+
+After changing `.env`, always **recreate** the backend container so it picks up new env: `docker compose -p aletheia-ai up -d --force-recreate backend`.
+
 ### Only postgres running
 
 If `docker ps` shows only `aletheia-db`, backend/frontend may have failed. **On the VM:**
 
 ```bash
 cd /opt/aletheia-ai
-docker compose ps -a          # All containers including exited
-docker compose logs backend   # Backend startup errors
-docker compose logs frontend  # Frontend build/start errors
-docker compose up --build     # Run in foreground to see build output
+docker compose -p aletheia-ai ps -a          # All containers including exited
+docker compose -p aletheia-ai logs backend   # Backend startup errors
+docker compose -p aletheia-ai logs frontend  # Frontend build/start errors
+docker compose -p aletheia-ai up --build     # Run in foreground to see build output
 ```
 
 ### ai.key: "Is a directory" or "Signing key file not found"
@@ -191,7 +223,7 @@ cd /opt/aletheia-ai
 sudo rm -rf ai.key                                    # Remove the directory
 openssl genpkey -algorithm RSA -out ai.key -pkeyopt rsa_keygen_bits:2048
 chmod 600 ai.key
-docker compose down && docker compose up -d           # Recreate containers
+docker compose -p aletheia-ai down && docker compose -p aletheia-ai up -d   # Recreate containers
 ```
 
 Or copy a key from your machine: `scp ai.key ubuntu@VM:/opt/aletheia-ai/ai.key`
@@ -200,7 +232,7 @@ Or copy a key from your machine: `scp ai.key ubuntu@VM:/opt/aletheia-ai/ai.key`
 
 **Cause:** `next.config.ts` required TypeScript at runtime; production image uses `npm ci --omit=dev` (no devDependencies).
 
-**Fix:** Resolved by using `next.config.mjs` (plain JS). Ensure you have the latest commit. Rebuild: `docker compose build frontend --no-cache && docker compose up -d`.
+**Fix:** Resolved by using `next.config.mjs` (plain JS). Ensure you have the latest commit. Rebuild: `docker compose -p aletheia-ai build frontend --no-cache && docker compose -p aletheia-ai up -d`.
 
 ### ngrok: status=203/EXEC or "ngrok unavailable"
 
@@ -230,7 +262,7 @@ Wants=network-online.target
 [Service]
 Type=simple
 EnvironmentFile=/etc/ngrok/ngrok.env
-ExecStart=/usr/local/bin/ngrok http 3000 --domain=kaia-uncharacterized-unorbitally.ngrok-free.dev
+ExecStart=/usr/local/bin/ngrok http 3001 --domain=kaia-uncharacterized-unorbitally.ngrok-free.dev
 Restart=on-failure
 RestartSec=5
 
@@ -259,7 +291,7 @@ Or on the VM, edit the service and remove OAuth flags:
 ```bash
 sudo nano /etc/systemd/system/ngrok.service
 # ExecStart must be (replace with your domain and port):
-#   ExecStart=/usr/local/bin/ngrok http 3000 --domain=YOUR-DOMAIN.ngrok-free.dev
+#   ExecStart=/usr/local/bin/ngrok http 3001 --domain=YOUR-DOMAIN.ngrok-free.dev
 # Remove any --oauth=... or --oauth-allow-email=...
 sudo systemctl daemon-reload
 sudo systemctl restart ngrok
@@ -276,8 +308,8 @@ sudo systemctl status ngrok
 
 ```bash
 sed -i 's|^NEXT_PUBLIC_API_URL=.*|NEXT_PUBLIC_API_URL=|' .env
-docker compose build frontend --no-cache --build-arg NEXT_PUBLIC_API_URL=
-docker compose up -d
+docker compose -p aletheia-ai build frontend --no-cache --build-arg NEXT_PUBLIC_API_URL=
+docker compose -p aletheia-ai up -d
 ```
 
 ### University network / firewall — use ngrok
@@ -288,7 +320,7 @@ If VM ports (3000, 8080) are blocked from outside (e.g. university network), exp
 ansible-playbook -i deploy/ansible/inventory.yml deploy/ansible/playbook.yml -e ngrok_enabled=true
 ```
 
-Add `NGROK_AUTHTOKEN` to `.env`. The playbook starts one tunnel (frontend on port 3000), sets `NEXT_PUBLIC_API_URL=` and rebuilds so the client uses relative `/api` URLs. The [Next.js runtime proxy](frontend/app/api/[...path]/route.ts) forwards `/api/*` to the backend at `BACKEND_INTERNAL_URL` (set to `http://backend:8080` in docker-compose). No second tunnel or CORS needed.
+Add `NGROK_AUTHTOKEN` to `.env`. The playbook starts one tunnel (frontend on port 3001 by default), sets `NEXT_PUBLIC_API_URL=` and rebuilds so the client uses relative `/api` URLs. The [Next.js runtime proxy](frontend/app/api/[...path]/route.ts) forwards `/api/*` to the backend at `BACKEND_INTERNAL_URL` (set to `http://backend:8080` in docker-compose). No second tunnel or CORS needed.
 
 ### Changing OPENAI_API_KEY (or other .env) on the server
 
@@ -302,14 +334,14 @@ Add `NGROK_AUTHTOKEN` to `.env`. The playbook starts one tunnel (frontend on por
 
 ```bash
 cd /opt/aletheia-ai
-docker compose up -d --force-recreate backend
+docker compose -p aletheia-ai up -d --force-recreate backend
 ```
 
-After any change to `.env` that affects a service, use `--force-recreate` for that service (or `docker compose down && docker compose up -d`) so the new variables are applied.
+After any change to `.env` that affects a service, use `--force-recreate` for that service (or `docker compose -p aletheia-ai down && docker compose -p aletheia-ai up -d`) so the new variables are applied.
 
 **Note:** `OPENAI_API_KEY` is the OpenAI API key string (from https://platform.openai.com/api-keys). The signing key file `ai.key` is configured separately via docker-compose (mounted at `/app/ai.key`); do not set `OPENAI_API_KEY=./ai.key`.
 
 ### Other causes
 
 - **ai.key missing on control node** — Playbook skips copy; fails at "Fail if signing key is missing". Create key or pass `-e signing_key_src=/path/to/ai.key`.
-- **Build failure** — Maven/npm may fail (network, memory). Run `docker compose up --build` to see full output.
+- **Build failure** — Maven/npm may fail (network, memory). Run `docker compose -p aletheia-ai up --build` to see full output.

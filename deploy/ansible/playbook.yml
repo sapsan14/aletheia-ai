@@ -24,11 +24,15 @@
     # Path to PQC key on control node; override with -e pqc_key_src=/path/to/ai_pqc.key (optional)
     pqc_key_path: "{{ pqc_key_src | default(playbook_dir ~ '/../../backend/ai_pqc.key') }}"
     # When true and no PQC key copied, generate ai_pqc.key on server via backend container (no Maven on server). Override with -e pqc_auto_generate=false to skip.
-    # ngrok: single-port (3000) via tunnel; API proxied by Next.js. Override with -e ngrok_enabled=false to expose VM:3000 + VM:8080.
+    # ngrok: single-port via tunnel; API proxied by Next.js. Override with -e ngrok_enabled=false to expose VM + backend.
     # Free tier only: ngrok http PORT --domain=DOMAIN (no --oauth; OAuth is paid-only).
     ngrok_enabled: true
     ngrok_domain: kaia-uncharacterized-unorbitally.ngrok-free.dev
-    ngrok_port: 3000
+    # Host port for our frontend (avoid 3000 so other users can use it). ngrok will point here.
+    app_host_port: "{{ deploy_app_host_port | default(3001) }}"
+    ngrok_port: "{{ app_host_port }}"
+    # Docker Compose project name: isolates our stack from other users' containers (networks, optional port mapping).
+    docker_compose_project: "{{ deploy_compose_project | default('aletheia-ai') }}"
 
   tasks:
     # Fix Docker apt conflict first so all later apt tasks can run (apt update fails otherwise)
@@ -225,7 +229,7 @@
       when: not (server_key_stat.stat.exists | default(false))
 
     - name: Build backend image (for PQC keygen when auto-generating)
-      ansible.builtin.shell: docker compose build backend
+      ansible.builtin.shell: docker compose -p {{ docker_compose_project }} build backend
       args:
         chdir: "{{ app_dir }}"
         executable: /bin/bash
@@ -233,7 +237,7 @@
       when: (pqc_auto_generate is not defined or pqc_auto_generate | bool) and not (pqc_key_stat.stat.exists | default(false)) and (pqc_key_on_server_path | default('') | length == 0)
 
     - name: Generate PQC key on server (no Maven needed)
-      ansible.builtin.shell: docker compose run --rm -v "{{ app_dir }}:/out" backend java -cp /app/app.jar ai.aletheia.crypto.PqcKeyGen /out
+      ansible.builtin.shell: docker compose -p {{ docker_compose_project }} run --rm -v "{{ app_dir }}:/out" backend java -cp /app/app.jar ai.aletheia.crypto.PqcKeyGen /out
       args:
         chdir: "{{ app_dir }}"
         executable: /bin/bash
@@ -275,29 +279,38 @@
         line: "AI_ALETHEIA_PQC_KEY_PATH=/app/ai_pqc.key"
       when: pqc_key_on_server_path | default('') | length > 0
 
-    - name: Create docker-compose override for PQC key mount and deploy (no host 5432)
+    - name: Create docker-compose override for PQC key mount and deploy (isolated ports, no 5432/8080 on host)
       ansible.builtin.copy:
         content: |
-          # PQC key mount + deploy: do not bind postgres to host (avoid port conflict with system pg or previous container)
+          # PQC + deploy: avoid port conflicts with other users (only frontend on app_host_port; postgres/backend internal only)
           services:
             backend:
               volumes:
                 - ./{{ pqc_key_on_server_path }}:/app/ai_pqc.key:ro
+              ports: []
             postgres:
               ports: []
+            frontend:
+              ports:
+                - "{{ app_host_port }}:3000"
         dest: "{{ app_dir }}/docker-compose.override.yml"
         owner: ubuntu
         group: ubuntu
         mode: "0644"
       when: pqc_key_on_server_path | default('') | length > 0
 
-    - name: Create docker-compose override for deploy only (no host 5432)
+    - name: Create docker-compose override for deploy only (isolated ports)
       ansible.builtin.copy:
         content: |
-          # Deploy: do not bind postgres to host (avoid port conflict)
+          # Deploy: avoid port conflicts (only frontend on app_host_port; postgres/backend internal only)
           services:
+            backend:
+              ports: []
             postgres:
               ports: []
+            frontend:
+              ports:
+                - "{{ app_host_port }}:3000"
         dest: "{{ app_dir }}/docker-compose.override.yml"
         owner: ubuntu
         group: ubuntu
@@ -315,20 +328,20 @@
 
     - name: Build and restart frontend only (use with --tags frontend)
       ansible.builtin.shell: |
-        cd {{ app_dir }} && docker compose build frontend && docker compose up -d frontend
+        cd {{ app_dir }} && docker compose -p {{ docker_compose_project }} build frontend && docker compose -p {{ docker_compose_project }} up -d frontend
       args:
         executable: /bin/bash
       tags: [frontend]
 
     - name: Build and start containers with docker compose
       ansible.builtin.shell: |
-        cd {{ app_dir }} && docker compose up -d --build
+        cd {{ app_dir }} && docker compose -p {{ docker_compose_project }} up -d --build
       args:
         executable: /bin/bash
       register: docker_up
 
     - name: Show docker compose status
-      ansible.builtin.command: docker compose ps -a
+      ansible.builtin.command: docker compose -p {{ docker_compose_project }} ps -a
       args:
         chdir: "{{ app_dir }}"
       register: compose_ps
@@ -339,7 +352,7 @@
         var: compose_ps.stdout_lines
 
     - name: Show backend logs if it exited
-      ansible.builtin.shell: docker compose logs --tail=50 backend
+      ansible.builtin.shell: docker compose -p {{ docker_compose_project }} logs --tail=50 backend
       args:
         chdir: "{{ app_dir }}"
       register: backend_logs
@@ -456,9 +469,9 @@
         set -e
         cd {{ app_dir }}
         sed -i 's|^NEXT_PUBLIC_API_URL=.*|NEXT_PUBLIC_API_URL=|' .env
-        sed -i 's|^CORS_ALLOWED_ORIGINS=.*|CORS_ALLOWED_ORIGINS=https://{{ ngrok_domain }},http://localhost:3000|' .env
-        docker compose build frontend --no-cache --build-arg NEXT_PUBLIC_API_URL=
-        docker compose up -d
+        sed -i 's|^CORS_ALLOWED_ORIGINS=.*|CORS_ALLOWED_ORIGINS=https://{{ ngrok_domain }},http://localhost:{{ app_host_port }},http://localhost:3000|' .env
+        docker compose -p {{ docker_compose_project }} build frontend --no-cache --build-arg NEXT_PUBLIC_API_URL=
+        docker compose -p {{ docker_compose_project }} up -d
       args:
         executable: /bin/bash
       when: ngrok_enabled
