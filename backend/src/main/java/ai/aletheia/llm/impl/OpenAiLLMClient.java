@@ -26,7 +26,7 @@ import java.time.Duration;
  * Uses Java HttpClient; no external SDK.
  */
 @Service
-@ConditionalOnExpression("'${ai.aletheia.llm.openai.api-key:}'.length() > 0")
+@ConditionalOnExpression("@environment.getProperty('ai.aletheia.llm.openai.api-key') != null && !@environment.getProperty('ai.aletheia.llm.openai.api-key').isEmpty()")
 public class OpenAiLLMClient implements LLMClient {
 
     private static final Logger log = LoggerFactory.getLogger(OpenAiLLMClient.class);

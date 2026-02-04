@@ -70,6 +70,7 @@ ansible-playbook -i 'aletheia ansible_host=YOUR_VM_IP,' deploy/ansible/playbook.
 | `deploy_repo_version` | main | Branch or tag |
 | `postgres_password` | local | DB password |
 | `openai_api_key` | (empty) | OpenAI API key. **Redeploy:** if you don't pass `-e openai_api_key`, the playbook keeps the existing value from server `.env` (no overwrite). |
+| `postgres_db` / `postgres_user` / `postgres_password` | aletheia / aletheia / local | DB name, user, password. **Redeploy:** if you don't pass them, the playbook **preserves** existing values from server `.env`, so the Postgres password is never overwritten and backend keeps matching the DB. |
 | `cors_allowed_origins` | http://localhost:3000 | CORS allowed origins (comma-separated). **ngrok:** add `https://your-subdomain.ngrok-free.dev` |
 | `next_public_api_url` | http://localhost:8080 | **ngrok:** leave empty (playbook sets it); frontend uses relative `/api`, proxied by Next.js. **Production (no ngrok):** `http://YOUR_VM_IP:8080` |
 | `deploy_app_host_port` | **3001** | Host port for frontend (avoids 3000 so other users can use it). ngrok tunnels this port. |
@@ -183,9 +184,26 @@ The playbook has been tested end-to-end. Typical run time: ~30 s (no rebuild) to
 
 ## Troubleshooting
 
+### Backend exits on start (Exited 1)
+
+If `docker ps -a` shows `aletheia-backend` as **Exited (1)**, the app failed during startup. **On the VM:**
+
+```bash
+cd /opt/aletheia-ai
+sudo docker compose -p aletheia-ai logs --tail=80 backend
+```
+
+Fix the cause (see below), then **force-recreate** so the container restarts with the same or updated config:
+
+```bash
+sudo docker compose -p aletheia-ai up -d --force-recreate backend
+```
+
+After changing `.env`, always run the same `up -d --force-recreate backend` so the backend picks up new env.
+
 ### 500 when sending a request (e.g. Send & Verify)
 
-The frontend proxies `/api/*` to the backend. A **500** usually means the backend threw an exception. **On the VM:**
+The frontend proxies `/api/*` to the backend. A **500** usually means the backend threw an exception (or the backend container is down and the proxy returns 500). **On the VM:**
 
 ```bash
 cd /opt/aletheia-ai
@@ -195,11 +213,45 @@ docker compose -p aletheia-ai logs --tail=100 backend
 **Typical causes:**
 
 1. **Missing or invalid OPENAI_API_KEY** — Backend needs it for `/api/ai/ask`. Set in `/opt/aletheia-ai/.env` and recreate backend: `docker compose -p aletheia-ai up -d --force-recreate backend`.
-2. **Signing key** — If you see "Signing key file not found" or "Could not load private key", fix `ai.key` (see [ai.key: "Is a directory"](#aikey-is-a-directory-or-signing-key-file-not-found)).
-3. **Database** — If Postgres was down or schema failed, check `docker compose -p aletheia-ai logs postgres` and ensure backend can reach `postgres:5432` (internal network).
-4. **TSA / timestamping** — Real TSA may be unreachable; try `AI_ALETHEIA_TSA_MODE=mock` in `.env` for testing.
+2. **SpEL / OPENAI_API_KEY** — If logs show `SpelParseException: Unexpected escape character` and the expression contains your API key, the backend was built with a condition that embeds the key in a SpEL expression (fixed in current code). **Fix:** Rebuild and redeploy the backend image, or ensure you use a commit that has the fix (condition uses `@environment.getProperty(...)` instead of `${...}` in the expression).
+3. **Signing key** — If you see "Signing key file not found" or "Could not load private key", fix `ai.key` (see [ai.key: "Is a directory"](#aikey-is-a-directory-or-signing-key-file-not-found)).
+4. **Database** — If Postgres was down or schema failed, check `docker compose -p aletheia-ai logs postgres` and ensure backend can reach `postgres:5432` (internal network). If you see "password authentication failed for user \"aletheia\"", see [Postgres password mismatch](#postgres-password-authentication-failed-for-user-aletheia).
+5. **TSA / timestamping** — Real TSA may be unreachable; try `AI_ALETHEIA_TSA_MODE=mock` in `.env` for testing.
 
 After changing `.env`, always **recreate** the backend container so it picks up new env: `docker compose -p aletheia-ai up -d --force-recreate backend`.
+
+### Postgres: password authentication failed for user "aletheia"
+
+**Symptom:** Backend logs: `FATAL: password authentication failed for user "aletheia"`.
+
+**Cause:** Postgres sets the user/password **only on first startup** (when the data volume is empty). After that, the password is fixed in the volume. Previously, the playbook **overwrote** `.env` with template defaults on every run (e.g. `POSTGRES_PASSWORD=local` when you didn't pass `-e postgres_password`). So the second deploy overwrote whatever password was in `.env` with the default; the backend then used the new value while Postgres still had the old one → auth failed. **Now the playbook preserves existing `POSTGRES_DB` / `POSTGRES_USER` / `POSTGRES_PASSWORD` from the server `.env` when you don't pass them**, so this should not happen again. If you already hit the error, use one of the fixes below.
+
+**Fix (keep existing DB data):** Edit `.env` on the server so that **user** and **password** match what Postgres was created with:
+
+1. **Typo:** If the error says user **"alethia"** (one e), fix it to **aletheia** (two e's):  
+   `POSTGRES_USER=aletheia`
+2. **Password:** Use the password that was in `.env` when the Postgres container was **first** started. If you didn’t set one, the playbook default was `local` — try `POSTGRES_PASSWORD=local`.
+
+```bash
+sudo nano /opt/aletheia-ai/.env
+# Ensure exactly (no typos):
+#   POSTGRES_USER=aletheia
+#   POSTGRES_PASSWORD=local
+# (or the password you first used on the server)
+sudo docker compose -p aletheia-ai up -d --force-recreate backend
+```
+
+**Fix (reset DB, lose data):** If you don’t remember the old password or want a clean DB:
+
+```bash
+cd /opt/aletheia-ai
+sudo docker compose -p aletheia-ai down
+sudo docker volume rm aletheia-ai_postgres_data    # or: docker volume ls then rm the aletheia postgres volume
+# Edit .env: set POSTGRES_PASSWORD to the value you want (e.g. local or a new secret)
+sudo docker compose -p aletheia-ai up -d
+```
+
+Then recreate the backend so it uses the same `.env`: `sudo docker compose -p aletheia-ai up -d --force-recreate backend`.
 
 ### Only postgres running
 
@@ -323,9 +375,12 @@ ansible-playbook -i deploy/ansible/inventory.yml deploy/ansible/playbook.yml -e 
 
 Add `NGROK_AUTHTOKEN` to `.env`. The playbook starts one tunnel (frontend on port 3001 by default), sets `NEXT_PUBLIC_API_URL=` and rebuilds so the client uses relative `/api` URLs. The [Next.js runtime proxy](frontend/app/api/[...path]/route.ts) forwards `/api/*` to the backend at `BACKEND_INTERNAL_URL` (set to `http://backend:8080` in docker-compose). No second tunnel or CORS needed.
 
-### Changing OPENAI_API_KEY (or other .env) on the server
+### Changing OPENAI_API_KEY or Postgres vars on the server
 
-**Redeploy and .env:** The playbook rewrites `.env` from a template on each run. If you do **not** pass `-e openai_api_key=...`, the playbook now **preserves** the existing `OPENAI_API_KEY` from the server's current `.env` (so redeploy no longer wipes it). Pass `-e openai_api_key=sk-...` only when you want to set or change it.
+**Redeploy and .env:** The playbook rewrites `.env` from a template on each run. When you **do not** pass a variable, it **preserves** the existing value from the server's current `.env`:
+
+- **OPENAI_API_KEY** — Pass `-e openai_api_key=sk-...` only when you want to set or change it; otherwise the existing key is kept.
+- **POSTGRES_DB / POSTGRES_USER / POSTGRES_PASSWORD** — Pass `-e postgres_password=...` (and optionally `postgres_db` / `postgres_user`) only when you want to set or change them; otherwise the existing values are kept. This avoids overwriting the DB password on redeploy and prevents "password authentication failed" (Postgres keeps the password it was first created with).
 
 **Symptom:** You set `OPENAI_API_KEY=sk-...` in `/opt/aletheia-ai/.env` and ran `docker compose restart backend`, but the app still shows "Set OPENAI_API_KEY on the server...".
 
@@ -341,6 +396,41 @@ docker compose -p aletheia-ai up -d --force-recreate backend
 After any change to `.env` that affects a service, use `--force-recreate` for that service (or `docker compose -p aletheia-ai down && docker compose -p aletheia-ai up -d`) so the new variables are applied.
 
 **Note:** `OPENAI_API_KEY` is the OpenAI API key string (from https://platform.openai.com/api-keys). The signing key file `ai.key` is configured separately via docker-compose (mounted at `/app/ai.key`); do not set `OPENAI_API_KEY=./ai.key`.
+
+**Correct format in `.env`:** One line, no quotes or brackets around the key:
+
+```bash
+OPENAI_API_KEY=sk-proj-xxxxxxxxxxxx
+```
+
+If you pass the key via Ansible, use the **plain value** only: `-e openai_api_key=sk-proj-...` (no `["..."]` or `'...'` around the key). Otherwise the key can be written with extra quoting; the playbook then "preserves" that corrupted value on every redeploy.
+
+### OPENAI_API_KEY looks corrupted (nested quotes/backslashes)
+
+**Symptom:** In `/opt/aletheia-ai/.env` the line looks like:
+
+```bash
+OPENAI_API_KEY=['[\'[\\\'[\\\\\\\'["[\\\\...sk-proj-...\\\\...\']"]...
+```
+
+**Cause:** The key was set once with extra quoting (e.g. as a YAML list or quoted string passed to `-e openai_api_key=...`). The playbook’s "preserve existing OPENAI_API_KEY" logic then keeps re-writing that same corrupted value on every deploy.
+
+**Fix on the VM:** Edit `.env` and replace the value with **only** the key (no quotes, no brackets):
+
+```bash
+sudo nano /opt/aletheia-ai/.env
+# Change the OPENAI_API_KEY line to exactly:
+# OPENAI_API_KEY=sk-proj-your-actual-key-here
+# (plain key only; no quotes or brackets)
+```
+
+Save, then recreate the backend so it picks up the fixed env:
+
+```bash
+sudo docker compose -p aletheia-ai up -d --force-recreate backend
+```
+
+From now on, redeploys will preserve this correct value as long as you don’t pass `-e openai_api_key=...` with quoted/list syntax.
 
 ### Other causes
 

@@ -191,11 +191,31 @@
         existing_openai_api_key: ""
       when: not (env_file_stat.stat.exists | default(false))
 
+    - name: Set existing POSTGRES_* facts from server .env
+      ansible.builtin.set_fact:
+        existing_postgres_db: "{{ ((env_slurp.content | b64decode) | regex_search('POSTGRES_DB=(.+)', '\\1')) | default('') | trim }}"
+        existing_postgres_user: "{{ ((env_slurp.content | b64decode) | regex_search('POSTGRES_USER=(.+)', '\\1')) | default('') | trim }}"
+        existing_postgres_password: "{{ ((env_slurp.content | b64decode) | regex_search('POSTGRES_PASSWORD=(.+)', '\\1')) | default('') | trim }}"
+      when: env_file_stat.stat.exists | default(false) and env_slurp is defined and env_slurp.content is defined
+
+    - name: Set existing POSTGRES_* to empty when .env missing or before slurp
+      ansible.builtin.set_fact:
+        existing_postgres_db: ""
+        existing_postgres_user: ""
+        existing_postgres_password: ""
+      when: not (env_file_stat.stat.exists | default(false))
+
     - name: Resolve OPENAI_API_KEY for .env
       ansible.builtin.set_fact:
         openai_api_key_resolved: "{{ openai_api_key | default(existing_openai_api_key | default('')) }}"
 
-    - name: Create .env from template (preserves existing OPENAI_API_KEY when -e openai_api_key not passed)
+    - name: Resolve POSTGRES_* for .env (preserve existing so password never changes on redeploy)
+      ansible.builtin.set_fact:
+        postgres_db_resolved: "{{ postgres_db | default(existing_postgres_db | default('aletheia')) }}"
+        postgres_user_resolved: "{{ postgres_user | default(existing_postgres_user | default('aletheia')) }}"
+        postgres_password_resolved: "{{ postgres_password | default(existing_postgres_password | default('local')) }}"
+
+    - name: Create .env from template (preserves existing OPENAI_API_KEY and POSTGRES_* when not passed)
       ansible.builtin.template:
         src: templates/.env.j2
         dest: "{{ app_dir }}/.env"
@@ -203,8 +223,10 @@
         group: ubuntu
         mode: "0600"
       vars:
-        # Use existing key from server when openai_api_key not passed, so redeploy doesn't wipe it
         openai_api_key: "{{ openai_api_key_resolved }}"
+        postgres_db: "{{ postgres_db_resolved }}"
+        postgres_user: "{{ postgres_user_resolved }}"
+        postgres_password: "{{ postgres_password_resolved }}"
 
     - name: Check if signing key exists locally
       ansible.builtin.stat:
