@@ -259,7 +259,7 @@ function VerifyContent() {
     .join(" — ");
 
   const policyRules = record.policyRulesEvaluated ?? [];
-  const hasPolicyCoverage =
+  const hasPolicyData =
     record.policyCoverage != null || policyRules.length > 0;
   const passRules = policyRules.filter((rule) => rule.status === "pass");
   const notEvaluatedRules = policyRules.filter(
@@ -277,6 +277,8 @@ function VerifyContent() {
       : record.policyCoverage != null
         ? Math.round(record.policyCoverage * DEMO_POLICY_TOTAL_RULES)
         : 0;
+  /** Show Policy coverage block even when no data (show "not available" + static "Why not 100%?") */
+  const showPolicyCoverageBlock = true;
 
   function handleCopySummary() {
     if (summaryLine) void navigator.clipboard.writeText(summaryLine);
@@ -565,8 +567,8 @@ function VerifyContent() {
         </section>
       ) : null}
 
-      {/* Phase 4 — Policy coverage */}
-      {hasPolicyCoverage && (
+      {/* Phase 4 A.3 — Policy coverage block (always visible); "Why not 100%?" expandable */}
+      {showPolicyCoverageBlock && (
         <section
           className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-600 dark:bg-zinc-700/30"
           aria-label="Policy coverage"
@@ -579,9 +581,9 @@ function VerifyContent() {
               📘 Policy coverage (demo)
             </h2>
             <span className="text-sm text-zinc-600 dark:text-zinc-400">
-              {coveragePercent != null
+              {hasPolicyData && coveragePercent != null
                 ? `${coveragePercent}% — ${rulesChecked} of ${DEMO_POLICY_TOTAL_RULES} rules checked`
-                : "Coverage not available"}
+                : "Policy coverage not available"}
             </span>
           </div>
 
@@ -612,7 +614,9 @@ function VerifyContent() {
             </ul>
           ) : (
             <p className="text-sm text-zinc-500 dark:text-zinc-400">
-              Policy rule details are not available for this record.
+              Policy rule details are not available for this record. For the demo
+              policy, R1 (signed and timestamped) and R2 (model recorded) are
+              checked; R3 and R4 are not evaluated in Phase 4.
             </p>
           )}
 
@@ -668,8 +672,10 @@ function VerifyContent() {
                   </>
                 ) : (
                   <p className="mb-2">
-                    Rule-level details were not provided, but coverage indicates that
-                    not all policy checks were run.
+                    For the demo policy we check: R1 (response signed and timestamped),
+                    R2 (model identity recorded). We do not run in Phase 4: R3 (no
+                    medical/legal advice), R4 (human review). So confidence is based
+                    only on the checks we actually perform.
                   </p>
                 )}
                 <p className="text-zinc-500 dark:text-zinc-400">
