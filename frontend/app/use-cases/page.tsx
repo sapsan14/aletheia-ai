@@ -3,7 +3,7 @@
 import { trackEvent } from "@/lib/analytics";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 
 const USE_CASES = [
   {
@@ -43,7 +43,7 @@ const USE_CASES = [
   },
 ];
 
-export default function UseCasesPage() {
+function UseCasesContent() {
   const searchParams = useSearchParams();
   const fromId = searchParams.get("fromId");
   const homeHref = fromId ? `/?id=${fromId}` : "/";
@@ -110,5 +110,17 @@ export default function UseCasesPage() {
         <p>© 2026 Anton Sokolov &amp; Team 3</p>
       </footer>
     </div>
+  );
+}
+
+export default function UseCasesPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-zinc-50 p-6 flex items-center justify-center dark:bg-zinc-900">
+        <p className="text-zinc-500 dark:text-zinc-400">Loading…</p>
+      </div>
+    }>
+      <UseCasesContent />
+    </Suspense>
   );
 }

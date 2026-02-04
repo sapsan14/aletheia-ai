@@ -13,7 +13,7 @@ import { TOOLTIPS } from "@/lib/tooltips";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 
 /** Response from POST /api/ai/ask */
 interface AiAskResponse {
@@ -944,7 +944,7 @@ function TrustPanel({
   );
 }
 
-export default function Home() {
+function HomeContent() {
   const [prompt, setPrompt] = useState("");
   const [responseData, setResponseData] = useState<AiAskResponse | null>(null);
   const [verifyRecord, setVerifyRecord] = useState<VerifyRecord | null>(null);
@@ -1347,5 +1347,17 @@ export default function Home() {
         </p>
       </footer>
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen overflow-x-hidden bg-zinc-50 p-4 dark:bg-zinc-900 md:p-6 flex items-center justify-center">
+        <p className="text-zinc-500 dark:text-zinc-400">Loading…</p>
+      </div>
+    }>
+      <HomeContent />
+    </Suspense>
   );
 }
