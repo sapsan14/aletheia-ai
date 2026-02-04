@@ -13,6 +13,7 @@ This document describes the trust model of the Aletheia PoC: the cryptographic c
 - [Mermaid: trust chain](#mermaid-trust-chain)
 - [eIDAS mapping: non-qualified → qualified](#eidas-mapping-non-qualified--qualified)
 - [Conceptual summary](#conceptual-summary)
+- [Relation to AI Act / audit duties](#relation-to-ai-act--audit-duties)
 - [Related documents](#related-documents)
 
 ---
@@ -111,6 +112,14 @@ The PoC uses **non-qualified** components. The architecture is designed so that 
 - **TSA** attests *when* it was said (timestamp over signature bytes).
 - The **trust model** is standard PKI; the **architecture** is eIDAS-ready.
 - **Non-qualified today** → **qualified tomorrow** by swapping key and TSA, not the pipeline.
+
+---
+
+## Relation to AI Act / audit duties
+
+Aletheia logs and signs AI outputs and stores the results of policy evaluation (e.g. which rules were checked and passed). This creates a verifiable record of what the system attested at a given time and supports **traceability and audit** of AI-assisted decisions: an auditor or regulator can see what output was produced, when it was signed and timestamped, and which policy checks were applied.
+
+Aletheia does **not**, by itself, guarantee legal compliance or the correctness of decisions. It provides evidence (signatures, timestamps, policy coverage) that can be used as part of an organisation’s accountability and audit processes. Responsibility for how that evidence is used and for the underlying decisions remains with the deployer and the organisation.
 
 ---
 
