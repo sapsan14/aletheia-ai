@@ -1,5 +1,7 @@
 # Aletheia AI — Plan Phase 5: API Platform & Integrations (2026)
 
+**Aletheia signs external AI outputs for regulated workflows.**
+
 This document describes **Phase 5** of the roadmap: turning Aletheia from a demo product into an **API platform** that can be embedded in corporate pipelines, agent frameworks (MCP, LangChain, LlamaIndex), HR/legal/compliance systems, and internal LLM infrastructures. It is based on completed Phases 1–4 and the chosen strategy after market validation.
 
 **Status:** Draft for review  
@@ -38,6 +40,23 @@ Phase 5 is the transition from “pilots” to “integrations”.
 - MCP attestation: document and support agent attestation (5.4).
 - Integrations: SIEM export and optional blockchain anchoring (5.5).
 - Partner scenarios: 1–2 real integrations (5.6).
+
+### Implementation status (2026‑02 snapshot)
+
+Phase 5 is **not started as implementation** yet. Some groundwork has already been laid during Phases 3–4 and the Phase 4.5 transition:
+
+- [x] **Public API draft & OpenAPI skeleton (5.1)**  
+  `docs/api/openapi.yaml` exists and describes the core ask/verify/evidence/verifier endpoints; it will be hardened and versioned in Phase 5.
+- [ ] **Sign-only API for external LLMs (5.2)**  
+  High-level design only; no dedicated sign-only endpoint yet.
+- [ ] **SDKs (5.3)**  
+  No official Python/TypeScript SDKs yet; only internal usage examples.
+- [ ] **MCP attestation (5.4)**  
+  Described at a conceptual level; implementation is deferred.
+- [ ] **Integrations (5.5)**  
+  SIEM / blockchain exports are documented in `docs/en/integrations/`, but not wired as production integrations.
+- [ ] **Partner scenarios (5.6)**  
+  No live partner integrations yet; pilots from Phase 4 will inform which scenarios to implement first.
 
 **Out of scope for Phase 5:** Full Policy Registry (versioning), Policy Evaluation Pipeline, time-travel verify, human/hybrid review, enterprise dashboards, multi-tenant deployments (deferred to Phase 6+).
 

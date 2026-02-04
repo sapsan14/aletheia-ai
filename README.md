@@ -6,7 +6,9 @@
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![RFC 3161](https://img.shields.io/badge/RFC-3161-purple)](https://www.ietf.org/rfc/rfc3161.txt)
 
-**Verifiable AI responses with signing and timestamps.**
+**Aletheia signs external AI outputs for regulated workflows.**
+
+Verifiable AI responses with signing and timestamps.
 
 PoC for cryptographically signed and timestamped LLM answers so that responses can be proven, not just trusted.
 
