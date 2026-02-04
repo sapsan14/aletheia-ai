@@ -942,90 +942,76 @@ export default function Home() {
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-zinc-50 p-4 dark:bg-zinc-900 md:p-6">
-      <header className="mx-auto mb-6 w-full max-w-6xl rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-700 dark:bg-zinc-800">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-              Aletheia AI
-            </p>
-            <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 md:text-3xl">
-              AI said that. But under which rules?
-            </h1>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">
-              We don&apos;t certify truth. We certify responsibility.
-            </p>
-          </div>
-          <div className="flex flex-col items-start gap-2">
+      <div className="mx-auto w-full max-w-6xl min-w-0 space-y-6">
+        {/* Top dashboard: logo + slogan; Explore use cases button top right */}
+        <section
+          className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-700 dark:bg-zinc-800"
+          aria-label="Product"
+        >
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="flex min-w-0 flex-wrap items-center gap-4">
+              <div className="flex shrink-0 rounded-xl bg-white p-1 dark:bg-zinc-800">
+                <Image
+                  src="/logo.png"
+                  alt="Aletheia AI"
+                  width={80}
+                  height={80}
+                  className="rounded-xl dark:bg-zinc-800"
+                  unoptimized
+                />
+              </div>
+              <div className="min-w-0">
+                <h1 className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
+                  Aletheia AI
+                </h1>
+                <p className="mt-1 text-2xl font-bold text-zinc-900 dark:text-zinc-50 md:text-3xl">
+                  AI said it. Prove it.
+                </p>
+                <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+                  Verifiable AI responses with Quantum-resistant signing and timestamps
+                </p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <a
+                    href="https://csrc.nist.gov/pubs/fips/204/final"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Secured by ML-DSA algorithm. Your evidence will remain valid even in the era of quantum computing."
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-indigo-400/60 bg-indigo-50 px-2.5 py-1 text-sm font-medium text-indigo-800 hover:bg-indigo-100 dark:border-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-200 dark:hover:bg-indigo-900/50"
+                  >
+                    <PqcIcon className="h-4 w-4 shrink-0 text-indigo-600 dark:text-indigo-400" />
+                    Quantum-Proof Trust Anchor
+                  </a>
+                  <a
+                    href="https://www.rfc-editor.org/rfc/rfc3161"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="RFC 3161 Trusted Timestamp. External attestation that this response existed at this exact point in time."
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-amber-400/60 bg-amber-50 px-2.5 py-1 text-sm font-medium text-amber-800 hover:bg-amber-100 dark:border-amber-600 dark:bg-amber-950/50 dark:text-amber-200 dark:hover:bg-amber-900/50"
+                  >
+                    <span aria-hidden>⏳</span>
+                    Non-Repudiable Time-Proof
+                  </a>
+                </div>
+              </div>
+            </div>
             <Link
-              href="#demo"
+              href="/use-cases"
               onClick={() => {
                 void trackEvent("cta_click");
               }}
-              className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+              className="shrink-0 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
             >
-              Verify a response — Demo
-            </Link>
-            <span className="text-xs text-zinc-500 dark:text-zinc-400">
-              No crypto wallet. Just transparency.
-            </span>
-            <Link
-              href="/use-cases"
-              className="text-xs font-medium text-blue-600 hover:underline dark:text-blue-400"
-            >
-              Explore use cases →
+              Explore use cases
             </Link>
           </div>
-        </div>
-      </header>
-      <div className="mx-auto grid min-w-0 w-full max-w-6xl items-start gap-6 lg:grid-cols-[minmax(0,672px)_380px]">
-        {/* Left: Chat — fixed max width so it doesn't grow when right column content grows */}
-        <main
-          id="demo"
-          className="min-w-0 space-y-6 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-700 dark:bg-zinc-800"
-        >
-          <div className="flex items-center gap-4">
-            <div className="flex shrink-0 rounded-xl bg-white p-1 dark:bg-zinc-800">
-              <Image
-                src="/logo.png"
-                alt="Aletheia AI"
-                width={80}
-                height={80}
-                className="rounded-xl dark:bg-zinc-800"
-                unoptimized
-              />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
-                Aletheia AI
-              </h1>
-              <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                Verifiable AI responses with Quantum-resistant signing and timestamps
-              </p>
-              <div className="mt-2 flex flex-wrap gap-2">
-                <a
-                  href="https://csrc.nist.gov/pubs/fips/204/final"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title="Secured by ML-DSA algorithm. Your evidence will remain valid even in the era of quantum computing."
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-indigo-400/60 bg-indigo-50 px-2.5 py-1 text-sm font-medium text-indigo-800 hover:bg-indigo-100 dark:border-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-200 dark:hover:bg-indigo-900/50"
-                >
-                  <PqcIcon className="h-4 w-4 shrink-0 text-indigo-600 dark:text-indigo-400" />
-                  Quantum-Proof Trust Anchor
-                </a>
-                <a
-                  href="https://www.rfc-editor.org/rfc/rfc3161"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title="RFC 3161 Trusted Timestamp. External attestation that this response existed at this exact point in time."
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-amber-400/60 bg-amber-50 px-2.5 py-1 text-sm font-medium text-amber-800 hover:bg-amber-100 dark:border-amber-600 dark:bg-amber-950/50 dark:text-amber-200 dark:hover:bg-amber-900/50"
-                >
-                  <span aria-hidden>⏳</span>
-                  Non-Repudiable Time-Proof
-                </a>
-              </div>
-            </div>
-          </div>
+        </section>
 
+        {/* Two columns — same total width as sections above (1fr + fixed right column) */}
+        <div className="grid min-w-0 grid-cols-1 items-start gap-6 lg:grid-cols-[1fr_minmax(320px,380px)]">
+          <main
+            id="demo"
+            className="min-w-0 space-y-6 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-700 dark:bg-zinc-800"
+          >
           <div>
             <label
               htmlFor="prompt"
@@ -1038,6 +1024,12 @@ export default function Home() {
               rows={4}
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  if (prompt.trim() && !isLoading) handleSend();
+                }
+              }}
               placeholder="Ask anything"
               disabled={isLoading}
               className="w-full rounded-xl border border-zinc-300 px-3 py-2 text-zinc-900 placeholder-zinc-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-60 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100 dark:placeholder-zinc-500"
@@ -1123,27 +1115,23 @@ export default function Home() {
           </div>
         </main>
 
-        {/* Right: Trust Panel — min-w-0 so it shrinks on mobile; content wraps */}
-        <aside className="min-w-0 lg:min-w-0">
-          <TrustPanel
-            verifyRecord={verifyRecord}
-            responseData={responseData}
-            apiBase={apiBase}
-            onDownloadEvidence={handleDownloadEvidence}
-            downloading={downloading}
-            downloadError={downloadError}
-          />
-        </aside>
+          {/* Right: Trust Panel */}
+          <aside className="min-w-0">
+            <TrustPanel
+              verifyRecord={verifyRecord}
+              responseData={responseData}
+              apiBase={apiBase}
+              onDownloadEvidence={handleDownloadEvidence}
+              downloading={downloading}
+              downloadError={downloadError}
+            />
+          </aside>
+        </div>
       </div>
 
-      <footer className="mt-8 text-center text-xs text-zinc-500 dark:text-zinc-400">
+      <footer className="mx-auto mt-8 max-w-6xl text-center text-xs text-zinc-500 dark:text-zinc-400">
         <p>© 2026 Anton Sokolov &amp; Team 3</p>
         <p className="mt-1">
-          <Link href="/use-cases" className="underline hover:text-zinc-700 dark:hover:text-zinc-300">
-            Use cases
-          </Link>
-        </p>
-        <p>
           <a
             href="https://taltech.ee/vanemarendajaks"
             target="_blank"
