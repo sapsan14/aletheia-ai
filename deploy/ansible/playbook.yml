@@ -281,7 +281,7 @@
         line: "AI_ALETHEIA_PQC_KEY_PATH=/app/ai_pqc.key"
       when: pqc_key_on_server_path | default('') | length > 0
 
-    - name: Create docker-compose override for PQC key mount and deploy (isolated ports: frontend app_host_port, backend backend_internal_port; no host 5432/8080)
+    - name: Create docker-compose override for PQC key mount and deploy (isolated ports)
       ansible.builtin.copy:
         content: |
           # PQC + deploy: avoid port conflicts (frontend on app_host_port; backend on backend_internal_port; postgres/backend not on host)
@@ -305,7 +305,7 @@
         mode: "0644"
       when: pqc_key_on_server_path | default('') | length > 0
 
-    - name: Create docker-compose override for deploy only (isolated ports)
+    - name: Create docker-compose override for deploy only
       ansible.builtin.copy:
         content: |
           # Deploy: avoid port conflicts (frontend on app_host_port; backend on backend_internal_port; not on host)
