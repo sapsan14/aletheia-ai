@@ -16,6 +16,7 @@ Documentation is grouped by language in `docs/<lang>/` (en, ru, et). This page g
 | **Run the killer demo** | [Demo script](DEMO_SCRIPT.md) (≤5 min) | [Offline verifier](../scripts/README.md) |
 | **Understand crypto** | [Crypto reference](en/CRYPTO_REFERENCE.md) (algorithms, keys, why tsaToken) | [Signing](en/SIGNING.md), [Trust model](en/TRUST_MODEL.md) |
 | **PQC / quantum-ready** | [Plan PQC](en/PLAN_PQC.md) (post-quantum hybrid signing, optional PoC) | [Signing](en/SIGNING.md), [Crypto reference](en/CRYPTO_REFERENCE.md) |
+| **Quantum-safe blockchain** | [Plan QSB](en/PLAN_QUANTUM_SAFE_BLOCKCHAIN.md) (LLM response ledger) | [Plan PQC](en/PLAN_PQC.md), [Plan Phase 5](en/PLAN_PHASE5.md) |
 | **Education & research** | [Plan EDU](ru/PLAN_EDU.md) (RU) · [Plan EDU](et/PLAN_EDU.md) (ET) — lab platform, PQC and AI accountability training | [Plan PQC](en/PLAN_PQC.md), [legal/README](legal/README.md) (PQC standards, EU law) |
 | **Test or CI** | [MOCK_TSA](en/MOCK_TSA.md), [Cryptographic Oracle](en/CRYPTO_ORACLE.md) | [Testing strategy](en/TESTING_STRATEGY.md) |
 | **Deploy** | [README → Deployment](../README.md#deployment) | [deploy/ansible/README](../deploy/ansible/README.md) (includes [API proxy (Docker)](../deploy/ansible/README.md#api-proxy-docker), ngrok, CORS) |
@@ -36,6 +37,7 @@ Same topics exist in **Russian** ([docs/ru/](ru/)) and **Estonian** ([docs/et/](
 | **Plan Phase 4** | Market validation & policy foundation (demo policy, coverage, landing, outreach) | [EN](en/PLAN_PHASE4.md) | [RU](ru/PLAN_PHASE4.md) | [ET](et/PLAN_PHASE4.md) |
 | **Plan Phase 5** | API platform & integrations (OpenAPI, sign-only, SDKs, MCP, SIEM) | [EN](en/PLAN_PHASE5.md) | — | — |
 | **Plan PQC** | Post-quantum crypto (hybrid classical + ML-DSA; optional PoC) | [EN](en/PLAN_PQC.md) | [RU](ru/PLAN_PQC.md) | [ET](et/PLAN_PQC.md) |
+| **Plan QSB** | Quantum-safe blockchain for LLM responses | [EN](en/PLAN_QUANTUM_SAFE_BLOCKCHAIN.md) | — | — |
 | **Plan EDU** | Education platform: lab scenarios, PQC and AI accountability training | — | [RU](ru/PLAN_EDU.md) | [ET](et/PLAN_EDU.md) |
 | **Killer demo script** | Step-by-step legal/compliance demo (≤5 min) | [DEMO_SCRIPT.md](DEMO_SCRIPT.md) | | |
 | **Signing** | What we sign, key, interface, storage | [SIGNING](en/SIGNING.md) | [Подпись](ru/SIGNING.md) | [Allkirjastamine](et/SIGNING.md) |
