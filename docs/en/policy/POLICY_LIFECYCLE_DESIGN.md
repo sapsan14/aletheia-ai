@@ -2,7 +2,7 @@
 
 This document outlines how Aletheia could support **multiple policies** and policy switching in Phase 5. It is **design-only**: no implementation is required in Phase 4.5. It prepares the product for per-tenant or per–product-tier policies without committing to a specific implementation date.
 
-**Related:** [PHASE4_5_TRANSITION.md](../PHASE4_5_TRANSITION.md) §3.1 · [aletheia-demo-2026-01.md](aletheia-demo-2026-01.md) (current Coverage-policy)
+**Related:** [PHASE4_5_TRANSITION.md](../PHASE4_5_TRANSITION.md) §3.1 · [aletheia-demo-2026-01.md](aletheia-demo-2026-01.md) (current Coverage-policy) · [POLICY_CREATION_AND_HUMAN_VERIFICATION.md](POLICY_CREATION_AND_HUMAN_VERIFICATION.md) (creating/updating policies and human verification)
 
 ---
 

@@ -42,3 +42,8 @@ In the Phase 4.5 transition, this demo policy is applied consistently across:
   and `policy_rules_evaluated` for offline verification.
 - **UI:** the verify page and the Trust Panel show Coverage-policy (demo) and
   explicitly label it as `aletheia-demo (2026-01)` in the trust summary.
+
+## See also
+
+- [POLICY_CREATION_AND_HUMAN_VERIFICATION.md](POLICY_CREATION_AND_HUMAN_VERIFICATION.md) — creating and updating policies, both policy types, and human verification (R4).
+- [POLICY_LIFECYCLE_DESIGN.md](POLICY_LIFECYCLE_DESIGN.md) — policy selection and lifecycle (Phase 5 design).
