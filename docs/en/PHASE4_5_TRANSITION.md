@@ -382,6 +382,8 @@ For Phase 4.5 we want **high confidence** before Phase 5 work starts.
 
 ### 4.2 Manual / exploratory
 
+Use the [Manual test checklist (4.2)](../MANUAL_TEST_CHECKLIST_4_2.md) to run and sign off.
+
 - End-to-end demo flow:
   - Open main page → run demo → see Trust summary, Policy coverage, “Why not 100%?”.
   - Follow “Full verification page” → check verify UI.
