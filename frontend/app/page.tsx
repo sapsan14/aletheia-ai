@@ -12,6 +12,7 @@ import { trackEvent } from "@/lib/analytics";
 import { TOOLTIPS } from "@/lib/tooltips";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 /** Response from POST /api/ai/ask */
@@ -487,6 +488,13 @@ function TrustPanel({
               </p>
             </details>
           </div>
+          <p
+            className="mt-3 rounded-lg border border-amber-200 bg-amber-50/80 px-3 py-2 text-xs text-amber-800 dark:border-amber-700/50 dark:bg-amber-900/20 dark:text-amber-200"
+            title={TOOLTIPS.ambiguity_scope_warning}
+            role="note"
+          >
+            ⓘ {TOOLTIPS.ambiguity_scope_warning}
+          </p>
         </div>
 
         {/* AI Claim */}
@@ -899,11 +907,69 @@ export default function Home() {
   // Use relative /api so requests go to same origin (ngrok or VM:3000); Next.js proxies to backend.
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
   const apiBase = typeof window !== "undefined" ? "" : apiUrl;
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const idParam = searchParams.get("id");
 
   useEffect(() => {
     void trackEvent("landing_view");
     void trackEvent("demo_view");
   }, []);
+
+  // Persist current response id so Browser Back from use-cases/verify can restore
+  const currentId = verifyRecord?.id ?? responseData?.id;
+  useEffect(() => {
+    if (typeof window === "undefined" || currentId == null) return;
+    try {
+      sessionStorage.setItem("aletheia_restore_id", String(currentId));
+    } catch {
+      // ignore
+    }
+  }, [currentId]);
+
+  // Restore prompt and response when returning (/?id=... or Browser Back with sessionStorage)
+  useEffect(() => {
+    const idFromUrl = idParam ?? null;
+    const idFromStorage =
+      typeof window !== "undefined" && !idFromUrl
+        ? sessionStorage.getItem("aletheia_restore_id")
+        : null;
+    const idToRestore = idFromUrl ?? idFromStorage;
+    if (!idToRestore) return;
+    const numId = Number(idToRestore);
+    if (!Number.isInteger(numId) || numId < 1) return;
+    let cancelled = false;
+    fetch(`${apiBase}/api/ai/verify/${idToRestore}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to load");
+        return res.json();
+      })
+      .then((data: VerifyRecord) => {
+        if (cancelled) return;
+        setVerifyRecord(data);
+        setPrompt(data.prompt ?? "");
+        setResponseData({
+          id: data.id,
+          response: data.response,
+          responseHash: data.responseHash,
+          signature: data.signature,
+          tsaToken: data.tsaToken,
+          model: data.llmModel,
+        });
+        if (idFromUrl) router.replace("/", { scroll: false });
+        else if (idFromStorage) {
+          try {
+            sessionStorage.removeItem("aletheia_restore_id");
+          } catch {
+            // ignore
+          }
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [idParam, apiBase, router]);
 
   async function handleSend() {
     const trimmed = prompt.trim();
@@ -1084,7 +1150,7 @@ export default function Home() {
               </div>
             </div>
             <Link
-              href="/use-cases"
+              href={currentId != null ? `/use-cases?fromId=${currentId}` : "/use-cases"}
               onClick={() => {
                 void trackEvent("cta_click");
               }}

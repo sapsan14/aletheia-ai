@@ -258,7 +258,7 @@ function VerifyContent() {
       <div className="space-y-4">
         <p className="text-red-600 dark:text-red-400">{error}</p>
         <Link
-          href="/"
+          href={id ? `/?id=${id}` : "/"}
           className="text-sm text-blue-600 hover:underline dark:text-blue-400"
         >
           ← Back to home
@@ -725,6 +725,13 @@ function VerifyContent() {
               </div>
             )}
           </div>
+          <p
+            className="mt-3 rounded-lg border border-amber-200 bg-amber-50/80 px-3 py-2 text-xs text-amber-800 dark:border-amber-700/50 dark:bg-amber-900/20 dark:text-amber-200"
+            title={TOOLTIPS.ambiguity_scope_warning}
+            role="note"
+          >
+            ⓘ {TOOLTIPS.ambiguity_scope_warning}
+          </p>
         </section>
       )}
 
@@ -1015,7 +1022,7 @@ function VerifyContent() {
       )}
 
       <Link
-        href="/"
+        href={`/?id=${record.id}`}
         className="inline-block text-sm text-blue-600 hover:underline dark:text-blue-400"
       >
         ← Back to home

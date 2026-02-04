@@ -45,4 +45,7 @@ export const TOOLTIPS: Record<string, string> = {
   // PQC.6 — Quantum-Resistant badge
   pqc_badge:
     "This response includes a post-quantum (ML-DSA) signature in addition to the classical signature, so it remains verifiable even in a future with large-scale quantum computers.",
+  // Phase 4.5 — Ambiguity / scope (3.2.1)
+  ambiguity_scope_warning:
+    "Coverage applies to this response only. Other conversation context (e.g. earlier turns, external tools) is not signed or checked. We don't certify truth; we certify responsibility.",
 };

@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 const USE_CASES = [
   {
@@ -39,6 +42,11 @@ const USE_CASES = [
 ];
 
 export default function UseCasesPage() {
+  const searchParams = useSearchParams();
+  const fromId = searchParams.get("fromId");
+  const homeHref = fromId ? `/?id=${fromId}` : "/";
+  const demoHref = fromId ? `/?id=${fromId}#demo` : "/#demo";
+
   return (
     <div className="min-h-screen bg-zinc-50 p-6 text-zinc-900 dark:bg-zinc-900 dark:text-zinc-100">
       <main className="mx-auto w-full max-w-4xl">
@@ -78,13 +86,13 @@ export default function UseCasesPage() {
 
         <div className="mt-8 flex flex-wrap items-center gap-3">
           <Link
-            href="/#demo"
+            href={demoHref}
             className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
           >
             Try demo
           </Link>
           <Link
-            href="/"
+            href={homeHref}
             className="text-sm text-blue-600 hover:underline dark:text-blue-400"
           >
             ← Back to home
