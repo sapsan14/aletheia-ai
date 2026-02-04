@@ -275,24 +275,43 @@
         line: "AI_ALETHEIA_PQC_KEY_PATH=/app/ai_pqc.key"
       when: pqc_key_on_server_path | default('') | length > 0
 
-    - name: Create docker-compose override for PQC key mount
+    - name: Create docker-compose override for PQC key mount and deploy (no host 5432)
       ansible.builtin.copy:
         content: |
+          # PQC key mount + deploy: do not bind postgres to host (avoid port conflict with system pg or previous container)
           services:
             backend:
               volumes:
                 - ./{{ pqc_key_on_server_path }}:/app/ai_pqc.key:ro
+            postgres:
+              ports: []
         dest: "{{ app_dir }}/docker-compose.override.yml"
         owner: ubuntu
         group: ubuntu
         mode: "0644"
       when: pqc_key_on_server_path | default('') | length > 0
 
-    - name: Remove docker-compose override when no PQC key on server
-      ansible.builtin.file:
-        path: "{{ app_dir }}/docker-compose.override.yml"
-        state: absent
+    - name: Create docker-compose override for deploy only (no host 5432)
+      ansible.builtin.copy:
+        content: |
+          # Deploy: do not bind postgres to host (avoid port conflict)
+          services:
+            postgres:
+              ports: []
+        dest: "{{ app_dir }}/docker-compose.override.yml"
+        owner: ubuntu
+        group: ubuntu
+        mode: "0644"
       when: pqc_key_on_server_path | default('') | length == 0
+
+    - name: Stop and remove existing containers (free port 5432 if held by old postgres)
+      ansible.builtin.shell: |
+        cd {{ app_dir }} && docker compose down
+      args:
+        executable: /bin/bash
+      register: compose_down
+      failed_when: false
+      changed_when: false
 
     - name: Build and restart frontend only (use with --tags frontend)
       ansible.builtin.shell: |
