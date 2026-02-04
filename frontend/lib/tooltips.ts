@@ -3,7 +3,7 @@
  * Use by ID: title={TOOLTIPS.verified_ai_response} or aria-label={TOOLTIPS.copy_response}.
  * Do not hard-code tooltip strings in components.
  *
- * @see docs/en/PLAN_PHASE3_UI.md — Tooltip texts (copy-paste ready)
+ * @see docs/internal/en/plan-phase3-ui.md — Tooltip texts (copy-paste ready)
  */
 export const TOOLTIPS: Record<string, string> = {
   verified_ai_response:

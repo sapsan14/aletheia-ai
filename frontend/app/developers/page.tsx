@@ -7,7 +7,7 @@ const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") || "http://l
 const SWAGGER_HREF = `${baseUrl}/swagger-ui.html`;
 const PLAN_PHASE5_HREF =
   process.env.NEXT_PUBLIC_DOCS_PLAN_PHASE5_URL ||
-  "https://github.com/sapsan14/aletheia-ai/blob/main/docs/en/PLAN_PHASE5.md";
+  "https://github.com/sapsan14/aletheia-ai/blob/main/docs/internal/en/plan-phase5.md";
 
 export default function DevelopersPage() {
   return (

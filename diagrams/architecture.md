@@ -209,7 +209,7 @@ graph LR
 
 ## 6. Trust chain
 
-Who attests what: we attest *content* (signature over hash); TSA attests *time* (timestamp over signature bytes). See [Trust model (EN)](../docs/en/TRUST_MODEL.md).
+Who attests what: we attest *content* (signature over hash); TSA attests *time* (timestamp over signature bytes). See [Trust model (EN)](../docs/users/en/trust-model.md).
 
 ```mermaid
 graph LR
@@ -289,14 +289,14 @@ RSA signatures use random padding. Same hash + same key → different padding �
 
 **Doc index:** [docs/README.md](../docs/README.md) — overview and where to start.
 
-- **PoC:** [EN](../docs/en/PoC.md) · [RU](../docs/ru/PoC.md) · [ET](../docs/et/PoC.md)
-- **Plan:** [EN](../docs/en/PLAN.md) · [RU](../docs/ru/PLAN.md) · [ET](../docs/et/PLAN.md)
-- **Signing:** [EN](../docs/en/SIGNING.md) · [RU](../docs/ru/SIGNING.md) · [ET](../docs/et/SIGNING.md)
-- **Timestamping:** [EN](../docs/en/TIMESTAMPING.md) · [RU](../docs/ru/TIMESTAMPING.md) · [ET](../docs/et/TIMESTAMPING.md)
-- **Trust model & eIDAS:** [EN](../docs/en/TRUST_MODEL.md) · [RU](../docs/ru/TRUST_MODEL.md) · [ET](../docs/et/TRUST_MODEL.md)
-- **MOCK_TSA:** [EN](../docs/en/MOCK_TSA.md) · [RU](../docs/ru/MOCK_TSA.md)
-- **Crypto reference** (algorithms, padding, digest, serial): [EN](../docs/en/CRYPTO_REFERENCE.md)
-- **Cryptographic Oracle:** [EN](../docs/en/CRYPTO_ORACLE.md) · [RU](../docs/ru/CRYPTO_ORACLE.md) · [ET](../docs/et/CRYPTO_ORACLE.md)
-- **Agent Audit Model:** [EN](../docs/en/AGENT_AUDIT_MODEL.md) · [RU](../docs/ru/AGENT_AUDIT_MODEL.md) · [ET](../docs/et/AGENT_AUDIT_MODEL.md)
-- **Testing Strategy:** [EN](../docs/en/TESTING_STRATEGY.md) · [RU](../docs/ru/TESTING_STRATEGY.md) · [ET](../docs/et/TESTING_STRATEGY.md)
+- **PoC:** [EN](../docs/developers/en/poc-architecture.md) · [RU](../docs/developers/ru/poc-architecture.md) · [ET](../docs/developers/et/poc-architecture.md)
+- **Plan:** [EN](../docs/internal/en/plan.md) · [RU](../docs/internal/ru/plan.md) · [ET](../docs/internal/et/plan.md)
+- **Signing:** [EN](../docs/developers/en/signing.md) · [RU](../docs/developers/ru/signing.md) · [ET](../docs/developers/et/signing.md)
+- **Timestamping:** [EN](../docs/developers/en/timestamping.md) · [RU](../docs/developers/ru/timestamping.md) · [ET](../docs/developers/et/timestamping.md)
+- **Trust model & eIDAS:** [EN](../docs/users/en/trust-model.md) · [RU](../docs/users/ru/trust-model.md) · [ET](../docs/users/et/trust-model.md)
+- **MOCK_TSA:** [EN](../docs/developers/en/mock-tsa.md) · [RU](../docs/developers/ru/mock-tsa.md)
+- **Crypto reference:** [EN](../docs/developers/en/crypto-reference.md)
+- **Cryptographic Oracle:** [EN](../docs/developers/en/crypto-oracle.md) · [RU](../docs/developers/ru/crypto-oracle.md) · [ET](../docs/developers/et/crypto-oracle.md)
+- **Agent Audit Model:** [EN](../docs/internal/en/agent-audit-model.md) · [RU](../docs/internal/ru/agent-audit-model.md) · [ET](../docs/internal/et/agent-audit-model.md)
+- **Testing Strategy:** [EN](../docs/developers/en/testing-strategy.md) · [RU](../docs/developers/ru/testing-strategy.md) · [ET](../docs/developers/et/testing-strategy.md)
 - **README:** [../README.md](../README.md)

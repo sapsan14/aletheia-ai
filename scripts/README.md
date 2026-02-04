@@ -50,4 +50,4 @@ Optional: set `TSA_CA_FILE` to a TSA CA PEM path to verify the timestamp signatu
 2. **Signature** — Load `public_key.pem`; verify `signature.sig` over the hash (RSA PKCS#1 v1.5 over DigestInfo(SHA-256, hash)).
 3. **TSA token** — Parse `timestamp.tsr` (RFC 3161); read `genTime`; optionally verify TSA signature.
 
-See [Plan Phase 2](docs/en/PLAN_PHASE2.md) (Evidence Package format, DP2.2) and root [README — Offline verification](README.md#offline-verification-dp22).
+See [Plan Phase 2](docs/internal/en/plan-phase2.md) (Evidence Package format, DP2.2) and root [README — Offline verification](README.md#offline-verification-dp22).

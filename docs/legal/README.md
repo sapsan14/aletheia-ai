@@ -80,7 +80,7 @@ The documents in this folder and in `downloads/` are suitable for courses on cry
 | **eIDAS, EU AI Act, GDPR** | Legal and policy context for trust services, timestamps, and AI accountability. |
 | **RFC 3161** | Timestamp protocol used in Aletheia and in many TSA implementations. |
 
-**Lab and curriculum:** For lab scenarios and a structured education plan, see [Plan EDU (RU)](../ru/PLAN_EDU.md). Laboratory scripts (when added) live under `docs/ru/LAB_*.md`. Implementation and PQC design are described in [Plan PQC](../en/PLAN_PQC.md).
+**Lab and curriculum:** For lab scenarios and a structured education plan, see [Plan EDU (RU)](../internal/ru/plan-edu.md). Laboratory scripts (when added) live under `docs/internal/ru/`. Implementation and PQC design are described in [Plan PQC](../internal/en/plan-pqc.md).
 
 ---
 

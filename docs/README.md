@@ -1,64 +1,104 @@
-# Aletheia AI — Documentation index
+# Aletheia AI — Documentation
 
-Documentation is grouped by language in `docs/<lang>/` (en, ru, et). This page gives an overview and suggests where to start.
-
----
-
-## Where to start
-
-| If you want to… | Read first | Then |
-|-----------------|------------|------|
-| **Understand the project** | [PoC](en/PoC.md) (architecture & stack) | [Vision & roadmap](en/VISION_AND_ROADMAP.md) |
-| **Implement or extend** | [Implementation plan](en/PLAN.md) | [Signing](en/SIGNING.md), [Timestamping](en/TIMESTAMPING.md) |
-| **Plan Phase 2 (killer demo)** | [PLAN_PHASE2](en/PLAN_PHASE2.md) | [Vision Phase 2](en/VISION_AND_ROADMAP.md#2-killer-demo--domain-choice) |
-| **Plan Phase 4 (market + policy)** | [PLAN_PHASE4](en/PLAN_PHASE4.md) | [NEXT.md](tmp/NEXT.md) (direction: B + A.1–A.3) |
-| **Plan Phase 5 (API & integrations)** | [PLAN_PHASE5](en/PLAN_PHASE5.md) | OpenAPI, sign-only, SDKs, MCP, SIEM |
-| **Run the killer demo** | [Demo script](DEMO_SCRIPT.md) (≤5 min) | [Offline verifier](../scripts/README.md) |
-| **Understand crypto** | [Crypto reference](en/CRYPTO_REFERENCE.md) (algorithms, keys, why tsaToken) | [Signing](en/SIGNING.md), [Trust model](en/TRUST_MODEL.md) |
-| **PQC / quantum-ready** | [Plan PQC](en/PLAN_PQC.md) (post-quantum hybrid signing, optional PoC) | [Signing](en/SIGNING.md), [Crypto reference](en/CRYPTO_REFERENCE.md) |
-| **Education & research** | [Plan EDU](ru/PLAN_EDU.md) (RU) · [Plan EDU](et/PLAN_EDU.md) (ET) — lab platform, PQC and AI accountability training | [Plan PQC](en/PLAN_PQC.md), [legal/README](legal/README.md) (PQC standards, EU law) |
-| **Test or CI** | [MOCK_TSA](en/MOCK_TSA.md), [Cryptographic Oracle](en/CRYPTO_ORACLE.md) | [Testing strategy](en/TESTING_STRATEGY.md) |
-| **Deploy** | [README → Deployment](../README.md#deployment) | [deploy/ansible/README](../deploy/ansible/README.md) (includes [API proxy (Docker)](../deploy/ansible/README.md#api-proxy-docker), ngrok, CORS) |
-
-Same topics exist in **Russian** ([docs/ru/](ru/)) and **Estonian** ([docs/et/](et/)). [Crypto reference](en/CRYPTO_REFERENCE.md) is EN-only; [MOCK_TSA](en/MOCK_TSA.md) has no ET translation.
+Docs are organized by **audience**. Use the table that matches your role.
 
 ---
 
-## Documents by topic
+## Users
 
-| Topic | Description | EN | RU | ET |
-|-------|-------------|----|----|-----|
-| **PoC** | Architecture, stack, cryptography choices | [PoC](en/PoC.md) | [PoC](ru/PoC.md) | [PoC](et/PoC.md) |
-| **Vision & roadmap** | Next steps, Evidence Package, AI Claim | [Vision](en/VISION_AND_ROADMAP.md) | [Видение](ru/VISION_AND_ROADMAP.md) | [Visioon](et/VISION_AND_ROADMAP.md) |
-| **Plan** | Step-by-step implementation tasks | [PLAN](en/PLAN.md) | [План](ru/PLAN.md) | [Plaan](et/PLAN.md) |
-| **Plan Phase 2** | Killer demo, Evidence Package, offline verifier | [EN](en/PLAN_PHASE2.md) | [RU](ru/PLAN_PHASE2.md) | [ET](et/PLAN_PHASE2.md) |
-| **Plan Phase 3 UI** | Verify page wireframe, tooltips, UX (audit/compliance) | [PLAN_PHASE3_UI.md](en/PLAN_PHASE3_UI.md) | | |
-| **Plan Phase 4** | Market validation & policy foundation (demo policy, coverage, landing, outreach) | [EN](en/PLAN_PHASE4.md) | [RU](ru/PLAN_PHASE4.md) | [ET](et/PLAN_PHASE4.md) |
-| **Phase 4 demo policy** | Canonical demo policy rules and notes | [EN](en/policy/aletheia-demo-2026-01.md) | — | — |
-| **Phase 4 scenario** | Killer scenario (Phase 4) | [DEMO_SCENARIO_PHASE4.md](DEMO_SCENARIO_PHASE4.md) | — | — |
-| **Phase 4 outreach** | Target list and email template | [PHASE4_OUTREACH.md](outreach/PHASE4_OUTREACH.md) | — | — |
-| **Phase 4 analytics** | Minimal event tracking and counts | [PHASE4_ANALYTICS.md](PHASE4_ANALYTICS.md) | — | — |
-| **Plan Phase 5** | API platform & integrations (OpenAPI, sign-only, SDKs, MCP, SIEM) | [EN](en/PLAN_PHASE5.md) | — | — |
-| **Plan PQC** | Post-quantum crypto (hybrid classical + ML-DSA; optional PoC) | [EN](en/PLAN_PQC.md) | [RU](ru/PLAN_PQC.md) | [ET](et/PLAN_PQC.md) |
-| **Plan EDU** | Education platform: lab scenarios, PQC and AI accountability training | — | [RU](ru/PLAN_EDU.md) | [ET](et/PLAN_EDU.md) |
-| **Killer demo script** | Step-by-step legal/compliance demo (≤5 min) | [DEMO_SCRIPT.md](DEMO_SCRIPT.md) | | |
-| **Signing** | What we sign, key, interface, storage | [SIGNING](en/SIGNING.md) | [Подпись](ru/SIGNING.md) | [Allkirjastamine](et/SIGNING.md) |
-| **Timestamping** | RFC 3161, TSA, mock/real, storage | [TIMESTAMPING](en/TIMESTAMPING.md) | [Временные метки](ru/TIMESTAMPING.md) | [Ajatemplid](et/TIMESTAMPING.md) |
-| **Trust model** | Who attests what, eIDAS mapping | [TRUST_MODEL](en/TRUST_MODEL.md) | [Модель доверия](ru/TRUST_MODEL.md) | [Usaldusmudel](et/TRUST_MODEL.md) |
-| **MOCK_TSA** | Deterministic TSA for tests | [MOCK_TSA](en/MOCK_TSA.md) | [MOCK_TSA](ru/MOCK_TSA.md) | — |
-| **Crypto Oracle** | Oracle pattern for testing | [CRYPTO_ORACLE](en/CRYPTO_ORACLE.md) | [Оракул](ru/CRYPTO_ORACLE.md) | [Oraakel](et/CRYPTO_ORACLE.md) |
-| **Crypto reference** | Algorithms, keys, tsaToken (beginner-friendly) | [CRYPTO_REFERENCE](en/CRYPTO_REFERENCE.md) | — | — |
-| **Agent Audit** | Audit model for LLM agents | [AGENT_AUDIT](en/AGENT_AUDIT_MODEL.md) | [Аудит агентов](ru/AGENT_AUDIT_MODEL.md) | [Agentide audit](et/AGENT_AUDIT_MODEL.md) |
-| **Testing strategy** | Unit, integration, fixtures, CI | [TESTING_STRATEGY](en/TESTING_STRATEGY.md) | [Стратегия тестирования](ru/TESTING_STRATEGY.md) | [Testimise strateegia](et/TESTING_STRATEGY.md) |
-| **Future ideas** (PKI for AI agents, OpenClaw, MCP) | — | [Идеи](ru/ideas/README.md) | [Ideed](et/ideas/README.md) |
-| **Legal & regulatory** | EU law: eIDAS, AI Act, GDPR; ETSI timestamps; **PQC:** NIST FIPS 203/204/205, ETSI TRs; **Education:** use of docs for courses and research | [legal/README.md](legal/README.md) | | |
-| **Scripts** | Offline verifier (JAR, Java, OpenSSL), usage | [scripts/README.md](../scripts/README.md) | | |
-| **Diagrams** | Mermaid: pipeline, trust chain, stack | [diagrams/architecture.md](../diagrams/architecture.md) | | |
+Concepts, trust model, and how to use the product.
+
+| Document | EN | RU | ET |
+|----------|----|----|-----|
+| **Trust model and eIDAS** | [Trust model](users/en/trust-model.md) | [Модель доверия](users/ru/trust-model.md) | [Usaldusmudel](users/et/trust-model.md) |
+| **Demo scenario (legal/compliance)** | [Demo scenario](users/en/demo-scenario.md) | [Сценарий (RU)](users/ru/demo-scenario.md) | [Stsenaarium (ET)](users/et/demo-scenario.md) |
 
 ---
 
-## Cross-references
+## Developers and testers
 
-- From any `docs/<lang>/` file: same-language docs use relative links (e.g. `[SIGNING](SIGNING.md)`). README and diagrams: `../../README.md`, `../../diagrams/architecture.md`.
-- Root [README](../README.md) links to `docs/en/`, `docs/ru/`, `docs/et/` and [diagrams/architecture.md](../diagrams/architecture.md).
-- **Plan documents by language:** PLAN, Phase 2, Phase 4, PQC exist in EN, RU, ET. Plan Phase 3 UI and Plan Phase 5 are EN-only (translations can be added later).
+API, setup, crypto, testing, deployment.
+
+| Document | EN | RU | ET |
+|----------|----|----|-----|
+| **Quick start (env, run, deploy)** | [Quick start](developers/en/quickstart.md) | — | — |
+| **API overview and OpenAPI** | [API reference](api/README.md) | — | — |
+| **PoC architecture and stack** | [PoC architecture](developers/en/poc-architecture.md) | [Архитектура](developers/ru/poc-architecture.md) | [Arhitektuur](developers/et/poc-architecture.md) |
+| **Signing (what we sign, keys)** | [Signing](developers/en/signing.md) | [Подпись](developers/ru/signing.md) | [Allkirjastamine](developers/et/signing.md) |
+| **Timestamping (RFC 3161, TSA)** | [Timestamping](developers/en/timestamping.md) | [Временные метки](developers/ru/timestamping.md) | [Ajatemplid](developers/et/timestamping.md) |
+| **Testing strategy** | [Testing strategy](developers/en/testing-strategy.md) | [Стратегия тестирования](developers/ru/testing-strategy.md) | [Testimise strateegia](developers/et/testing-strategy.md) |
+| **Mock TSA (tests)** | [Mock TSA](developers/en/mock-tsa.md) | [Mock TSA](developers/ru/mock-tsa.md) | — |
+| **Crypto Oracle (tests)** | [Crypto Oracle](developers/en/crypto-oracle.md) | [Оракул](developers/ru/crypto-oracle.md) | [Oraakel](developers/et/crypto-oracle.md) |
+| **Crypto reference (algorithms)** | [Crypto reference](developers/en/crypto-reference.md) | — | — |
+| **Demo script (step-by-step)** | [Demo script](scripts/demo-script.md) | — | — |
+| **Manual test checklist (4.2)** | [Manual test checklist](scripts/manual-test-checklist-4-2.md) | — | — |
+| **Phase 4 analytics** | [Analytics](analytics/phase4-analytics.md) | — | — |
+| **Deployment (Ansible)** | [Deploy README](../deploy/ansible/README.md) | — | — |
+| **Legal and regulatory (eIDAS, PQC)** | [Legal docs](legal/README.md) | — | — |
+| **Architecture diagrams** | [Diagrams](../diagrams/architecture.md) | — | — |
+
+---
+
+## Partners
+
+Value proposition, use cases, integration.
+
+| Document | EN | RU | ET |
+|----------|----|----|-----|
+| **Use case: legal/compliance** | [Demo scenario](users/en/demo-scenario.md) | — | — |
+| **Use case: Trust Lab (PQC)** | [Trust Lab case](use-cases/trust-lab-case-ambiguous-pqc.md) | — | — |
+| **Outreach (targets, template)** | [Phase 4 outreach](outreach/phase4-outreach.md) | — | — |
+
+---
+
+## Internal (project planning only)
+
+Vision, roadmap, phase plans. Not for external distribution.
+
+| Document | EN | RU | ET |
+|----------|----|----|-----|
+| **Vision and roadmap** | [Vision and roadmap](internal/en/vision-roadmap.md) | [Видение](internal/ru/vision-roadmap.md) | [Visioon](internal/et/vision-roadmap.md) |
+| **Implementation plan** | [Plan](internal/en/plan.md) | [План](internal/ru/plan.md) | [План](internal/et/plan.md) |
+| **Plan Phase 2 (killer demo)** | [Plan Phase 2](internal/en/plan-phase2.md) | [RU](internal/ru/plan-phase2.md) | [ET](internal/et/plan-phase2.md) |
+| **Plan Phase 3 (UI)** | [Plan Phase 3 UI](internal/en/plan-phase3-ui.md) | — | — |
+| **Plan Phase 4 (market, policy)** | [Plan Phase 4](internal/en/plan-phase4.md) | [RU](internal/ru/plan-phase4.md) | [ET](internal/et/plan-phase4.md) |
+| **Plan Phase 5 (API)** | [Plan Phase 5](internal/en/plan-phase5.md) | — | — |
+| **Plan PQC (post-quantum)** | [Plan PQC](internal/en/plan-pqc.md) | [RU](internal/ru/plan-pqc.md) | [ET](internal/et/plan-pqc.md) |
+| **Plan EDU (education)** | — | [Plan EDU](internal/ru/plan-edu.md) | [Plan EDU](internal/et/plan-edu.md) |
+| **Phase 4→5 transition** | [Phase 4–5 transition](internal/en/phase4-5-transition.md) | — | — |
+| **Agent audit model** | [Agent audit](internal/en/agent-audit-model.md) | [RU](internal/ru/agent-audit-model.md) | [ET](internal/et/agent-audit-model.md) |
+| **Future ideas (PKI, MCP)** | — | [Идеи](internal/ru/ideas/readme.md) | [Ideed](internal/et/ideas/readme.md) |
+
+---
+
+## Policy
+
+Demo policy and policy design (shared across audiences).
+
+| Document | Path |
+|----------|------|
+| **Demo policy (rules R1–R4)** | [aletheia-demo-2026-01](policy/aletheia-demo-2026-01.md) · [JSON](policy/aletheia-demo-2026-01.json) |
+| **Policy lifecycle design** | [Policy lifecycle](policy/policy-lifecycle-design.md) |
+| **Policy creation and human verification** | [Policy creation](policy/policy-creation-and-human-verification.md) |
+
+---
+
+## Authorship
+
+The Aletheia AI project was initiated by **Anton Sokolov** (TalTech continuing education).  
+Licensed under **MIT**. See [LICENSE](../LICENSE).
+
+---
+
+## Translations
+
+Documents are provided in **English (EN)**, **Russian (RU)**, and **Estonian (ET)** where applicable. EN is the primary language; RU and ET exist for users, developers, and internal plans as listed in the tables above. New docs are added in EN first; translations can be added to the same path under `users/<lang>/`, `developers/<lang>/`, `internal/<lang>/`, or `partners/<lang>/`.
+
+---
+
+## Structure and naming
+
+- **Folders:** `users/`, `developers/`, `partners/`, `internal/` by audience; `policy/`, `api/`, `scripts/`, `analytics/`, `legal/`, `outreach/`, `use-cases/` by topic.
+- **Filenames:** lowercase, hyphens (e.g. `trust-model.md`, `plan-phase4.md`).
+- **Translations:** See [TRANSLATION_TODO.md](TRANSLATION_TODO.md) for status and docs that still need RU/ET.
+- **Legacy:** Old `docs/en/`, `docs/ru/`, `docs/et/` have been removed; all content lives in the structure above.

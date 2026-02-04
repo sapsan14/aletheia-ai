@@ -87,7 +87,7 @@ cd /opt/aletheia-ai
 docker compose run --rm -v /opt/aletheia-ai:/out backend java -cp /app/app.jar ai.aletheia.crypto.PqcKeyGen /out
 ```
 
-This creates `ai_pqc.key` and `ai_pqc_public.pem` in `/opt/aletheia-ai`. Then add to `.env`: `AI_ALETHEIA_PQC_ENABLED=true` and `AI_ALETHEIA_PQC_KEY_PATH=/app/ai_pqc.key`, create `docker-compose.override.yml` with backend volume `./ai_pqc.key:/app/ai_pqc.key:ro`, and run `docker compose up -d --force-recreate backend`. See [docs/en/PLAN_PQC.md](../../docs/en/PLAN_PQC.md) for key generation and configuration.
+This creates `ai_pqc.key` and `ai_pqc_public.pem` in `/opt/aletheia-ai`. Then add to `.env`: `AI_ALETHEIA_PQC_ENABLED=true` and `AI_ALETHEIA_PQC_KEY_PATH=/app/ai_pqc.key`, create `docker-compose.override.yml` with backend volume `./ai_pqc.key:/app/ai_pqc.key:ro`, and run `docker compose up -d --force-recreate backend`. See [docs/internal/en/plan-pqc.md](../../docs/internal/en/plan-pqc.md) for key generation and configuration.
 
 All `.env.j2` template variables can be overridden via `-e`.
 
