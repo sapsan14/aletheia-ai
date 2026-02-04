@@ -73,6 +73,7 @@ ansible-playbook -i 'aletheia ansible_host=YOUR_VM_IP,' deploy/ansible/playbook.
 | `cors_allowed_origins` | http://localhost:3000 | CORS allowed origins (comma-separated). **ngrok:** add `https://your-subdomain.ngrok-free.dev` |
 | `next_public_api_url` | http://localhost:8080 | **ngrok:** leave empty (playbook sets it); frontend uses relative `/api`, proxied by Next.js. **Production (no ngrok):** `http://YOUR_VM_IP:8080` |
 | `deploy_app_host_port` | **3001** | Host port for frontend (avoids 3000 so other users can use it). ngrok tunnels this port. |
+| `deploy_backend_port` | **8081** | Internal port the backend listens on (avoids 8080 so other users can use it). Frontend proxy uses `http://backend:8081`. |
 | `deploy_compose_project` | **aletheia-ai** | Docker Compose project name (isolates our stack from other users' containers). |
 | `ngrok_enabled` | **true** | Single-port via ngrok; API proxied by Next.js. Set `false` to expose VM directly. |
 | `ngrok_authtoken` | — | **Required** when ngrok_enabled. From https://dashboard.ngrok.com/get-started/your-authtoken |
@@ -138,7 +139,7 @@ ansible-playbook -i deploy/ansible/inventory.yml deploy/ansible/playbook.yml -e 
 ```
 
 Add `NGROK_AUTHTOKEN` to `.env` (project root). The playbook will:
-- Bind **only port 3001** on the host for our frontend (postgres and backend stay internal; no 3000/8080/5432 conflict with other users)
+- Bind **only port 3001** on the host for our frontend (postgres and backend stay internal). Backend listens on **8081** inside the stack (not on host), so 3000 and 8080 stay free for other users.
 - Use Docker Compose project name `aletheia-ai` so our stack is isolated from other users' containers
 - Start ngrok tunnel for frontend (port 3001, your free domain)
 - Set `NEXT_PUBLIC_API_URL=` so the client uses relative `/api` URLs (proxied to backend by [frontend/app/api/[...path]/route.ts](frontend/app/api/[...path]/route.ts))
@@ -146,7 +147,7 @@ Add `NGROK_AUTHTOKEN` to `.env` (project root). The playbook will:
 
 ### Shared machine (multiple users / no port conflicts)
 
-If several people run apps on the same VM (e.g. university server), use the default settings: our app uses **port 3001** and project name **aletheia-ai**. Others can use 3000 and their own compose project. To use a different port:
+If several people run apps on the same VM (e.g. university server), use the default settings: our app uses **frontend port 3001** and **backend internal port 8081** (not exposed on host). Others can use 3000 and 8080 and their own compose project. To use a different port:
 
 ```bash
 ansible-playbook -i deploy/ansible/inventory.yml deploy/ansible/playbook.yml -e deploy_app_host_port=3002

@@ -31,6 +31,8 @@
     # Host port for our frontend (avoid 3000 so other users can use it). ngrok will point here.
     app_host_port: "{{ deploy_app_host_port | default(3001) }}"
     ngrok_port: "{{ app_host_port }}"
+    # Backend internal port (avoid 8080 so other users can use it; frontend proxy uses this).
+    backend_internal_port: "{{ deploy_backend_port | default(8081) }}"
     # Docker Compose project name: isolates our stack from other users' containers (networks, optional port mapping).
     docker_compose_project: "{{ deploy_compose_project | default('aletheia-ai') }}"
 
@@ -279,20 +281,24 @@
         line: "AI_ALETHEIA_PQC_KEY_PATH=/app/ai_pqc.key"
       when: pqc_key_on_server_path | default('') | length > 0
 
-    - name: Create docker-compose override for PQC key mount and deploy (isolated ports, no 5432/8080 on host)
+    - name: Create docker-compose override for PQC key mount and deploy (isolated ports: frontend app_host_port, backend backend_internal_port; no host 5432/8080)
       ansible.builtin.copy:
         content: |
-          # PQC + deploy: avoid port conflicts with other users (only frontend on app_host_port; postgres/backend internal only)
+          # PQC + deploy: avoid port conflicts (frontend on app_host_port; backend on backend_internal_port; postgres/backend not on host)
           services:
             backend:
               volumes:
                 - ./{{ pqc_key_on_server_path }}:/app/ai_pqc.key:ro
               ports: []
+              environment:
+                SERVER_PORT: "{{ backend_internal_port }}"
             postgres:
               ports: []
             frontend:
               ports:
                 - "{{ app_host_port }}:3000"
+              environment:
+                BACKEND_INTERNAL_URL: "http://backend:{{ backend_internal_port }}"
         dest: "{{ app_dir }}/docker-compose.override.yml"
         owner: ubuntu
         group: ubuntu
@@ -302,15 +308,19 @@
     - name: Create docker-compose override for deploy only (isolated ports)
       ansible.builtin.copy:
         content: |
-          # Deploy: avoid port conflicts (only frontend on app_host_port; postgres/backend internal only)
+          # Deploy: avoid port conflicts (frontend on app_host_port; backend on backend_internal_port; not on host)
           services:
             backend:
               ports: []
+              environment:
+                SERVER_PORT: "{{ backend_internal_port }}"
             postgres:
               ports: []
             frontend:
               ports:
                 - "{{ app_host_port }}:3000"
+              environment:
+                BACKEND_INTERNAL_URL: "http://backend:{{ backend_internal_port }}"
         dest: "{{ app_dir }}/docker-compose.override.yml"
         owner: ubuntu
         group: ubuntu
