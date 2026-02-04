@@ -30,7 +30,7 @@
 
 Hello {{Name}},
 
-When AI is involved in decisions, proving **what was said** and **under which rules**
+When AI is involved in decisions, proving **what was said** and **which regulatory or policy framework applied**
 is hard. This creates risk for compliance and audit teams.
 
 Aletheia provides cryptographically verifiable evidence: signed responses, policy
