@@ -352,6 +352,7 @@ function TrustPanel({
       a.download = filename;
       a.click();
       URL.revokeObjectURL(url);
+      trackEvent("download_verifier");
     } catch (err) {
       setVerifierError(err instanceof Error ? err.message : "Download failed");
     } finally {
@@ -1023,6 +1024,7 @@ export default function Home() {
     const trimmed = prompt.trim();
     if (!trimmed) return;
 
+    trackEvent("cta_click");
     setIsLoading(true);
     setError(null);
     setDownloadError(null);
@@ -1107,7 +1109,7 @@ export default function Home() {
 
   async function handleDownloadEvidence() {
     if (!responseData) return;
-    void trackEvent("download_evidence_click", { responseId: responseData.id });
+    trackEvent("download_evidence", { responseId: responseData.id });
     setDownloading(true);
     setDownloadError(null);
     try {
@@ -1199,9 +1201,6 @@ export default function Home() {
             </div>
             <Link
               href={currentId != null ? `/use-cases?fromId=${currentId}` : "/use-cases"}
-              onClick={() => {
-                void trackEvent("cta_click");
-              }}
               className="shrink-0 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
             >
               Explore use cases

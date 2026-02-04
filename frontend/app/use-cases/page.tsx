@@ -1,7 +1,9 @@
 "use client";
 
+import { trackEvent } from "@/lib/analytics";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 
 const USE_CASES = [
   {
@@ -46,6 +48,10 @@ export default function UseCasesPage() {
   const fromId = searchParams.get("fromId");
   const homeHref = fromId ? `/?id=${fromId}` : "/";
   const demoHref = fromId ? `/?id=${fromId}#demo` : "/#demo";
+
+  useEffect(() => {
+    trackEvent("view_use_cases");
+  }, []);
 
   return (
     <div className="min-h-screen bg-zinc-50 p-6 text-zinc-900 dark:bg-zinc-900 dark:text-zinc-100">

@@ -329,7 +329,7 @@ function VerifyContent() {
 
   async function handleDownloadEvidence() {
     if (!record) return;
-    void trackEvent("download_evidence_click", { responseId: record.id });
+    trackEvent("download_evidence", { responseId: record.id });
     setEvidenceDownloading(true);
     setEvidenceError(null);
     try {
@@ -396,6 +396,7 @@ function VerifyContent() {
       a.download = filename;
       a.click();
       URL.revokeObjectURL(url);
+      trackEvent("download_verifier");
     } catch (err) {
       setVerifierError(err instanceof Error ? err.message : "Download failed");
     } finally {

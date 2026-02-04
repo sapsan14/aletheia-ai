@@ -1,0 +1,298 @@
+openapi: 3.0.3
+info:
+  title: Aletheia AI API
+  description: |
+    API for verifiable AI responses: sign and timestamp LLM outputs, retrieve verification
+    records, and download Evidence Packages for offline verification.
+    Phase 4.5 includes policy coverage evaluation (demo policy aletheia-demo 2026-01).
+  version: 1.0.0
+  contact:
+    name: Aletheia AI
+
+servers:
+  - url: http://localhost:8080
+    description: Local backend (run with cd backend && mvn spring-boot:run)
+  - url: /api
+    description: Relative to frontend proxy (Next.js proxies /api/* to backend)
+
+paths:
+  /api/ai/ask:
+    post:
+      summary: Ask AI and get signed response
+      description: |
+        Full flow: prompt → LLM → canonicalize → hash → sign → timestamp → save.
+        Returns a verifiable response with id; use GET /api/ai/verify/{id} for full record.
+        Requires OPENAI_API_KEY and signing key on the backend.
+      operationId: ask
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AiAskRequest'
+            example:
+              prompt: "What is 2+2?"
+      responses:
+        '200':
+          description: Verifiable response with id, hash, signature, tsaToken
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AiAskResponse'
+        '400':
+          description: Missing or empty prompt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '502':
+          description: LLM failed
+        '503':
+          description: Signing/processing failed
+
+  /api/ai/verify/{id}:
+    get:
+      summary: Get verification record by id
+      description: |
+        Returns the full stored record for the verification page, including hash match and
+        signature validity (recomputed by the backend). Phase 4.5 includes policy coverage
+        and per-rule results for the demo Coverage-policy (aletheia-demo 2026-01).
+      operationId: verify
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: Response id (from POST /api/ai/ask)
+      responses:
+        '200':
+          description: Full verification record
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AiVerifyResponse'
+        '404':
+          description: Record not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/ai/evidence/{id}:
+    get:
+      summary: Download Evidence Package
+      description: |
+        Builds and returns the Evidence Package (.aep) for a stored response: ZIP archive
+        with response.txt, canonical.bin, hash, signature, timestamp, metadata.json, public key.
+        Use query format=json to get JSON with base64-encoded file contents instead of ZIP.
+        Required for offline verification with the verifier JAR.
+      operationId: evidence
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: format
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [json]
+          description: If "json", returns JSON with base64 file contents instead of ZIP
+      responses:
+        '200':
+          description: ZIP (application/zip) or JSON with base64 files
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+                  format: byte
+        '404':
+          description: Record not found
+        '503':
+          description: Signing key not configured
+
+  /api/ai/verifier:
+    get:
+      summary: Download offline verifier JAR
+      description: |
+        Returns the offline verifier JAR (aletheia-verifier.jar) for verifying Evidence
+        Packages without the Aletheia server. Requires Java 21+. Build with
+        mvn package -Pverifier. 503 if JAR is not available.
+      operationId: verifier
+      responses:
+        '200':
+          description: JAR file (application/java-archive)
+          content:
+            application/java-archive:
+              schema:
+                type: string
+                format: binary
+        '503':
+          description: Verifier JAR not available (build with mvn package -Pverifier)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+
+components:
+  schemas:
+    AiAskRequest:
+      type: object
+      required: [prompt]
+      properties:
+        prompt:
+          type: string
+          description: User prompt sent to the LLM
+      description: Request body for POST /api/ai/ask
+
+    AiAskResponse:
+      type: object
+      properties:
+        response:
+          type: string
+          description: AI response text (canonical form)
+        responseHash:
+          type: string
+          description: SHA-256 hex of canonical response
+        signature:
+          type: string
+          nullable: true
+          description: Base64 RSA signature of hash (null if key not configured)
+        tsaToken:
+          type: string
+          nullable: true
+          description: Base64 RFC 3161 timestamp token
+        id:
+          type: integer
+          format: int64
+          description: Saved record id; use for GET /api/ai/verify/{id} and Evidence Package
+        model:
+          type: string
+          description: Model identifier (e.g. gpt-4)
+
+    AiVerifyResponse:
+      type: object
+      description: Full verification record for GET /api/ai/verify/{id}. Includes policy coverage and rule results for the demo Coverage-policy (aletheia-demo 2026-01).
+      properties:
+        id:
+          type: integer
+          format: int64
+        prompt:
+          type: string
+        response:
+          type: string
+        responseHash:
+          type: string
+        computedHash:
+          type: string
+          nullable: true
+          description: Backend-recomputed hash (for debugging mismatch)
+        signature:
+          type: string
+          nullable: true
+        tsaToken:
+          type: string
+          nullable: true
+        llmModel:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        requestId:
+          type: string
+          nullable: true
+        temperature:
+          type: number
+          nullable: true
+        systemPrompt:
+          type: string
+          nullable: true
+        version:
+          type: integer
+          nullable: true
+        claim:
+          type: string
+          nullable: true
+          description: AI claim text (DP2.4)
+        confidence:
+          type: number
+          format: double
+          nullable: true
+          description: Confidence in [0,1] (DP2.4)
+        policyVersion:
+          type: string
+          nullable: true
+          description: Claim-policy or Coverage-policy version stored on the record
+        hashMatch:
+          type: boolean
+          nullable: true
+          description: true if recomputed hash equals stored responseHash
+        signatureValid:
+          type: string
+          nullable: true
+          description: "valid | invalid | n_a (not applicable)"
+        policyCoverage:
+          type: number
+          format: double
+          nullable: true
+          description: |
+            Coverage ratio 0..1 for the demo Coverage-policy (aletheia-demo 2026-01).
+            Fraction of rules that were evaluated and passed (e.g. 0.5 = 2 of 4 rules).
+        policyRulesEvaluated:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/PolicyRuleResult'
+          description: |
+            Per-rule results for the demo policy (R1–R4). Each rule has ruleId and status
+            (pass | not_evaluated). Used with policyCoverage to explain "Why is confidence not 100%?"
+        signaturePqc:
+          type: string
+          nullable: true
+          description: Base64 ML-DSA (PQC) signature when PQC enabled
+        pqcAlgorithm:
+          type: string
+          nullable: true
+          description: e.g. ML-DSA (Dilithium3)
+
+    PolicyRuleResult:
+      type: object
+      description: One rule result in policyRulesEvaluated (demo policy R1–R4).
+      properties:
+        ruleId:
+          type: string
+          example: "R1"
+          description: Stable rule id (R1 = signed+timestamped, R2 = model recorded, R3 = content, R4 = human review)
+        status:
+          type: string
+          enum: [pass, not_evaluated]
+          description: pass if the check was run and passed; not_evaluated if not run in this phase
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        id:
+          type: integer
+          format: int64
+          nullable: true

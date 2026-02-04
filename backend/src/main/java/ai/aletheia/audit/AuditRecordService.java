@@ -37,6 +37,11 @@ public class AuditRecordService {
         PolicyEvaluationResult evaluation = policyEvaluationService.evaluate(entity);
         entity.setPolicyCoverage(evaluation.coverage());
         entity.setPolicyRulesEvaluated(policyEvaluationService.toJson(evaluation.rules()));
+        // Phase 4.5: if no explicit policyVersion was provided (e.g. DP2.4),
+        // persist the demo policy version used for coverage evaluation.
+        if (entity.getPolicyVersion() == null || entity.getPolicyVersion().isBlank()) {
+            entity.setPolicyVersion(evaluation.policyVersion());
+        }
         AiResponse saved = repository.save(entity);
         return saved.getId();
     }
