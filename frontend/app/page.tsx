@@ -972,6 +972,14 @@ export default function Home() {
                   <span aria-hidden>⏳</span>
                   Non-Repudiable Time-Proof
                 </a>
+                <Link
+                  href="/quantum-plan"
+                  title="Open the quantum-safe blockchain implementation plan"
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-400/60 bg-emerald-50 px-2.5 py-1 text-sm font-medium text-emerald-800 hover:bg-emerald-100 dark:border-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-200 dark:hover:bg-emerald-900/50"
+                >
+                  <span aria-hidden>⛓️</span>
+                  Quantum-Safe Blockchain Plan
+                </Link>
               </div>
             </div>
           </div>
