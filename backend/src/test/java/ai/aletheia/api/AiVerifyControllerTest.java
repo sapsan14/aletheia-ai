@@ -63,6 +63,32 @@ class AiVerifyControllerTest {
     }
 
     @Test
+    void verify_returnsPolicyCoverageAndRulesEvaluated() throws Exception {
+        AiResponse entity = new AiResponse("P", "R", "h".repeat(64));
+        entity.setLlmModel("gpt-4");
+        entity.setSignature("sig");
+        entity.setTsaToken("tsa");
+        entity.setPolicyCoverage(0.5);
+        entity.setPolicyRulesEvaluated(
+                "[{\"ruleId\":\"R1\",\"status\":\"pass\"},{\"ruleId\":\"R2\",\"status\":\"pass\"},"
+                        + "{\"ruleId\":\"R3\",\"status\":\"not_evaluated\"},{\"ruleId\":\"R4\",\"status\":\"not_evaluated\"}]");
+        entity.setPolicyVersion("2026-01");
+        AiResponse saved = repository.save(entity);
+
+        mockMvc.perform(get("/api/ai/verify/" + saved.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.policyCoverage").value(0.5))
+                .andExpect(jsonPath("$.policyVersion").value("2026-01"))
+                .andExpect(jsonPath("$.policyRulesEvaluated").isArray())
+                .andExpect(jsonPath("$.policyRulesEvaluated.length()").value(4))
+                .andExpect(jsonPath("$.policyRulesEvaluated[0].ruleId").value("R1"))
+                .andExpect(jsonPath("$.policyRulesEvaluated[0].status").value("pass"))
+                .andExpect(jsonPath("$.policyRulesEvaluated[1].ruleId").value("R2"))
+                .andExpect(jsonPath("$.policyRulesEvaluated[3].ruleId").value("R4"))
+                .andExpect(jsonPath("$.policyRulesEvaluated[3].status").value("not_evaluated"));
+    }
+
+    @Test
     void verify_unknownId_returns404WithJsonBody() throws Exception {
         mockMvc.perform(get("/api/ai/verify/999999"))
                 .andExpect(status().isNotFound())
