@@ -8,6 +8,8 @@
 
 Verifiable AI responses with signing and timestamps. Proof, not just trust.
 
+**For researchers and practitioners in trustworthy AI:** Aletheia provides **cryptographic attestation** of AI-generated content (e.g. LLM responses, agent outputs): digital signature over a canonical representation plus optional TSA timestamp. The result is an **Evidence Package** (hash, signature, timestamp, metadata) that auditors can verify offline. Target use: regulated domains (compliance, legal, healthcare) where you need an audit trail and non-repudiation, not just logging. Stack: Spring Boot backend, Next.js frontend; REST API for “prompt → signed response” and for sign-only flows (e.g. attesting your own model’s output). Designed to integrate with conversational UIs and automated pipelines; see [docs](docs/README.md) for trust model, API, and deployment.
+
 ---
 
 ## Documentation
