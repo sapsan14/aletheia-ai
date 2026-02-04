@@ -14,13 +14,17 @@ public final class ClaimCanonical {
      * Build canonical bytes for claim metadata (used in signed payload).
      * Same order must be used when building Evidence Package canonical.bin.
      */
+    /** Fixed decimal format so DB round-trip of Double does not change the signed payload (backend and frontend must match). */
+    private static final java.util.Locale LOCALE = java.util.Locale.ROOT;
+
     public static byte[] toCanonicalBytes(String claim, Double confidence, String model, String policyVersion) {
         // Deterministic JSON: keys alphabetically ordered. Escape strings for JSON.
         String c = escapeJson(claim != null ? claim : "");
         String m = escapeJson(model != null ? model : "");
         String p = escapeJson(policyVersion != null ? policyVersion : "");
         double conf = confidence != null ? confidence : 0.0;
-        String json = "{\"claim\":\"" + c + "\",\"confidence\":" + conf + ",\"model\":\"" + m + "\",\"policy_version\":\"" + p + "\"}";
+        String confStr = String.format(LOCALE, "%.6f", conf);
+        String json = "{\"claim\":\"" + c + "\",\"confidence\":" + confStr + ",\"model\":\"" + m + "\",\"policy_version\":\"" + p + "\"}";
         return json.getBytes(StandardCharsets.UTF_8);
     }
 

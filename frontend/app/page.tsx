@@ -110,7 +110,8 @@ function claimCanonicalJson(
   const m = escapeJson(model ?? "");
   const p = escapeJson(policyVersion ?? "");
   const conf = confidence != null ? Number(confidence) : 0;
-  return `{"claim":"${c}","confidence":${conf},"model":"${m}","policy_version":"${p}"}`;
+  const confStr = conf.toFixed(6);
+  return `{"claim":"${c}","confidence":${confStr},"model":"${m}","policy_version":"${p}"}`;
 }
 
 const EVIDENCE_FILE_DESCRIPTIONS: Record<string, string> = {
@@ -234,24 +235,37 @@ function TrustPanel({
   }
 
   async function handleVerifyHash() {
-    const responseText = record?.response ?? responseData?.response ?? "";
-    const storedHash = record?.responseHash ?? responseData?.responseHash ?? "";
+    const id = record?.id ?? responseData?.id;
+    let dataToUse = record;
+    if (id && dataToUse?.response && !dataToUse?.prompt && (dataToUse?.claim == null) && (dataToUse?.policyVersion == null)) {
+      try {
+        const res = await fetch(`${apiBase}/api/ai/verify/${id}`);
+        if (res.ok) {
+          const full = (await res.json()) as VerifyRecord;
+          dataToUse = full;
+        }
+      } catch {
+        /* use existing dataToUse */
+      }
+    }
+    const responseText = dataToUse?.response ?? responseData?.response ?? "";
+    const storedHash = dataToUse?.responseHash ?? responseData?.responseHash ?? "";
     if (!responseText || !storedHash) return;
     setHashChecking(true);
     setHashMatch(null);
     try {
       const responseCanonical = canonicalize(responseText);
       const hasClaim =
-        (record?.claim != null && String(record.claim).trim() !== "") ||
-        (record?.policyVersion != null && String(record.policyVersion).trim() !== "");
-      const toHash = hasClaim && record
+        (dataToUse?.claim != null && String(dataToUse.claim).trim() !== "") ||
+        (dataToUse?.policyVersion != null && String(dataToUse.policyVersion).trim() !== "");
+      const toHash = hasClaim && dataToUse
         ? responseCanonical +
           "\n" +
           claimCanonicalJson(
-            record.claim,
-            record.confidence,
-            record.llmModel,
-            record.policyVersion
+            dataToUse.claim,
+            dataToUse.confidence,
+            dataToUse.llmModel,
+            dataToUse.policyVersion
           )
         : responseCanonical;
       const computed = await sha256Hex(toHash);
@@ -392,6 +406,12 @@ function TrustPanel({
                 {timestampLabel}
               </dd>
             </div>
+            <div className="flex flex-wrap gap-x-2">
+              <dt className="text-zinc-500 dark:text-zinc-400">📘 Coverage-policy:</dt>
+              <dd className="text-zinc-700 dark:text-zinc-300" title={TOOLTIPS.policy_coverage}>
+                aletheia-demo (2026-01)
+              </dd>
+            </div>
           </dl>
           <div className="mt-3 flex flex-wrap gap-2">
             <details className="rounded-xl border border-zinc-200 bg-white px-3 py-2 dark:border-zinc-600 dark:bg-zinc-800">
@@ -444,10 +464,10 @@ function TrustPanel({
                 <p className="mb-1 text-sm font-medium text-zinc-600 dark:text-zinc-400">
                   Claim:
                 </p>
-                {record.claim.length > 200 && !claimExpanded ? (
+                {record.claim.length > 80 && !claimExpanded ? (
                   <>
                     <blockquote className="border-l-2 border-zinc-300 pl-3 text-zinc-700 dark:border-zinc-500 dark:text-zinc-300">
-                      &ldquo;{record.claim.slice(0, 200)}…&rdquo;
+                      &ldquo;{record.claim.slice(0, 80).trim()}…&rdquo;
                     </blockquote>
                     <button
                       type="button"

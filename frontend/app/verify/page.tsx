@@ -97,7 +97,8 @@ function claimCanonicalJson(
   const m = escapeJson(model ?? "");
   const p = escapeJson(policyVersion ?? "");
   const conf = confidence != null ? Number(confidence) : 0;
-  return `{"claim":"${c}","confidence":${conf},"model":"${m}","policy_version":"${p}"}`;
+  const confStr = conf.toFixed(6);
+  return `{"claim":"${c}","confidence":${confStr},"model":"${m}","policy_version":"${p}"}`;
 }
 
 function truncateMiddle(str: string, head = 20, tail = 20): string {
